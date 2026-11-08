@@ -3,3 +3,12 @@ global-styling:
   css:
     theme:
       css/style.css: {}
+
+navbar:
+  version: VERSION
+  js:
+    js/navbar.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - bootstrap5/bootstrap5-js-latest

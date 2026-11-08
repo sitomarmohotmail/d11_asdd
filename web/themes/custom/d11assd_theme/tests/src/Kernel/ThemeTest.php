@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests the d11assd_theme declaration.
  *
- * Spec 001: CA1, CA2, CA3, CA11, CA14, CA7d.
+ * Spec 001: CA1, CA2, CA3, CA11, CA14, CA7d, CA23.
  */
 #[Group('d11assd_theme')]
 class ThemeTest extends KernelTestBase {
@@ -131,6 +131,36 @@ class ThemeTest extends KernelTestBase {
         "$file differs from the Bootstrap5 one."
       );
     }
+  }
+
+  /**
+   * CA23 (R13, R5, v1.2): the navbar library is defined with correct deps.
+   *
+   * Checks that d11assd_theme/navbar exists with js/navbar.js and declares
+   * core/drupal, core/once and bootstrap5/bootstrap5-js-latest as
+   * dependencies (the last one provides the global `bootstrap` object).
+   */
+  public function testNavbarLibrary(): void {
+    $this->container->get('theme_installer')->install(['d11assd_theme']);
+    $library = $this->container->get('library.discovery')
+      ->getLibraryByName('d11assd_theme', 'navbar');
+    $this->assertIsArray($library, 'Library d11assd_theme/navbar exists.');
+
+    $paths = array_column($library['js'], 'data');
+    $this->assertContains(
+      'themes/custom/d11assd_theme/js/navbar.js',
+      $paths,
+      'navbar library includes js/navbar.js.'
+    );
+
+    $deps = $library['dependencies'] ?? [];
+    $this->assertContains('core/drupal', $deps, 'Depends on core/drupal.');
+    $this->assertContains('core/once', $deps, 'Depends on core/once.');
+    $this->assertContains(
+      'bootstrap5/bootstrap5-js-latest',
+      $deps,
+      'Depends on bootstrap5/bootstrap5-js-latest (provides window.bootstrap).'
+    );
   }
 
   /**

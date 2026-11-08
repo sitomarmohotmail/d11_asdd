@@ -75,8 +75,8 @@ if [ "$a11y" -eq 1 ]; then
   # shellcheck disable=SC1091
   . "$NVM_DIR/nvm.sh" >/dev/null
   nvm use >/dev/null
-  run "axe + foco 1280px" npm run --silent a11y -- --focus "${urls[@]}"
-  run "axe + foco 320px" npm run --silent a11y -- --focus --width 320 "${urls[@]}"
+  run "axe + foco 1280px" npm run --silent a11y -- --focus --menu "${urls[@]}"
+  run "axe + foco 320px" npm run --silent a11y -- --focus --menu --width 320 "${urls[@]}"
 fi
 
 printf '\n'

@@ -162,3 +162,70 @@ El aviso de la 2.ª pasada para QA sobre *Archivos afectados* ya está resuelto:
 - 2026-11-08: la persona confirma la lista de comprobación manual (CA-A5).
   Con 0 hallazgos ALTOS, MEDIOS y BAJOS en código propio, la puerta de
   accesibilidad queda **SUPERADA** (las 10 OBS no bloquean, según RA).
+
+---
+
+## v1.2 · Revisión de accesibilidad (R11, R12, R13 — 2026-11-08)
+
+- Versión de la spec: 1.2
+- Norma: WCAG 2.2 AA
+- Resultado: **PENDIENTE DE REVISIÓN MANUAL**
+- Hallazgos nuevos: 0 ALTOS · 0 MEDIOS · 0 BAJOS · 0 OBS nuevas
+
+> Revisión centrada en lo nuevo de la v1.2: menú plegable operable con teclado
+> (R11), objetivos táctiles ≥ 24×24 px (R12), cierre con Esc (R13) y la
+> librería `d11assd_theme/navbar`. Los criterios CA17–CA22, CA20 y CA-A7 los
+> comprueba `check.sh --menu`. La lista anterior (v1.1) y sus OBS siguen en pie.
+
+### Alcance
+- URL: `http://d11assd.local/` a 320 px y 1280 px con `--menu --focus`.
+- Archivos: `js/navbar.js`, `d11assd_theme.libraries.yml`, `d11assd_theme.info.yml`.
+
+### Revisión automática (axe-core + --menu)
+| URL | Ancho | Violaciones | Menú: problemas | Foco: sin indicador | Reflujo |
+|---|---|---|---|---|---|
+| `/` | 320 px | 0 | 0 | 0 / 7 elementos | sin scroll horizontal |
+| `/` | 1280 px | 0 | 0 | 0 / 8 elementos | sin scroll horizontal |
+
+CA17, CA17b, CA18, CA18b, CA19, CA20, CA21, CA22 y CA-A7: **todos superados**.
+
+### Revisión estática de js/navbar.js
+- `Drupal.behaviors` y `once()` correctamente usados (no roba el foco al cargar).
+- `aria-expanded` gestionado por `bootstrap.Collapse.getOrCreateInstance().hide()`, no a mano (decisión 8).
+- `toggler.focus()` en línea 42: correcto (devuelve foco al botón tras Esc, CA21).
+- No hay `outline: none`, `tabindex > 0` ni `innerHTML`.
+- Librería `navbar` declarada con `core/drupal`, `core/once` y `bootstrap5/bootstrap5-js-latest`; añadida a `libraries` en `.info.yml`.
+- `event.stopPropagation()` en Esc: no interfiere con otros manejadores. No hay `preventDefault()`, por lo que Esc sigue funcionando para otros componentes.
+
+### Hallazgos
+Ninguno en código propio.
+
+### Comprobación manual (CA-A8)
+Haz esta lista a 320 px (modo responsive de las DevTools o pantalla real), sin sesión iniciada, con teclado y con Orca + Firefox.
+
+**Teclado**
+- [ ] Pulsa Tab hasta el botón del menú. Pulsa **Intro**: el menú se despliega, el botón muestra `aria-expanded="true"` y el siguiente Tab lleva al primer enlace del menú principal («Inicio»).
+- [ ] Con el menú abierto, pulsa **Tab** desde «Inicio» hasta el último enlace («Iniciar sesión»). Foco visible en cada enlace; el orden es botón → «Inicio» → «Iniciar sesión».
+- [ ] Con el foco en el botón y el menú abierto, pulsa **Esc**: el menú se cierra, el botón recupera el foco y `aria-expanded` vuelve a `"false"`.
+- [ ] Con el foco en un enlace del menú abierto («Inicio» o «Iniciar sesión»), pulsa **Esc**: el menú se cierra y el foco vuelve al botón.
+- [ ] Con el menú **cerrado**, pulsa Esc: el foco permanece donde estaba (CA22).
+- [ ] A 1280 px el botón del menú no se ve; pulsa Esc con el foco en un enlace de la barra: el foco permanece donde estaba (CA22).
+
+**Lector de pantalla (Orca + Firefox, 320 px)**
+- [ ] Navega con Tab hasta el botón del menú. Orca debe anunciar algo como «Toggle navigation, botón, **contraído**» (el `aria-expanded="false"` se traduce como «contraído»; el texto del atributo lo lee el lector de pantalla, no el JS propio).
+- [ ] Pulsa Intro para abrir el menú. Orca debe anunciar el botón como «**expandido**» o indicar el cambio de estado.
+- [ ] Pulsa Esc para cerrar. Orca debe anunciar el botón de nuevo como «contraído» y el foco debe seguir en él (no hay desplazamiento inesperado de la lectura).
+- [ ] Recorre el menú desplegado con flecha abajo: «Inicio, enlace» → «Iniciar sesión, enlace». El orden coincide con el visual.
+
+> Nota: «Toggle navigation» sigue en inglés (OBS-01, Bootstrap5, ya registrada). No bloquea.
+
+### Tests permanentes (v1.2)
+| Criterio | Test | Estado |
+|---|---|---|
+| CA16 (botón con `aria-expanded` y `aria-controls`) | `Functional\FrontendTest::testNavbarToggler` | Correcto |
+| CA23 (librería `navbar` con `js/navbar.js` y dependencias) | `Kernel\ThemeTest::testNavbarLibrary` | Correcto |
+| CA23b (`js/navbar.js` cargado en la portada) | `Functional\FrontendTest::testNavbarScriptLoaded` | Correcto |
+| CA17–CA22, CA20, CA-A7 | `check.sh` (`axe-check.mjs --menu`) | Superados (ver tabla) |
+| CA-A8 | Lista manual | **Pendiente de la persona** |
+
+**Resultado v1.2: PENDIENTE DE REVISIÓN MANUAL** · 0 ALTOS · 0 MEDIOS · 0 BAJOS · 0 OBS nuevas. La v1.2 podrá cerrarse como SUPERADA cuando la persona confirme la lista de CA-A8.

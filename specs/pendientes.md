@@ -6,4 +6,6 @@ Una línea por pendiente: origen · descripción. Se agrupan en specs futuras.
 - 001 · OBS: textos en inglés sin `|t` en plantillas de Bootstrap5 («Toggle navigation», «Close», «breadcrumb»); comunicar a los mantenedores o sobrescribir plantillas en una spec propia.
 - 001 · OBS-10: al cerrar un aviso, el foco vuelve a `<body>` (JS de Bootstrap).
 - 001 · OBS: vista `frontpage` con textos en inglés («Welcome!») y RSS sin título de feed.
-- 001 · Responsive (v1.2): menú plegable (`aria-expanded`, teclado) y objetivos táctiles ≥ 24×24 px. Reflujo a 320 px ya lo cubre `check.sh`. Solo cuando la persona lo pida.
+- 001 v1.2 · CA22 usa el patrón «Si… entonces» para un caso normal (Esc con el menú cerrado).
+- 001 v1.2 · CA-A7 se solapa con CA-A3 y CA20.
+- 001 v1.2 · CA6 y las tareas no citan ESLint sobre `js/navbar.js` (lo cubre `check.sh` por spec-002).

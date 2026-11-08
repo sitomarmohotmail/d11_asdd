@@ -9,6 +9,7 @@ dependencies:
 
 libraries:
   - d11assd_theme/global-styling
+  - d11assd_theme/navbar
 
 regions:
   header: Header

@@ -241,4 +241,43 @@ class FrontendTest extends BrowserTestBase {
     $this->assertCount(1, $this->getSession()->getPage()->findAll('css', 'main'));
   }
 
+  /**
+   * CA16 (R11, v1.2): the navbar toggler button has the correct ARIA markup.
+   *
+   * Checks that the button exists with aria-expanded="false" and that
+   * aria-controls points to an existing element containing both nav blocks.
+   */
+  public function testNavbarToggler(): void {
+    $this->drupalGet('<front>');
+    $page = $this->getSession()->getPage();
+
+    $button = $page->find('css', 'nav.navbar button.navbar-toggler');
+    $this->assertNotNull($button, 'Navbar toggler button exists inside nav.navbar.');
+    $this->assertSame('button', $button->getAttribute('type'));
+    $this->assertSame('false', $button->getAttribute('aria-expanded'));
+
+    $controls_id = $button->getAttribute('aria-controls');
+    $this->assertNotEmpty($controls_id, 'aria-controls is set on the toggler.');
+
+    $controlled = $page->findById($controls_id);
+    $this->assertNotNull($controlled, "Element #$controls_id referenced by aria-controls exists.");
+
+    $this->assertNotNull(
+      $controlled->find('css', '#block-d11assd-theme-main-navigation'),
+      "#$controls_id contains the main navigation block."
+    );
+    $this->assertNotNull(
+      $controlled->find('css', '#block-d11assd-theme-account-menu'),
+      "#$controls_id contains the account menu block."
+    );
+  }
+
+  /**
+   * CA23b (R13, v1.2): the front page loads js/navbar.js.
+   */
+  public function testNavbarScriptLoaded(): void {
+    $this->drupalGet('<front>');
+    $this->assertSession()->responseContains('themes/custom/d11assd_theme/js/navbar.js');
+  }
+
 }

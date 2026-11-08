@@ -79,3 +79,55 @@ concretar la redacción de CA-A4c (AMB-010, BAJA) o dejarlo para la próxima
 revisión.
 
 La aprobación la da la persona: este informe no cambia el `estado` de la spec.
+
+---
+
+# Validación v1.2 (borrador, nivel L) — solo lo nuevo
+
+- Fecha: 2026-11-08 · Resultado: BLOQUEADA · 0 BLOQUEANTES · 1 ALTO · 5 MEDIOS · 3 BAJOS
+- La v1.2 es clara y cada DEBE (R11, R12) tiene criterio. R13 y CA16–CA23 se leen bien. Hay un defecto de dependencias (DRU-003) y una contradicción heredada (CON-005). Los criterios dinámicos con Puppeteer son aceptables por decisión de la persona.
+
+## Hallazgos
+### DRU-003 · ALTA · CA23, decisión 8, R13
+- **Evidencia:** «librería `d11assd_theme/navbar` con un único archivo `js/navbar.js` y las dependencias `core/drupal` y `core/once`» y «`bootstrap.Collapse.getOrCreateInstance(el).hide()`».
+- **Problema:** el JS usa el global `bootstrap`, que viene de `bootstrap5/bootstrap5-js-latest` (`bootstrap.bundle.js`). CA23 fija las dependencias exactas y no la incluye, así que el test exigiría una librería sin garantía de orden de carga.
+- **Corrección:** añadir `bootstrap5/bootstrap5-js-latest` a las dependencias de CA23 y de la librería.
+- **Verificación:** comprobado (`bootstrap5.libraries.yml` l.107–110 y `bootstrap5.info.yml` l.13).
+
+### CON-005 · MEDIA · R5 / decisión 2
+- **Evidencia:** decisión 2 «Solo CSS en el tema, sin SCSS (R5)»; R5 v1.2 «CSS y JS sin compilar».
+- **Problema:** la decisión 2 contradice R5 y R13 (JS propio); también el plan dice «ajustes mínimos (R5)» solo para CSS.
+- **Corrección:** decisión 2: «Solo CSS y JS sin compilar, sin SCSS (R5)».
+- **Verificación:** comprobado (lectura de la spec).
+
+### EARS-005 · MEDIA · CA17
+- **Evidencia:** «poner `aria-expanded="true"`, mostrar el elemento controlado y llevar el foco, con el siguiente Tab, al primer enlace del menú».
+- **Problema:** mezcla tres comportamientos; «primer enlace del menú» es ambiguo (menú principal o cuenta). CA18 tiene el mismo patrón.
+- **Corrección:** separar estado/visibilidad de orden de foco y nombrar el enlace: «primer enlace de `#block-d11assd-theme-main-navigation`» (o el que siga al botón en el DOM).
+- **Verificación:** deducido (`page.html.twig` l.68–80: el menú va tras el botón).
+
+### AMB-011 · MEDIA · R12 / CA20
+- **Evidencia:** R12 «dentro de una frase quedan exentos»; CA20 «que no esté dentro de un párrafo».
+- **Problema:** dos reglas de exención distintas; el script no sabría cuál aplicar (p. ej. enlace «Powered by Drupal» en un `<span>` o `<div>`).
+- **Corrección:** unificar, p. ej. «exentos los enlaces con texto circundante dentro de `<p>`»; listar en CA20 los enlaces de pie esperados.
+- **Verificación:** deducido (texto de R12 y CA20).
+
+### A11Y-008 · MEDIA · RA
+- **Evidencia:** RA: «CSS propio, ajustes de R10, logo y colocación de bloques».
+- **Problema:** v1.2 añade JS propio (`js/navbar.js`) y el alcance de RA no lo cubre; CA-A7 sí lo mide, pero RA debería decirlo.
+- **Corrección:** añadir «JS propio (`js/navbar.js`)» a RA.
+- **Verificación:** comprobado.
+
+### TRZ-007 · MEDIA · CA23
+- **Evidencia:** «y cargarla en las páginas que se renderizan con `d11assd_theme`» (test solo Kernel, `ThemeTest::testNavbarLibrary`).
+- **Problema:** un Kernel puede comprobar `info.yml`, no que la página sirva `js/navbar.js`; si falla la carga, CA21 solo lo detecta en `check.sh`.
+- **Corrección:** dividir: CA23 (Kernel: definición) y añadir a CA16 o a `FrontendTest` que la portada incluye `themes/custom/d11assd_theme/js/navbar.js`.
+- **Verificación:** deducido.
+
+## BAJOS (a `specs/pendientes.md`)
+- CA22 usa «Si… entonces» (patrón de comportamiento no deseado) para un caso normal; mejor *Mientras*/*Cuando*.
+- CA-A7 solapa con CA-A3 y CA20 (target-size); aclarar que CA-A7 solo añade el estado «menú abierto».
+- La spec no cita ESLint sobre `js/navbar.js` (spec-002) en CA6 ni en las tareas; `scripts/check.sh` ya lo cubre.
+
+## Recomendación
+Corregir DRU-003 antes de aprobar; CON-005, EARS-005, AMB-011, A11Y-008 y TRZ-007 en la misma edición (son cambios de texto). No hace falta repetir la pasada. Sin conflicto real CA9/CA9b frente a CA23: CA9b limita solo `global-styling`.

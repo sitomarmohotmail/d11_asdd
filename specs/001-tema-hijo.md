@@ -1,8 +1,9 @@
 ---
 id: 001
 titulo: Tema hijo de Bootstrap5
-version: 1.1
+version: 1.2
 estado: implementada
+nivel: L
 tipo: tema
 proyecto: d11assd_theme
 ---
@@ -14,6 +15,7 @@ proyecto: d11assd_theme
 |---|---|---|---|
 | 1.0 | 2026-11-08 | implementada (`84bb516`) | Versión inicial, criterios en Dado/Cuando/Entonces. |
 | 1.1 | 2026-11-08 | implementada (aprobada por la persona tras validación SUPERADA CON AVISOS en la 3.ª pasada; QA, seguridad y accesibilidad superadas) | Migración a EARS y prioridades. Nuevos R10 (ajustes de Bootstrap5 propios del tema hijo) y RA (WCAG 2.2 AA). Criterios para todos los requisitos. Corregida tras `001-validacion.md` (pasadas 1 y 2: BLOQUEADA). Tras la primera puerta de accesibilidad (BLOQUEADA) se añaden, dentro de RA y con el visto bueno de la persona, CA-A1d, CA-A4d, CA-A4e y CA-A6. |
+| 1.2 | 2026-11-08 | implementada (QA, accesibilidad automática superados; lista manual CA-A8 pendiente de la persona) | Responsive: menú plegable operable con teclado (R11), objetivos táctiles ≥ 24 × 24 px (R12) y cierre con Esc (R13). Comprobación dinámica con Puppeteer (`--menu` en `axe-check.mjs`), no con Selenium. R5 se reformula para admitir JS propio sin compilar. |
 
 ## Contexto
 El sitio usa ahora Olivero como tema público. Queremos un tema propio que
@@ -34,8 +36,9 @@ propios.
 - **R4** *(DEBE)* — Añade una librería propia `d11assd_theme/global-styling`
   con `css/style.css`. Se carga en todas las páginas que se renderizan con
   `d11assd_theme`, además de las librerías de Bootstrap5.
-- **R5** *(DEBE)* — El tema solo usa CSS: sin SCSS ni dependencias de Node.js
-  dentro de `web/themes/custom/d11assd_theme`.
+- **R5** *(DEBE)* — El tema usa CSS y JS sin compilar: sin SCSS ni
+  dependencias de Node.js dentro de `web/themes/custom/d11assd_theme`.
+  *(v1.2: antes decía «solo CSS»; se amplía por R13.)*
 - **R6** *(DEBE)* — Es el tema por defecto del sitio. Claro sigue siendo el
   tema de administración.
 - **R7** *(DEBE)* — Los bloques del tema (`config/optional/block.block.d11assd_theme_*.yml`)
@@ -76,9 +79,28 @@ propios.
   el generador de subtemas de Bootstrap5 (`SettingsManager.php`), y core las
   guarda en `d11assd_theme.settings` (`theme_settings_convert_to_config()`).
   No se incluyen en `config/install`.
+- **R11** *(DEBE, v1.2)* — Por debajo del punto de ruptura de la barra
+  (`navbar-expand-lg`, < 992 px), el menú plegable de Bootstrap5 se abre y se
+  cierra con teclado (Intro y Espacio) desde su botón, y el botón informa de
+  su estado con `aria-expanded` y del elemento que controla con
+  `aria-controls`. Por encima del punto de ruptura, el menú se muestra
+  desplegado y el botón no se ve.
+- **R12** *(DEBE, v1.2)* — El botón del menú, los enlaces de la barra
+  (marca, menú principal y menú de la cuenta) y los enlaces del pie tienen un
+  objetivo de al menos 24 × 24 px CSS, o cumplen la excepción de espaciado de
+  WCAG 2.5.8 (un círculo de 24 px de diámetro centrado en el objetivo no
+  corta a ningún otro objetivo). Se aplica a 320 px y a 1280 px. Los enlaces
+  dentro de una frase quedan exentos (excepción «en línea» de 2.5.8).
+- **R13** *(DEBERÍA, v1.2 · incluido por decisión de la persona)* — Con el menú plegable
+  abierto, la tecla Esc lo cierra y devuelve el foco a su botón. Bootstrap5
+  no lo hace; requiere JS propio (`js/navbar.js`, `Drupal.behaviors` y
+  `once()`) en una librería distinta de `global-styling`. WCAG 2.2 AA no lo
+  exige para un menú que se abre con clic, pero es el comportamiento
+  esperado (patrón *disclosure* de ARIA APG) y lo detectó la puerta de
+  accesibilidad de la v1.1.
 - **RA** *(DEBE)* — El sistema deberá cumplir WCAG 2.2 nivel AA en todo lo que
-  añade o modifica esta spec: CSS propio, ajustes de R10, logo y colocación de
-  bloques (ver `.claude/rules/accesibilidad.md`). Las violaciones que provienen
+  añade o modifica esta spec: CSS propio, JS propio (`js/navbar.js`, v1.2),
+  ajustes de R10, logo y colocación de bloques (ver `.claude/rules/accesibilidad.md`). Las violaciones que provienen
   de plantillas o CSS de core o Bootstrap5:
   - se corrigen en el tema hijo si incumplen AA y se pueden corregir con CSS
     o ajustes, **sin sobrescribir plantillas**;
@@ -246,6 +268,67 @@ QA.
   con teclado, **el sistema deberá** mostrar el foco visible en cada elemento
   interactivo, en un orden lógico y sin que quede tapado.
 
+### Responsive (v1.2)
+Los criterios *check.sh* los comprueba `scripts/a11y/axe-check.mjs --menu`
+(Puppeteer), que `scripts/check.sh` ejecuta a 320 px y 1280 px sobre la
+portada. No forman parte de PHPUnit.
+
+- **CA16** *(R11 · Functional)* — **Cuando** un visitante anónimo abra la
+  portada, **el sistema deberá** generar dentro de `<nav class="navbar">` un
+  `<button>` con la clase `navbar-toggler`, `type="button"`,
+  `aria-expanded="false"` y un `aria-controls` igual al `id` de un elemento
+  existente que contenga `#block-d11assd-theme-main-navigation` y
+  `#block-d11assd-theme-account-menu`.
+- **CA17** *(R11 · check.sh)* — **Mientras** el ancho de la ventana sea
+  320 px y el menú esté cerrado, **cuando** el botón del menú tenga el foco y
+  se pulse Intro, **el sistema deberá** poner `aria-expanded="true"` en el
+  botón y mostrar el elemento controlado.
+- **CA17b** *(R11 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
+  esté abierto, **cuando** el botón del menú tenga el foco y se pulse Tab,
+  **el sistema deberá** poner el foco en el primer enlace de
+  `#block-d11assd-theme-main-navigation`.
+- **CA18** *(R11 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
+  esté abierto, **cuando** el botón del menú tenga el foco y se pulse
+  Espacio, **el sistema deberá** poner `aria-expanded="false"` y ocultar el
+  elemento controlado.
+- **CA18b** *(R11 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
+  esté cerrado, **cuando** el botón del menú tenga el foco y se pulse Tab,
+  **el sistema deberá** poner el foco en un elemento que no esté dentro del
+  elemento controlado.
+- **CA19** *(R11 · check.sh)* — **Mientras** el ancho sea 1280 px, **el
+  sistema deberá** no mostrar el botón del menú y mostrar visibles los enlaces
+  del menú principal y del menú de la cuenta.
+- **CA20** *(R12 · check.sh)* — **Cuando** se mida la portada a 320 px (con
+  el menú abierto) y a 1280 px, **el sistema deberá** dar al botón del menú,
+  a cada enlace de `<nav class="navbar">` y a cada enlace de `<footer>` que
+  no esté dentro de una frase (exención «en línea» de R12; hoy, el enlace
+  «Drupal» del bloque `d11assd_theme_powered_by_drupal`) un área de al menos 24 × 24 px CSS, o una
+  separación tal que un círculo de 24 px centrado en él no corte a otro
+  objetivo.
+- **CA21** *(R13 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
+  esté abierto, **cuando** el foco esté en el botón o en un enlace del menú y
+  se pulse Esc, **el sistema deberá** cerrar el menú
+  (`aria-expanded="false"`) y poner el foco en el botón del menú.
+- **CA22** *(R13 · check.sh)* — **Si** se pulsa Esc con el menú cerrado o con
+  el botón no visible (1280 px), **entonces el sistema deberá** dejar el foco
+  donde estaba.
+- **CA23** *(R13, R5 · Kernel)* — **El sistema deberá** definir la librería
+  `d11assd_theme/navbar` con un único archivo `js/navbar.js` y las
+  dependencias `core/drupal`, `core/once` y `bootstrap5/bootstrap5-js-latest`
+  (aporta el global `bootstrap` que usa la decisión 8), y declararla en
+  `libraries` de `d11assd_theme.info.yml`.
+- **CA23b** *(R13 · Functional)* — **Cuando** un visitante anónimo abra la
+  portada, **el sistema deberá** cargar
+  `themes/custom/d11assd_theme/js/navbar.js`.
+- **CA-A7** *(RA · check.sh)* — **Cuando** se ejecute `scripts/check.sh`
+  sobre la portada a 320 px con el menú abierto, **el sistema deberá** dar 0
+  violaciones de axe (incluida `target-size`), sin scroll horizontal y con
+  foco visible ≥ 3:1 en el botón y en los enlaces del menú.
+- **CA-A8** *(RA · manual)* — **Cuando** la persona abra y cierre el menú a
+  320 px con teclado y con Orca, **el sistema deberá** anunciar el botón como
+  «contraído» o «expandido» según su estado y mantener el orden de foco
+  botón → enlaces del menú → contenido.
+
 ## Fuera de alcance
 - Compilación de SCSS y personalización de variables de Bootstrap (spec futura).
 - Plantillas Twig propias y sobrescritura de plantillas de Bootstrap5,
@@ -258,10 +341,15 @@ QA.
 - Desinstalar Olivero o Bootstrap5 y borrar sus bloques.
 - Despliegue en Docker.
 - Accesibilidad de las páginas de administración (Claro, core).
+- v1.2: tests FunctionalJavascript con Selenium (se usa Puppeteer, decisión 6).
+- v1.2: traducir `aria-label="Toggle navigation"` del botón (OBS-01): exige
+  sobrescribir `page.html.twig` de Bootstrap5.
+- v1.2: devolver el foco al cerrar un aviso (OBS-10).
+- v1.2: cerrar el menú al hacer clic fuera o al salir el foco con Tab.
 
 ## Decisiones
 1. Nombre de máquina: `d11assd_theme`.
-2. Solo CSS en el tema, sin SCSS (R5). Node.js se usa únicamente como
+2. Solo CSS y JS sin compilar en el tema, sin SCSS (R5). Node.js se usa únicamente como
    herramienta de desarrollo en la raíz del proyecto (`npm run a11y`, CA-A3),
    nunca dentro del tema.
 3. El tema se escribe a mano, sin el generador de Bootstrap5. Por eso hay que
@@ -274,6 +362,19 @@ QA.
    podrían corregir sobrescribiendo plantillas se registran como OBS (RA). Por
    ejemplo, `aria-label="Toggle navigation"` en inglés en `page.html.twig` de
    Bootstrap5.
+6. *(v1.2)* El comportamiento dinámico del menú (CA17–CA22) se comprueba con
+   Puppeteer, ampliando `scripts/a11y/axe-check.mjs` con la opción `--menu`,
+   y no con tests FunctionalJavascript de PHPUnit. Es más barato porque
+   Puppeteer ya está instalado; a cambio, esos criterios quedan fuera de
+   PHPUnit y la trazabilidad los cita como `check.sh`. Selenium se valorará
+   cuando haya JS propio con lógica de servidor.
+7. *(v1.2)* El reflujo a 320 px ya lo cubre `check.sh` (CA-A3); no se añade
+   nada. La regla `target-size` de axe (WCAG 2.5.8) ya se ejecuta, pero solo
+   sobre lo visible: por eso CA20 mide también con el menú abierto.
+8. *(v1.2)* El JS de R13 escucha `keydown` en el botón y en el elemento
+   controlado y cierra el menú con la API de Bootstrap
+   (`bootstrap.Collapse.getOrCreateInstance(el).hide()`), sin duplicar la
+   lógica de apertura ni tocar `aria-expanded` a mano.
 
 ## Plan técnico
 Archivos en `web/themes/custom/d11assd_theme/`:
@@ -295,6 +396,19 @@ Archivos en `web/themes/custom/d11assd_theme/`:
 | `tests/src/Functional/ThemeSettingsFormTest.php` | CA7e. |
 
 Y en la raíz del proyecto: `config/sync/d11assd_theme.settings.yml` (R9, R10).
+
+v1.2 (propuesta, se concreta tras aprobar):
+
+| Archivo | Para qué |
+|---------|----------|
+| `d11assd_theme.libraries.yml` | Nueva librería `navbar` con `js/navbar.js` (CA23). |
+| `d11assd_theme.info.yml` | Añade `d11assd_theme/navbar` a `libraries`. |
+| `js/navbar.js` | Cierre con Esc y retorno del foco (R13). |
+| `css/style.css` | Solo si la medición de CA20 falla: tamaño mínimo de los objetivos. |
+| `tests/src/Kernel/ThemeTest.php` | CA23. |
+| `tests/src/Functional/FrontendTest.php` | CA16. |
+| `scripts/a11y/axe-check.mjs` | Opción `--menu`: CA17–CA22 y axe con el menú abierto (CA-A7). |
+| `scripts/check.sh` | Añade `--menu` a las pasadas de 320 y 1280 px. |
 
 Activación: `drush theme:install d11assd_theme`, se define como tema por
 defecto en `system.theme` y después `drush cex`. Para R10 en este sitio: crear
@@ -322,6 +436,16 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 - [x] Seguridad (`asdd-seguridad`) superada
 - [x] Accesibilidad (`asdd-accesibilidad`) superada y lista manual confirmada por la persona (CA-A3–CA-A5, 2026-11-08)
 
+### v1.2
+- [x] Decisión de la persona: R13 (Esc) incluido; OBS-01 fuera de alcance
+- [x] Validación (`asdd-validacion`), una pasada: 1 ALTO y 5 MEDIOS corregidos en el texto
+- [x] Aprobación de la persona
+- [x] Suites `custom-*` en verde antes de empezar
+- [x] Tests CA16, CA23, CA23b y opción `--menu` del script (rojo: N fallos)
+- [x] Implementación (`js/navbar.js`, librería y, si hace falta, CSS)
+- [x] `scripts/check.sh --spec specs/001-tema-hijo.md` en verde
+- [x] Accesibilidad (`asdd-accesibilidad`), una pasada: 0 ALTOS · 0 MEDIOS · 0 BAJOS. Lista manual CA-A8 pendiente de la persona
+
 ## Trazabilidad (requisito → criterio → test)
 | Requisito | Criterio | Test |
 |-----------|----------|------|
@@ -346,6 +470,14 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 | RA | CA-A6 | `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` |
 | RA | CA-A3, CA-A4, CA-A4b, CA-A4c | `npm run a11y` y revisión estática (informe `001-accesibilidad.md`) |
 | RA | CA-A5 | comprobación manual (informe `001-accesibilidad.md`) |
+| R11 | CA16 | `Functional\FrontendTest::testNavbarToggler` |
+| R11 | CA17, CA17b, CA18, CA18b, CA19 | `check.sh` (`axe-check.mjs --menu`) |
+| R12 | CA20 | `check.sh` (`axe-check.mjs --menu`) |
+| R13 | CA21, CA22 | `check.sh` (`axe-check.mjs --menu`) |
+| R13, R5 | CA23 | `Kernel\ThemeTest::testNavbarLibrary` |
+| R13 | CA23b | `Functional\FrontendTest::testNavbarScriptLoaded` |
+| RA | CA-A7 | `check.sh` (`axe-check.mjs --menu`) |
+| RA | CA-A8 | comprobación manual |
 | — | CA6 | `vendor/bin/phpcs`, `vendor/bin/phpstan` |
 
 ## Informes
