@@ -1,0 +1,33 @@
+# Dependencias (se instalan con composer install)
+/vendor/
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
+/recipes/
+/drush/contrib/
+# Archivos generados por Composer scaffold
+/web/*.php
+/web/*.txt
+/web/.htaccess
+/web/.ht.router.php
+/web/sites/*.php
+/web/sites/*.yml
+/web/sites/*.txt
+/web/sites/default/default.*
+/web/sites/default/files/
+# Configuración local y secretos
+/web/sites/*/settings*.php
+/web/sites/*/services*.yml
+!/web/sites/default/settings.php
+/.env
+# Tests / IDE
+/web/sites/simpletest/
+/reports/
+.phpunit.result.cache
+.idea/
+.vscode/
+
+# PHPUnit local (contiene credenciales); se versiona phpunit.xml.dist
+/phpunit.xml
