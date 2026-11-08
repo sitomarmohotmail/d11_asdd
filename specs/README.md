@@ -4,7 +4,8 @@ Cada funcionalidad nace aquí **antes** de escribir código.
 
 El proceso adopta parcialmente el marco
 [efactory-llc/asdd](https://github.com/efactory-llc/asdd) (licencia MIT):
-requisitos en formato EARS y agentes de validación, QA y seguridad adaptados a
+requisitos en formato EARS y agentes de validación, QA, seguridad y
+accesibilidad adaptados a
 Drupal. Los agentes están en `.claude/agents/` y los umbrales en
 `.claude/rules/quality-gates.md`.
 
@@ -12,7 +13,7 @@ Drupal. Los agentes están en `.claude/agents/` y los umbrales en
 
 ```
 borrador → [validación] → aprobada → tests en rojo → implementación
-        → [QA] → [seguridad] → implementada → commit spec-NNN
+        → [QA] → [seguridad] → [accesibilidad] → implementada → commit spec-NNN
 ```
 
 1. **Spec**: copiar `_plantilla.md` a `NNN-nombre-corto.md` y rellenar
@@ -32,8 +33,27 @@ borrador → [validación] → aprobada → tests en rojo → implementación
    cobertura de cada requisito y escribe `NNN-qa.md`.
 9. **Seguridad**: el agente `asdd-seguridad` revisa el código de la spec y
    escribe `NNN-seguridad.md`.
-10. **Cierre**: estado `implementada`, commit con referencia a la spec
+10. **Accesibilidad** (si la spec pinta interfaz): el agente
+    `asdd-accesibilidad` revisa el código, ejecuta axe-core y genera una lista
+    de comprobación manual que confirma la persona. Escribe
+    `NNN-accesibilidad.md`.
+11. **Cierre**: estado `implementada`, commit con referencia a la spec
     (`spec-NNN: …`), incluidos los informes.
+
+## Accesibilidad
+
+Todo lo que añade o cambia HTML, Twig, CSS o JS debe cumplir **WCAG 2.2 AA**.
+Esas specs llevan el requisito **RA** y criterios de accesibilidad concretos.
+Lista de comprobación y reglas: `.claude/rules/accesibilidad.md`.
+
+Revisión automática con axe-core (requiere Node, ver `.nvmrc`):
+
+```bash
+nvm use && npm ci                         # una vez
+npx puppeteer browsers install chrome     # una vez (npm ya no lo hace solo)
+npm run a11y -- http://d11assd.local/     # una o varias URL
+npm run a11y -- --width 320 http://d11assd.local/   # en móvil
+```
 
 Los agentes se lanzan a mano en su paso; no hay encadenado automático.
 
@@ -74,3 +94,4 @@ Junto a cada spec quedan sus informes, que se versionan:
 - `NNN-validacion.md` — validación de la spec.
 - `NNN-qa.md` — puerta de QA.
 - `NNN-seguridad.md` — puerta de seguridad.
+- `NNN-accesibilidad.md` — puerta de accesibilidad.

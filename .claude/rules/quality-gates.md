@@ -1,7 +1,8 @@
 # Puertas de calidad (ASDD)
 
 Umbrales que deciden si una spec puede pasar a la fase siguiente. Los aplican
-los agentes `asdd-validacion`, `asdd-qa` y `asdd-seguridad`, y también el agente
+los agentes `asdd-validacion`, `asdd-qa`, `asdd-seguridad` y
+`asdd-accesibilidad`, y también el agente
 principal antes de cambiar el `estado` de una spec.
 
 Adaptado de [efactory-llc/asdd](https://github.com/efactory-llc/asdd) (MIT).
@@ -68,6 +69,23 @@ Agente: `asdd-seguridad`. Informe: `specs/NNN-seguridad.md`.
 | Otros riesgos con controles compensatorios | MEDIA / BAJA |
 
 Decisión: **SUPERADA**, **SUPERADA CON AVISOS** o **BLOQUEADA**.
+
+## 5. Puerta de accesibilidad (→ implementada)
+Solo para specs que añaden o cambian HTML, Twig, CSS o JS.
+Agente: `asdd-accesibilidad`. Informe: `specs/NNN-accesibilidad.md`.
+Norma y lista de comprobación: `.claude/rules/accesibilidad.md` (WCAG 2.2 AA).
+
+| Condición | Acción |
+|---|---|
+| Spec con interfaz sin requisito RA | ALTA (lo detecta `asdd-validacion`) |
+| Incumplimiento WCAG 2.2 AA confirmado en código propio | ALTA |
+| Violación de axe-core en código propio | ALTA |
+| Revisión automática con axe-core no ejecutada | ALTA |
+| Incumplimiento AA heredado de contrib que el tema hijo puede corregir | MEDIA |
+| Lista de comprobación manual sin confirmar por la persona | Resultado PENDIENTE DE REVISIÓN MANUAL |
+
+Una spec con interfaz solo pasa a `implementada` cuando esta puerta está
+SUPERADA (o SUPERADA CON AVISOS) **y** la persona ha confirmado la lista manual.
 
 ## Specs ya implementadas (revisión retrospectiva)
 Si se pasan los agentes sobre una spec ya `implementada`, los hallazgos no

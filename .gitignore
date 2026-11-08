@@ -34,3 +34,7 @@
 
 # Claude Code: preferencias locales
 /.claude/settings.local.json
+
+# Node (herramientas de accesibilidad)
+/node_modules/
+/specs/*-axe.json

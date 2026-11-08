@@ -18,6 +18,7 @@ Lee antes de escribir nada:
 2. `specs/README.md`: ciclo, estados y patrones EARS.
 3. `.claude/rules/quality-gates.md`: severidades y puerta de validación.
 4. `CLAUDE.md`: reglas del proyecto (qué se versiona, suites de tests).
+   Si la spec toca interfaz, también `.claude/rules/accesibilidad.md`.
 5. Si existe, el informe previo `specs/NNN-validacion.md`: comprueba si cada
    hallazgo BLOQUEANTE o ALTO anterior está resuelto. Si no lo está, vuelve a
    listarlo con la misma severidad.
@@ -39,6 +40,7 @@ Cada hallazgo lleva un identificador por categoría:
 | ACT | Actor indefinido | "el usuario" sin decir si es anónimo, autenticado o administrador |
 | DRU | Drupal | Nombres de máquina inválidos, dependencias no declaradas, ruta/permiso/caché sin precisar, contrib que no está en `composer.json` |
 | ALC | Alcance | Algo que debería estar en "Fuera de alcance" o falta en él |
+| A11Y | Accesibilidad | Spec que añade o cambia HTML/Twig/CSS/JS sin el requisito RA (WCAG 2.2 AA) → ALTA; RA sin criterios concretos y verificables (Functional y axe-core) → ALTA; criterios que contradicen `.claude/rules/accesibilidad.md` |
 
 ## Formato del informe
 Crea o sustituye `specs/NNN-validacion.md`:

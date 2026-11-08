@@ -6,7 +6,7 @@
   antes de la implementación y deben fallar inicialmente.
 - Una tarea está terminada solo si pasan los tests y `phpcs` está limpio.
 - Solo se versiona código propio: `web/modules/custom`, `web/themes/custom`,
-  `.claude/agents`, `.claude/rules`,
+  `.claude/agents`, `.claude/rules`, `scripts/`,
   `config/sync`, `specs/` y la raíz del proyecto. Core y contrib se instalan con Composer.
 - Commits en español, referenciando la spec: `spec-001: descripción`.
 
@@ -17,8 +17,13 @@
   - `asdd-validacion` — sobre la spec en borrador, antes de pedir aprobación.
   - `asdd-qa` — tras implementar (tests, phpcs, phpstan y cobertura por requisito).
   - `asdd-seguridad` — tras QA.
+  - `asdd-accesibilidad` — tras seguridad, si la spec toca HTML/Twig/CSS/JS.
 - Umbrales en `.claude/rules/quality-gates.md`. Una spec solo pasa a
-  `implementada` con QA y seguridad sin hallazgos BLOQUEANTES ni ALTOS.
+  `implementada` con QA, seguridad y accesibilidad sin hallazgos BLOQUEANTES ni ALTOS.
+- **Accesibilidad WCAG 2.2 AA** obligatoria en el tema, módulos y componentes
+  con HTML, CSS o JS: requisito RA en la spec y reglas en
+  `.claude/rules/accesibilidad.md`. axe-core: `npm run a11y -- URL`
+  (Node con nvm: `. ~/.nvm/nvm.sh`).
 - Solo la persona aprueba una spec; ningún agente cambia el estado a `aprobada`.
 
 ## Entorno local (debug)

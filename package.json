@@ -1,0 +1,16 @@
+{
+  "name": "d11assd-tooling",
+  "private": true,
+  "description": "Herramientas de desarrollo del proyecto (accesibilidad). No forma parte del sitio.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "a11y": "node scripts/a11y/axe-check.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/puppeteer": "4.10.2",
+    "puppeteer": "24.10.0"
+  }
+}

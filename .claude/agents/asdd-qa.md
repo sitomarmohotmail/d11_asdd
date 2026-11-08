@@ -36,7 +36,11 @@ implementación que no demuestra, con tests, lo que la spec exige.
    solo si al menos uno de sus criterios tiene un test que pasa.
 4. **Contrasta** la tabla de trazabilidad de la spec con lo que has
    encontrado.
-5. **Revisa** la calidad de los tests: aserciones débiles (solo código 200),
+5. **Accesibilidad**: si la spec tiene requisito RA, comprueba que los
+   criterios de accesibilidad verificables en el HTML (lang, enlace de salto,
+   regiones, h1, alt, etiquetas…) tienen tests Functional. La revisión con
+   axe-core y la manual no son tuyas: son de `asdd-accesibilidad`.
+6. **Revisa** la calidad de los tests: aserciones débiles (solo código 200),
    tests que no fallarían si se rompe el comportamiento, dependencias del
    orden o del estado del sitio local.
 
