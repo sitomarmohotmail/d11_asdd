@@ -18,7 +18,7 @@
   verifican con tests, no repitiendo el agente. Mensajes al usuario breves.
 - Criterios **EARS** (uno por comportamiento) y prioridades DEBE / DEBERÍA / PODRÍA.
 - QA = `scripts/check.sh --spec specs/NNN-….md [URL…]` (tests, phpcs,
-  phpstan, config:status, trazabilidad, axe + reflujo + foco). Durante el
+  phpstan, linters CSS/JS/Twig, config:status, trazabilidad, axe + reflujo + foco). Durante el
   desarrollo, tests por grupo: `vendor/bin/phpunit --group GRUPO`.
 - Hallazgos BAJOS → `specs/pendientes.md`, no se corrigen en la spec.
 - **Accesibilidad WCAG 2.2 AA** en todo lo que toca HTML/Twig/CSS/JS
@@ -41,6 +41,8 @@ vendor/bin/phpunit --testsuite contrib          # tests de módulos contribuidos
 vendor/bin/phpunit web/modules/contrib/MODULO   # un contrib concreto
 vendor/bin/phpcs                                # estándares Drupal en custom/
 vendor/bin/phpstan analyse                      # nivel 6 y rutas en phpstan.neon.dist
+npm run lint                                    # stylelint + eslint + twig-cs-fixer (reglas del core)
+npm run lint -- --fix                           # corrige lo automático
 ```
 
 ## Estructura

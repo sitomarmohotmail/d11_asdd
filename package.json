@@ -1,16 +1,31 @@
 {
   "name": "d11assd-tooling",
   "private": true,
-  "description": "Herramientas de desarrollo del proyecto (accesibilidad). No forma parte del sitio.",
+  "description": "Herramientas de desarrollo del proyecto (accesibilidad y linters). No forma parte del sitio.",
   "type": "module",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "a11y": "node scripts/a11y/axe-check.mjs"
+    "a11y": "node scripts/a11y/axe-check.mjs",
+    "lint": "scripts/lint/lint.sh all",
+    "lint:css": "scripts/lint/lint.sh css",
+    "lint:js": "scripts/lint/lint.sh js",
+    "lint:twig": "scripts/lint/lint.sh twig"
   },
   "devDependencies": {
     "@axe-core/puppeteer": "4.14.0",
-    "puppeteer": "25.16.0"
+    "eslint": "8.57.1",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-jsdoc": "61.7.1",
+    "eslint-plugin-prettier": "5.5.7",
+    "prettier": "3.9.10",
+    "puppeteer": "25.16.0",
+    "stylelint": "16.26.1",
+    "stylelint-config-standard": "38.0.0",
+    "stylelint-order": "7.0.1",
+    "stylelint-prettier": "5.1.0"
   }
 }

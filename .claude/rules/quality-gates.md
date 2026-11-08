@@ -25,6 +25,8 @@ Una pasada de `asdd-validacion`.
 `scripts/check.sh --spec specs/NNN-….md [URL…]` en verde:
 - suites `custom-unit`, `custom-kernel`, `custom-functional` sin fallos;
 - `phpcs` y `phpstan` (nivel de `phpstan.neon.dist`) sin errores;
+- Stylelint, ESLint (reglas del core de Drupal) y twig-cs-fixer sin errores
+  en el CSS, JS y Twig propios (`scripts/lint/lint.sh`, spec-002);
 - `drush config:status` sin diferencias;
 - todos los tests de la trazabilidad existen;
 - si hay interfaz: axe 0 violaciones, sin scroll horizontal y foco visible

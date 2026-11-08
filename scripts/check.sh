@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Puerta de QA automática (sustituye al agente asdd-qa).
+# Puerta de QA automática (sustituye al agente asdd-qa): tests, phpcs, phpstan,
+# linters CSS/JS/Twig (scripts/lint/lint.sh), config:status, trazabilidad y axe.
 #
 # Uso:
 #   scripts/check.sh [--spec specs/NNN-x.md] [--group GRUPO] [--no-a11y] [URL…]
@@ -48,6 +49,10 @@ else
 fi
 run "phpcs" vendor/bin/phpcs -q
 run "phpstan" vendor/bin/phpstan analyse --no-progress
+run "stylelint" scripts/lint/lint.sh css
+run "eslint" scripts/lint/lint.sh js
+run "twig" scripts/lint/lint.sh twig
+run "linters (fixtures)" scripts/lint/test.sh
 run "drush config:status" bash -c 'vendor/bin/drush config:status 2>&1 | grep -q "No differences"'
 
 if [ -n "$spec" ]; then
