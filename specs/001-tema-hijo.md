@@ -2,7 +2,7 @@
 id: 001
 titulo: Tema hijo de Bootstrap5
 version: 1.1
-estado: aprobada
+estado: implementada
 tipo: tema
 proyecto: d11assd_theme
 ---
@@ -13,7 +13,7 @@ proyecto: d11assd_theme
 | Versión | Fecha | Estado | Cambios |
 |---|---|---|---|
 | 1.0 | 2026-11-08 | implementada (`84bb516`) | Versión inicial, criterios en Dado/Cuando/Entonces. |
-| 1.1 | 2026-11-08 | aprobada (por la persona, tras validación SUPERADA CON AVISOS en la 3.ª pasada) | Migración a EARS y prioridades. Nuevos R10 (ajustes de Bootstrap5 propios del tema hijo) y RA (WCAG 2.2 AA). Criterios para todos los requisitos. Corregida tras `001-validacion.md` (pasadas 1 y 2: BLOQUEADA). |
+| 1.1 | 2026-11-08 | implementada (aprobada por la persona tras validación SUPERADA CON AVISOS en la 3.ª pasada; QA, seguridad y accesibilidad superadas) | Migración a EARS y prioridades. Nuevos R10 (ajustes de Bootstrap5 propios del tema hijo) y RA (WCAG 2.2 AA). Criterios para todos los requisitos. Corregida tras `001-validacion.md` (pasadas 1 y 2: BLOQUEADA). Tras la primera puerta de accesibilidad (BLOQUEADA) se añaden, dentro de RA y con el visto bueno de la persona, CA-A1d, CA-A4d, CA-A4e y CA-A6. |
 
 ## Contexto
 El sitio usa ahora Olivero como tema público. Queremos un tema propio que
@@ -207,9 +207,16 @@ QA.
   dentro de `<main>`.
 - **CA-A1c** *(RA · Functional)* — **Cuando** un visitante anónimo abra la
   portada, **el sistema deberá** generar exactamente un elemento `<main>`.
+- **CA-A1d** *(RA · Functional)* — **Cuando** un visitante anónimo abra la
+  portada, **el sistema deberá** generar exactamente un elemento `<h1>`.
 - **CA-A2** *(RA, R8 · Functional)* — **Cuando** un visitante anónimo abra la
   portada, **el sistema deberá** mostrar el logo dentro de un enlace a la
   portada (`rel="home"`) con atributo `alt` no vacío.
+- **CA-A6** *(RA, R7 · Kernel)* — **El sistema deberá** declarar los bloques
+  del tema con `langcode: es` y etiqueta en español, en `config/optional` y
+  en `config/sync`, para que los nombres de las regiones de navegación
+  («Navegación principal», «Menú de la cuenta de usuario») estén en el idioma
+  de la página (WCAG 3.1.2).
 - **CA-A3** *(RA · accesibilidad)* — **Mientras** `d11assd_theme.settings`
   tenga los valores de R10, **cuando** se ejecuten como visitante anónimo
   `npm run a11y -- http://d11assd.local/` y
@@ -224,6 +231,14 @@ QA.
   tenga los valores de R10, **el sistema deberá** mostrar subrayados
   (`text-decoration: underline`) los enlaces de `<footer>`, aunque la regla
   `footer.footer-dark a` de Bootstrap5 quite el subrayado (WCAG 1.4.1).
+- **CA-A4d** *(RA · Unit, accesibilidad)* — **Cuando** un enlace, botón o
+  campo de formulario reciba el foco por teclado, **el sistema deberá**
+  mostrar un contorno (`outline`) de al menos 2 px con contraste de al menos
+  3:1 frente al fondo, también en la barra y el pie oscuros de R10 (WCAG
+  2.4.7, 1.4.11). Bootstrap5 sustituye el contorno por un anillo de 1,29:1–1,75:1.
+- **CA-A4e** *(RA · Unit, accesibilidad)* — **Donde** un mensaje de estado
+  contenga enlaces, **el sistema deberá** mostrarlos con un contraste de al
+  menos 4,5:1 frente al fondo del aviso (WCAG 1.4.3).
 - **CA-A4b** *(RA · accesibilidad)* — **El sistema deberá** no contener en
   `css/style.css` `outline: none` ni `outline: 0` sin un indicador de foco
   alternativo con contraste de al menos 3:1.
@@ -267,15 +282,16 @@ Archivos en `web/themes/custom/d11assd_theme/`:
 |---------|----------|
 | `d11assd_theme.info.yml` | Declara el tema: `base theme: bootstrap5`, `dependencies`, regiones (R1–R3) y librería (R4). |
 | `d11assd_theme.libraries.yml` | Librería `global-styling` con `css/style.css` (R4). |
-| `css/style.css` | Estilos propios: ajustes mínimos (R5) y subrayado de los enlaces del pie (CA-A4c). |
-| `config/optional/block.block.d11assd_theme_*.yml` | Bloques del tema en las regiones de Bootstrap5, copiados de los de Bootstrap5. Se crean solos al instalar el tema (R7). |
+| `css/style.css` | Estilos propios: ajustes mínimos (R5), subrayado de los enlaces del pie (CA-A4c), foco visible (CA-A4d) y enlaces de los mensajes (CA-A4e). |
+| `config/optional/block.block.d11assd_theme_*.yml` | Bloques del tema en las regiones de Bootstrap5, copiados de los de Bootstrap5, con etiqueta en español y `langcode: es` (CA-A6). Se crean solos al instalar el tema (R7). |
 | `logo.svg`, `screenshot.png` | Identidad propia (R8). |
 | `config/install/d11assd_theme.settings.yml` | Ajustes de Bootstrap5 del tema hijo con los valores de R10. |
 | `config/schema/d11assd_theme.schema.yml` | Esquema `d11assd_theme.settings` de tipo `theme_settings` con las nueve claves `b5_*` y las tres `subtheme_*` (R10). |
 | `tests/src/Unit/ThemeFilesTest.php` | CA9, CA9b. |
+| `tests/src/Unit/ThemeCssTest.php` | CA-A4d, CA-A4e (reglas de `css/style.css`). |
 | `tests/src/Kernel/ThemeTest.php` | CA1, CA2, CA3, CA11, CA14, CA7d. |
-| `tests/src/Kernel/ConfigSyncTest.php` | CA5b, CA10, CA7c. |
-| `tests/src/Functional/FrontendTest.php` | CA4, CA5a, CA12, CA13, CA15, CA7a, CA7b, CA8, CA-A1, CA-A1b, CA-A1c, CA-A2. |
+| `tests/src/Kernel/ConfigSyncTest.php` | CA5b, CA10, CA7c, CA-A6. |
+| `tests/src/Functional/FrontendTest.php` | CA4, CA5a, CA12, CA13, CA15, CA7a, CA7b, CA8, CA-A1, CA-A1b, CA-A1c, CA-A1d, CA-A2. |
 | `tests/src/Functional/ThemeSettingsFormTest.php` | CA7e. |
 
 Y en la raíz del proyecto: `config/sync/d11assd_theme.settings.yml` (R9, R10).
@@ -295,15 +311,16 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 ### v1.1
 - [x] Validación (`asdd-validacion`) sin hallazgos BLOQUEANTES ni ALTOS
 - [x] Aprobación de la persona
-- [ ] Puerta de deuda técnica: suites `custom-*` en verde
-- [ ] Ampliar tests de criterios ya implementados (CA1, CA5b, CA9–CA15, CA-A1–CA-A2)
-- [ ] Tests para CA7a–CA7e y CA8 (en rojo)
-- [ ] Subrayado de enlaces del pie en `css/style.css` (CA-A4c)
-- [ ] Esquema y ajustes `d11assd_theme.settings` en `config/install` y `config/sync` (R10)
-- [ ] Correcciones en el tema hasta que pasen todos los tests
-- [ ] QA (`asdd-qa`) superado
-- [ ] Seguridad (`asdd-seguridad`) superada
-- [ ] Accesibilidad (`asdd-accesibilidad`) superada y lista manual confirmada (CA-A3–CA-A5)
+- [x] Puerta de deuda técnica: suites `custom-*` en verde
+- [x] Ampliar tests de criterios ya implementados (CA1, CA5b, CA9–CA15, CA-A1–CA-A2)
+- [x] Tests para CA7a–CA7e y CA8 (en rojo)
+- [x] Subrayado de enlaces del pie en `css/style.css` (CA-A4c)
+- [x] Esquema y ajustes `d11assd_theme.settings` en `config/install` y `config/sync` (R10)
+- [x] Correcciones en el tema hasta que pasen todos los tests
+- [x] Correcciones de la puerta de accesibilidad (A11Y-001 a A11Y-007): tests en rojo y después CSS y etiquetas
+- [x] QA (`asdd-qa`) superado
+- [x] Seguridad (`asdd-seguridad`) superada
+- [x] Accesibilidad (`asdd-accesibilidad`) superada y lista manual confirmada por la persona (CA-A3–CA-A5, 2026-11-08)
 
 ## Trazabilidad (requisito → criterio → test)
 | Requisito | Criterio | Test |
@@ -312,13 +329,21 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 | R2 | CA1, CA2 | `Kernel\ThemeTest::testThemeIsDiscovered`, `Kernel\ThemeTest::testInstallRequiresBaseThemeAndHasRegions` |
 | R3 | CA2 | `Kernel\ThemeTest::testInstallRequiresBaseThemeAndHasRegions` |
 | R4 | CA3, CA4 | `Kernel\ThemeTest::testGlobalStylingLibrary`, `Functional\FrontendTest::testFrontPage` |
-| R5 | CA9, CA9b | _pendiente_ |
+| R5 | CA9, CA9b | `Unit\ThemeFilesTest::testNoScssOrNodeFiles`, `Unit\ThemeFilesTest::testGlobalStylingOnlyDeclaresCss` |
 | R6 | CA4, CA5a, CA5b | `Functional\FrontendTest::testFrontPage`, `Functional\FrontendTest::testAdminUsesClaro`, `Kernel\ConfigSyncTest::testExportedThemeConfiguration` |
-| R7 | CA11, CA12, CA13 | _pendiente_ |
-| R8 | CA14, CA15, CA-A2 | _pendiente_ |
-| R9 | CA5b, CA10, CA7c | `Kernel\ConfigSyncTest::testExportedThemeConfiguration`; CA10 y CA7c _pendientes_ |
-| R10 | CA7a, CA7b, CA7c, CA7d, CA7e, CA8 | _pendiente_ |
-| RA | CA-A1, CA-A1b, CA-A1c, CA-A2 | _pendiente_ |
+| R7 | CA11, CA12, CA13, CA-A6 | `Kernel\ThemeTest::testInstallPlacesBlocks`, `Functional\FrontendTest::testBlocksInRegions`, `Functional\FrontendTest::testMessagesInMain`, `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` |
+| R8 | CA14, CA15, CA-A2 | `Kernel\ThemeTest::testOwnLogoAndScreenshot`, `Functional\FrontendTest::testLogo` |
+| R9 | CA5b, CA10, CA7c | `Kernel\ConfigSyncTest::testExportedThemeConfiguration`, `Kernel\ConfigSyncTest::testExportedBlocks`, `Kernel\ConfigSyncTest::testThemeSettingsExported` |
+| R10 | CA7a | `Functional\FrontendTest::testDefaultSettingsClasses` |
+| R10 | CA7b | `Functional\FrontendTest::testNoIncompleteClasses` |
+| R10 | CA7c | `Kernel\ConfigSyncTest::testThemeSettingsExported` |
+| R10 | CA7d | `Kernel\ThemeTest::testThemeSettingsInstalledWithSchema` |
+| R10 | CA7e | `Functional\ThemeSettingsFormTest::testSaveFormKeepsValidSchema` |
+| R10 | CA8 | `Functional\FrontendTest::testSettingsChangeAppliesToCachedPage` |
+| RA | CA-A1, CA-A1b, CA-A1c, CA-A1d | `Functional\FrontendTest::testHtmlLang`, `Functional\FrontendTest::testSkipLink`, `Functional\FrontendTest::testSingleMain`, `Functional\FrontendTest::testSingleH1` |
+| RA | CA-A2 | `Functional\FrontendTest::testLogo` |
+| RA | CA-A4d, CA-A4e | `Unit\ThemeCssTest::testFocusIndicators`, `Unit\ThemeCssTest::testAlertLinks`, y medición en `001-accesibilidad.md` |
+| RA | CA-A6 | `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` |
 | RA | CA-A3, CA-A4, CA-A4b, CA-A4c | `npm run a11y` y revisión estática (informe `001-accesibilidad.md`) |
 | RA | CA-A5 | comprobación manual (informe `001-accesibilidad.md`) |
 | — | CA6 | `vendor/bin/phpcs`, `vendor/bin/phpstan` |
@@ -332,3 +357,12 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 ## Notas de implementación
 - El bloque de búsqueda (`search_form_block`) está en `config/optional` y solo
   se crea si se activa el módulo Search, que ahora no está activo.
+- v1.1: la plantilla `status-messages.html.twig` de Bootstrap5 pinta cada
+  mensaje como `div role="alert"` sin `data-drupal-messages`; el bloque de
+  mensajes se identifica por `data-drupal-messages-fallback` (CA13).
+- v1.1: en el sitio, `d11assd_theme.settings` se creó con
+  `drush config:import --partial --source=<ruta absoluta>/config/install` y
+  `drush cex` (la ruta relativa falla porque Drush se ejecuta desde `web/`).
+- v1.1: Bootstrap5 tiene más textos en inglés sin `|t` en plantillas
+  heredadas: `aria-label="Toggle navigation"` (barra) y `aria-label="Close"`
+  (mensajes). Candidatos a OBS según RA.

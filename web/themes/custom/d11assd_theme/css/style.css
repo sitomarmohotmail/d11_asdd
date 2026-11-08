@@ -16,3 +16,64 @@
 footer {
   border-top: 3px solid var(--d11assd-primary);
 }
+
+/*
+ * WCAG 1.4.1: links in the footer must not rely on colour alone.
+ * Bootstrap5 removes the underline in "footer.footer-dark a"; the selectors
+ * below have the same specificity and load later (spec 001, CA-A4c).
+ */
+footer[role="contentinfo"] a,
+footer[role="contentinfo"] a:hover,
+footer.footer-dark a,
+footer.footer-dark a:hover {
+  text-decoration: underline;
+}
+
+/*
+ * WCAG 2.4.7 / 1.4.11: visible focus indicator (spec 001, CA-A4d).
+ * Bootstrap5 replaces the outline with a 4px ring of 1.29:1-1.75:1.
+ * On light backgrounds: #0a58ca is 6.44:1 on #fff.
+ */
+a:focus-visible,
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.nav-tabs .nav-link:focus-visible,
+.btn-close:focus-visible,
+.form-check-input:focus-visible {
+  outline: 2px solid #0a58ca;
+  outline-offset: 2px;
+}
+
+/*
+ * On the dark navbar and footer (R10) the outline follows the text colour
+ * (5.66:1-15.43:1 on #212529), also if an administrator changes the
+ * background in the theme settings.
+ */
+.navbar .nav-link:focus-visible,
+.navbar .navbar-brand a:focus-visible,
+.navbar .navbar-toggler:focus-visible,
+footer a:focus-visible,
+footer .nav-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/*
+ * The logo link takes the navbar text colour instead of the default link
+ * colour, so its currentColor outline keeps the contrast whatever the navbar
+ * background chosen in the theme settings.
+ */
+.navbar .navbar-brand a.site-logo {
+  color: inherit;
+}
+
+/*
+ * WCAG 1.4.3: links inside status messages use the alert text colour
+ * (#58151c on #f8d7da is 10.22:1) (spec 001, CA-A4e).
+ */
+.alert a:not(.btn) {
+  color: inherit;
+  font-weight: 700;
+}

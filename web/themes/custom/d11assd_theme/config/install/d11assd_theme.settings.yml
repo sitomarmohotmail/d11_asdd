@@ -1,0 +1,19 @@
+# Bootstrap5 settings of the D11assd theme (spec 001, R10).
+# Based on bootstrap5.settings, with two deliberate changes:
+# - b5_body_schema / b5_body_bg_schema: 'none' instead of '' (an empty value
+#   generates an incomplete "bg-" class on <body>).
+# - b5_footer_bg_schema: 'dark' instead of 'secondary' (#f8f9fa on #6c757d is
+#   4.45:1, below WCAG AA 4.5:1).
+b5_body_schema: 'none'
+b5_body_bg_schema: 'none'
+
+b5_navbar_schema: 'dark'
+b5_navbar_bg_schema: 'dark'
+
+b5_footer_schema: 'dark'
+b5_footer_bg_schema: 'dark'
+
+b5_top_container: 'container'
+b5_top_container_config: ''
+
+b5_theme_mode: 'light'
