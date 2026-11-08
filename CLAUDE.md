@@ -6,8 +6,20 @@
   antes de la implementación y deben fallar inicialmente.
 - Una tarea está terminada solo si pasan los tests y `phpcs` está limpio.
 - Solo se versiona código propio: `web/modules/custom`, `web/themes/custom`,
+  `.claude/agents`, `.claude/rules`,
   `config/sync`, `specs/` y la raíz del proyecto. Core y contrib se instalan con Composer.
 - Commits en español, referenciando la spec: `spec-001: descripción`.
+
+## Proceso ASDD (adopción parcial de efactory-llc/asdd)
+- Criterios de aceptación en formato **EARS** y requisitos con prioridad
+  DEBE / DEBERÍA / PODRÍA (ver `specs/README.md`).
+- Subagentes en `.claude/agents/`, que se lanzan a mano en su paso:
+  - `asdd-validacion` — sobre la spec en borrador, antes de pedir aprobación.
+  - `asdd-qa` — tras implementar (tests, phpcs, phpstan y cobertura por requisito).
+  - `asdd-seguridad` — tras QA.
+- Umbrales en `.claude/rules/quality-gates.md`. Una spec solo pasa a
+  `implementada` con QA y seguridad sin hallazgos BLOQUEANTES ni ALTOS.
+- Solo la persona aprueba una spec; ningún agente cambia el estado a `aprobada`.
 
 ## Entorno local (debug)
 - URL: http://d11assd.local (Apache + PHP 8.5 + MySQL 8.4 del sistema)

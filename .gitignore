@@ -31,3 +31,6 @@
 
 # PHPUnit local (contiene credenciales); se versiona phpunit.xml.dist
 /phpunit.xml
+
+# Claude Code: preferencias locales
+/.claude/settings.local.json

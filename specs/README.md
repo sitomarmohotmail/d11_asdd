@@ -2,17 +2,75 @@
 
 Cada funcionalidad nace aquí **antes** de escribir código.
 
+El proceso adopta parcialmente el marco
+[efactory-llc/asdd](https://github.com/efactory-llc/asdd) (licencia MIT):
+requisitos en formato EARS y agentes de validación, QA y seguridad adaptados a
+Drupal. Los agentes están en `.claude/agents/` y los umbrales en
+`.claude/rules/quality-gates.md`.
+
 ## Ciclo de trabajo
 
-1. **Spec**: copiar `_plantilla.md` a `NNN-nombre-corto.md` y rellenar *Contexto*,
-   *Requisitos* y *Criterios de aceptación* (en formato Dado / Cuando / Entonces).
-2. **Revisión**: la persona revisa y aprueba la spec (estado `aprobada`).
-3. **Plan y tareas**: el agente añade el plan técnico y la lista de tareas.
-4. **Tests primero**: cada criterio de aceptación se traduce en al menos un test
-   (Unit / Kernel / Functional). Deben fallar al principio.
-5. **Implementación** hasta que los tests pasen y `phpcs` esté limpio.
-6. **Cierre**: estado `implementada`, commit con referencia a la spec (`spec-NNN`).
+```
+borrador → [validación] → aprobada → tests en rojo → implementación
+        → [QA] → [seguridad] → implementada → commit spec-NNN
+```
+
+1. **Spec**: copiar `_plantilla.md` a `NNN-nombre-corto.md` y rellenar
+   *Contexto*, *Requisitos* (con prioridad) y *Criterios de aceptación* (EARS).
+2. **Validación**: el agente `asdd-validacion` revisa la spec y escribe
+   `NNN-validacion.md`. Se corrige la spec hasta que no queden hallazgos
+   BLOQUEANTES ni ALTOS.
+3. **Aprobación**: la persona revisa y aprueba la spec (estado `aprobada`).
+   Ningún agente puede aprobarla.
+4. **Plan y tareas**: el agente añade el plan técnico y la lista de tareas.
+5. **Deuda técnica**: las suites `custom-*` deben estar en verde antes de
+   empezar.
+6. **Tests primero**: cada criterio de aceptación se traduce en al menos un
+   test (Unit / Kernel / Functional). Deben fallar al principio.
+7. **Implementación** hasta que los tests pasen y `phpcs` esté limpio.
+8. **QA**: el agente `asdd-qa` ejecuta tests, phpcs y phpstan, comprueba la
+   cobertura de cada requisito y escribe `NNN-qa.md`.
+9. **Seguridad**: el agente `asdd-seguridad` revisa el código de la spec y
+   escribe `NNN-seguridad.md`.
+10. **Cierre**: estado `implementada`, commit con referencia a la spec
+    (`spec-NNN: …`), incluidos los informes.
+
+Los agentes se lanzan a mano en su paso; no hay encadenado automático.
 
 ## Estados
 
 `borrador` → `aprobada` → `en-curso` → `implementada`
+
+## Prioridades
+
+| Prioridad | Significado | En QA |
+|---|---|---|
+| **DEBE** | Obligatorio | Sin test → BLOQUEANTE |
+| **DEBERÍA** | Recomendable | Sin test → MEDIA |
+| **PODRÍA** | Opcional | Sin test → informativo |
+
+## Criterios de aceptación en EARS
+
+EARS (*Easy Approach to Requirements Syntax*) obliga a escribir cada criterio
+con una estructura fija, para que no haya ambigüedad. Un criterio = un
+comportamiento verificable.
+
+| Patrón | Plantilla | Ejemplo |
+|---|---|---|
+| Siempre | **El sistema deberá** ‹respuesta›. | El sistema deberá declarar `base theme: bootstrap5`. |
+| Evento | **Cuando** ‹disparador›, **el sistema deberá** ‹respuesta›. | Cuando un visitante anónimo abra la portada, el sistema deberá responder 200. |
+| Estado | **Mientras** ‹estado›, **el sistema deberá** ‹respuesta›. | Mientras el módulo esté desinstalado, el sistema deberá responder 404 en la ruta. |
+| Error | **Si** ‹condición no deseada›, **entonces el sistema deberá** ‹respuesta›. | Si falta un valor obligatorio, entonces el sistema deberá mostrar un mensaje de error. |
+| Opcional | **Donde** ‹característica presente›, **el sistema deberá** ‹respuesta›. | Donde el módulo Search esté activo, el sistema deberá mostrar el bloque de búsqueda. |
+
+Se pueden combinar (*Mientras … cuando …, el sistema deberá …*). Cada criterio
+indica entre paréntesis los requisitos que cubre y el tipo de test:
+`**CA1** *(R1, R2 · Kernel)* — Cuando …`.
+
+## Informes
+
+Junto a cada spec quedan sus informes, que se versionan:
+
+- `NNN-validacion.md` — validación de la spec.
+- `NNN-qa.md` — puerta de QA.
+- `NNN-seguridad.md` — puerta de seguridad.
