@@ -29,9 +29,30 @@ function parseArgs(argv) {
   return opts;
 }
 
+// Chrome se abre con --no-sandbox, así que solo se permiten el sitio local y
+// archivos locales (páginas de prueba), nunca webs externas.
+const ALLOWED_HOSTS = new Set(['d11assd.local', 'localhost', '127.0.0.1', '[::1]']);
+
+function isAllowed(url) {
+  let parsed;
+  try {
+    parsed = new URL(url);
+  }
+  catch {
+    return false;
+  }
+  if (parsed.protocol === 'file:') return true;
+  return ['http:', 'https:'].includes(parsed.protocol) && ALLOWED_HOSTS.has(parsed.hostname);
+}
+
 const opts = parseArgs(process.argv.slice(2));
 if (opts.urls.length === 0) {
   console.error('Uso: npm run a11y -- [--json salida.json] [--width 320] URL [URL…]');
+  process.exit(2);
+}
+const rejected = opts.urls.filter((url) => !isAllowed(url));
+if (rejected.length > 0) {
+  console.error(`URL no permitidas (solo ${[...ALLOWED_HOSTS].join(', ')} o file://): ${rejected.join(' ')}`);
   process.exit(2);
 }
 

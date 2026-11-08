@@ -10,7 +10,7 @@
     "a11y": "node scripts/a11y/axe-check.mjs"
   },
   "devDependencies": {
-    "@axe-core/puppeteer": "4.10.2",
-    "puppeteer": "24.10.0"
+    "@axe-core/puppeteer": "4.14.0",
+    "puppeteer": "25.16.0"
   }
 }
