@@ -30,6 +30,14 @@ necesidad de módulos adicionales.
 - **CA2** *(R2 · check.sh)* — **Cuando** se ejecute `drush config:status`,
   **el sistema deberá** reportar sin diferencias entre código y base de datos.
 
+## Decisión pendiente
+`navigation_extra_tools` requiere el módulo core `navigation`, que es
+incompatible con `admin_toolbar` + `gin_toolbar` (ambos requieren `toolbar`).
+Antes de aprobar esta spec hay que decidir:
+- **Opción A** — Descartar esta spec y mantener `admin_toolbar` + `gin_toolbar`.
+- **Opción B** — Desinstalar `admin_toolbar`, `admin_toolbar_tools` y `gin_toolbar`
+  y migrar a `navigation` + `navigation_extra_tools`.
+
 ## Fuera de alcance
 - Configuración avanzada de los elementos que expone el módulo.
 - Integración con otros módulos de navegación.
