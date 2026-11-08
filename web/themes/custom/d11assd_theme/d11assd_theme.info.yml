@@ -1,0 +1,22 @@
+name: D11assd
+type: theme
+description: 'Tema del proyecto d11assd, hijo de Bootstrap5.'
+core_version_requirement: ^11
+package: Custom
+'base theme': bootstrap5
+dependencies:
+  - bootstrap5:bootstrap5
+
+libraries:
+  - d11assd_theme/global-styling
+
+regions:
+  header: Header
+  nav_branding: 'Navigation branding region'
+  nav_main: 'Main navigation region'
+  nav_additional: 'Additional navigation region (eg search form, social icons, etc)'
+  breadcrumb: Breadcrumbs
+  content: 'Main content'
+  sidebar_first: 'Sidebar first'
+  sidebar_second: 'Sidebar second'
+  footer: Footer

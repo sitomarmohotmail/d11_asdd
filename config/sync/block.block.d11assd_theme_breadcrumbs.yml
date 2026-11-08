@@ -1,0 +1,22 @@
+uuid: 5ad0c26c-900b-423b-8ce5-1e98bd5abf59
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - d11assd_theme
+_core:
+  default_config_hash: _3kENLdbAEftky3rlXM9WKMBoUUQvEP3lTkdFgY_O0o
+id: d11assd_theme_breadcrumbs
+theme: d11assd_theme
+region: breadcrumb
+weight: 0
+provider: null
+plugin: system_breadcrumb_block
+settings:
+  id: system_breadcrumb_block
+  label: Breadcrumbs
+  label_display: '0'
+  provider: system
+visibility: {  }

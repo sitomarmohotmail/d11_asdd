@@ -1,0 +1,22 @@
+uuid: 0887a9e2-9b00-44d1-8c8c-8d1a7215e193
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - d11assd_theme
+_core:
+  default_config_hash: I4k5SZbxmIJl3zWXfo5ZmC226-iFEUaa9fLQ_yAmscU
+id: d11assd_theme_content
+theme: d11assd_theme
+region: content
+weight: -1
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  label_display: '0'
+  provider: system
+visibility: {  }

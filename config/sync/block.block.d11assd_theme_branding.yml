@@ -1,0 +1,25 @@
+uuid: 0f091709-d4c0-430d-8bb1-7dd09c8ce725
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - d11assd_theme
+_core:
+  default_config_hash: Z2cnxk_SoSBOedKMxd3wgWwcAgCeIHYjrc63gw384hU
+id: d11assd_theme_branding
+theme: d11assd_theme
+region: nav_branding
+weight: -6
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: true
+  use_site_slogan: false
+visibility: {  }

@@ -1,0 +1,27 @@
+uuid: 71b3e8e7-0e99-4d9e-aa71-06c7adbaa288
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.footer
+  module:
+    - system
+  theme:
+    - d11assd_theme
+_core:
+  default_config_hash: QKxm5_gm-7yTWWAN79kcIQqHkpDiuu52QVePTQvBbNY
+id: d11assd_theme_footer
+theme: d11assd_theme
+region: footer
+weight: -6
+provider: null
+plugin: 'system_menu_block:footer'
+settings:
+  id: 'system_menu_block:footer'
+  label: Footer
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

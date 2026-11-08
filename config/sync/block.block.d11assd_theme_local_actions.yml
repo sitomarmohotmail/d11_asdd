@@ -1,0 +1,20 @@
+uuid: e219b388-4972-4e65-b95f-0b1adaf77d1d
+langcode: en
+status: true
+dependencies:
+  theme:
+    - d11assd_theme
+_core:
+  default_config_hash: _XYyuarl9R7jSGumMqtnj4ews1JX4TQDNoCXksvfEGQ
+id: d11assd_theme_local_actions
+theme: d11assd_theme
+region: content
+weight: -2
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility: {  }
