@@ -15,7 +15,7 @@ proyecto: d11assd_theme
 |---|---|---|---|
 | 1.0 | 2026-11-08 | implementada (`84bb516`) | Versión inicial, criterios en Dado/Cuando/Entonces. |
 | 1.1 | 2026-11-08 | implementada (aprobada por la persona tras validación SUPERADA CON AVISOS en la 3.ª pasada; QA, seguridad y accesibilidad superadas) | Migración a EARS y prioridades. Nuevos R10 (ajustes de Bootstrap5 propios del tema hijo) y RA (WCAG 2.2 AA). Criterios para todos los requisitos. Corregida tras `001-validacion.md` (pasadas 1 y 2: BLOQUEADA). Tras la primera puerta de accesibilidad (BLOQUEADA) se añaden, dentro de RA y con el visto bueno de la persona, CA-A1d, CA-A4d, CA-A4e y CA-A6. |
-| 1.2 | 2026-11-08 | implementada (QA, accesibilidad automática superados; lista manual CA-A8 pendiente de la persona) | Responsive: menú plegable operable con teclado (R11), objetivos táctiles ≥ 24 × 24 px (R12) y cierre con Esc (R13). Comprobación dinámica con Puppeteer (`--menu` en `axe-check.mjs`), no con Selenium. R5 se reformula para admitir JS propio sin compilar. |
+| 1.2 | 2026-11-08 | implementada (QA y accesibilidad superados; lista manual CA-A8 confirmada por la persona) | Responsive: menú plegable operable con teclado (R11), objetivos táctiles ≥ 24 × 24 px (R12) y cierre con Esc (R13). Comprobación dinámica con Puppeteer (`--menu` en `axe-check.mjs`), no con Selenium. R5 se reformula para admitir JS propio sin compilar. |
 
 ## Contexto
 El sitio usa ahora Olivero como tema público. Queremos un tema propio que
@@ -444,7 +444,7 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 - [x] Tests CA16, CA23, CA23b y opción `--menu` del script (rojo: N fallos)
 - [x] Implementación (`js/navbar.js`, librería y, si hace falta, CSS)
 - [x] `scripts/check.sh --spec specs/001-tema-hijo.md` en verde
-- [x] Accesibilidad (`asdd-accesibilidad`), una pasada: 0 ALTOS · 0 MEDIOS · 0 BAJOS. Lista manual CA-A8 pendiente de la persona
+- [x] Accesibilidad (`asdd-accesibilidad`) superada y lista manual CA-A8 confirmada por la persona (2026-11-08)
 
 ## Trazabilidad (requisito → criterio → test)
 | Requisito | Criterio | Test |

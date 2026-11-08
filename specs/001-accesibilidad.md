@@ -204,18 +204,18 @@ Ninguno en código propio.
 Haz esta lista a 320 px (modo responsive de las DevTools o pantalla real), sin sesión iniciada, con teclado y con Orca + Firefox.
 
 **Teclado**
-- [ ] Pulsa Tab hasta el botón del menú. Pulsa **Intro**: el menú se despliega, el botón muestra `aria-expanded="true"` y el siguiente Tab lleva al primer enlace del menú principal («Inicio»).
-- [ ] Con el menú abierto, pulsa **Tab** desde «Inicio» hasta el último enlace («Iniciar sesión»). Foco visible en cada enlace; el orden es botón → «Inicio» → «Iniciar sesión».
-- [ ] Con el foco en el botón y el menú abierto, pulsa **Esc**: el menú se cierra, el botón recupera el foco y `aria-expanded` vuelve a `"false"`.
-- [ ] Con el foco en un enlace del menú abierto («Inicio» o «Iniciar sesión»), pulsa **Esc**: el menú se cierra y el foco vuelve al botón.
-- [ ] Con el menú **cerrado**, pulsa Esc: el foco permanece donde estaba (CA22).
-- [ ] A 1280 px el botón del menú no se ve; pulsa Esc con el foco en un enlace de la barra: el foco permanece donde estaba (CA22).
+- [x] Pulsa Tab hasta el botón del menú. Pulsa **Intro**: el menú se despliega, el botón muestra `aria-expanded="true"` y el siguiente Tab lleva al primer enlace del menú principal («Inicio»).
+- [x] Con el menú abierto, pulsa **Tab** desde «Inicio» hasta el último enlace («Iniciar sesión»). Foco visible en cada enlace; el orden es botón → «Inicio» → «Iniciar sesión».
+- [x] Con el foco en el botón y el menú abierto, pulsa **Esc**: el menú se cierra, el botón recupera el foco y `aria-expanded` vuelve a `"false"`.
+- [x] Con el foco en un enlace del menú abierto («Inicio» o «Iniciar sesión»), pulsa **Esc**: el menú se cierra y el foco vuelve al botón.
+- [x] Con el menú **cerrado**, pulsa Esc: el foco permanece donde estaba (CA22).
+- [x] A 1280 px el botón del menú no se ve; pulsa Esc con el foco en un enlace de la barra: el foco permanece donde estaba (CA22).
 
 **Lector de pantalla (Orca + Firefox, 320 px)**
-- [ ] Navega con Tab hasta el botón del menú. Orca debe anunciar algo como «Toggle navigation, botón, **contraído**» (el `aria-expanded="false"` se traduce como «contraído»; el texto del atributo lo lee el lector de pantalla, no el JS propio).
-- [ ] Pulsa Intro para abrir el menú. Orca debe anunciar el botón como «**expandido**» o indicar el cambio de estado.
-- [ ] Pulsa Esc para cerrar. Orca debe anunciar el botón de nuevo como «contraído» y el foco debe seguir en él (no hay desplazamiento inesperado de la lectura).
-- [ ] Recorre el menú desplegado con flecha abajo: «Inicio, enlace» → «Iniciar sesión, enlace». El orden coincide con el visual.
+- [x] Navega con Tab hasta el botón del menú. Orca debe anunciar algo como «Toggle navigation, botón, **contraído**» (el `aria-expanded="false"` se traduce como «contraído»; el texto del atributo lo lee el lector de pantalla, no el JS propio).
+- [x] Pulsa Intro para abrir el menú. Orca debe anunciar el botón como «**expandido**» o indicar el cambio de estado.
+- [x] Pulsa Esc para cerrar. Orca debe anunciar el botón de nuevo como «contraído» y el foco debe seguir en él (no hay desplazamiento inesperado de la lectura).
+- [x] Recorre el menú desplegado con flecha abajo: «Inicio, enlace» → «Iniciar sesión, enlace». El orden coincide con el visual.
 
 > Nota: «Toggle navigation» sigue en inglés (OBS-01, Bootstrap5, ya registrada). No bloquea.
 
@@ -226,6 +226,6 @@ Haz esta lista a 320 px (modo responsive de las DevTools o pantalla real), sin s
 | CA23 (librería `navbar` con `js/navbar.js` y dependencias) | `Kernel\ThemeTest::testNavbarLibrary` | Correcto |
 | CA23b (`js/navbar.js` cargado en la portada) | `Functional\FrontendTest::testNavbarScriptLoaded` | Correcto |
 | CA17–CA22, CA20, CA-A7 | `check.sh` (`axe-check.mjs --menu`) | Superados (ver tabla) |
-| CA-A8 | Lista manual | **Pendiente de la persona** |
+| CA-A8 | Lista manual | Confirmada por la persona (2026-11-08) |
 
-**Resultado v1.2: PENDIENTE DE REVISIÓN MANUAL** · 0 ALTOS · 0 MEDIOS · 0 BAJOS · 0 OBS nuevas. La v1.2 podrá cerrarse como SUPERADA cuando la persona confirme la lista de CA-A8.
+**Resultado v1.2: SUPERADA** · 0 ALTOS · 0 MEDIOS · 0 BAJOS · 0 OBS nuevas. Lista manual CA-A8 confirmada por la persona (2026-11-08).
