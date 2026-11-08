@@ -4,7 +4,7 @@ titulo: Título corto
 version: 1.0
 estado: borrador
 nivel: S | M | L
-tipo: modulo | tema
+tipo: modulo | tema | contrib
 proyecto: nombre_maquina
 ---
 
@@ -35,6 +35,7 @@ tipo de test (Unit, Kernel, Functional o check.sh).
 _(tras aprobar)_ Archivos y para qué.
 
 ## Tareas
+<!-- contrib puro: eliminar la línea de Tests -->
 - [ ] Tests (rojo: N fallos)
 - [ ] Implementación
 - [ ] `scripts/check.sh --spec specs/NNN-….md` en verde
@@ -42,7 +43,7 @@ _(tras aprobar)_ Archivos y para qué.
 ## Trazabilidad
 | Requisito | Criterio | Test |
 |-----------|----------|------|
-| R1 | CA1 | `Kernel\FooTest::testBar` |
+| R1 | CA1 | `Kernel\FooTest::testBar` _(contrib: `check.sh`)_ |
 
 ## Puertas
 - Validación: _(nivel M/L: resultado de `asdd-validacion`)_

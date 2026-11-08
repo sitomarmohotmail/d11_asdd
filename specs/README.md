@@ -10,7 +10,7 @@ para gastar pocos tokens. Umbrales en `.claude/rules/quality-gates.md`.
 
 | Nivel | Cuándo | Puertas |
 |---|---|---|
-| **S** | CSS, configuración, textos, correcciones pequeñas | Tests + `scripts/check.sh`. Sin agentes. |
+| **S** | CSS, configuración, textos, correcciones pequeñas, **contrib puro** | `scripts/check.sh`. Sin agentes. Tests solo si hay código propio. |
 | **M** | Lo habitual: componentes, plantillas, bloques | 1 pasada de `asdd-validacion` + `scripts/check.sh` |
 | **L** | Rutas, formularios, permisos, datos de usuario, JS propio | M + `asdd-seguridad` (si hay superficie de ataque) + `asdd-accesibilidad` (si hay interacción nueva) |
 
@@ -29,7 +29,8 @@ borrador → [validación, M/L] → aprobada → tests en rojo → implementaci�
    corrige los BLOQUEANTES y ALTOS comprobándolos en el código; no se repite
    la pasada salvo que un BLOQUEANTE no pueda cubrirse con un test.
 3. **Aprobación** de la persona (`estado: aprobada`).
-4. **Tests primero**, anotando el rojo en *Tareas* (`rojo: N fallos`).
+4. **Tests primero** (solo si hay código propio), anotando el rojo en *Tareas*
+   (`rojo: N fallos`). Contrib puro: sin tests — la comunidad los mantiene.
    Durante el desarrollo: `vendor/bin/phpunit --group GRUPO`.
 5. **Implementación** hasta verde.
 6. **QA**: `scripts/check.sh --spec specs/NNN-….md [URL…]` (tests, phpcs,
