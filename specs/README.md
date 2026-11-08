@@ -57,6 +57,20 @@ npm run a11y -- --width 320 http://d11assd.local/   # en móvil
 
 Los agentes se lanzan a mano en su paso; no hay encadenado automático.
 
+### Buenas prácticas (lecciones del piloto, spec 001)
+- **Registrar el rojo**: al escribir los tests de una spec, anota en *Notas de
+  implementación* cuántos fallaron antes de implementar (p. ej. «rojo: 6
+  fallos, CA7a–CA8»). QA lo comprueba.
+- **Verificar los informes**: el agente principal comprueba en el código los
+  hallazgos BLOQUEANTES y ALTOS antes de corregirlos. En el piloto, tres
+  hallazgos de validación eran erróneos y uno de accesibilidad se detectó tarde.
+- **No cambiar archivos mientras un agente ejecuta tests**: con QA en marcha,
+  esperar a que termine antes de editar código o tests.
+- **Spec abierta en el editor**: recarga la pestaña antes de editarla; una
+  copia antigua guardada sobrescribe los cambios del agente.
+- **Una pasada no basta**: cada corrección se vuelve a pasar por la puerta que
+  la detectó, hasta que no queden BLOQUEANTES ni ALTOS.
+
 ## Estados
 
 `borrador` → `aprobada` → `en-curso` → `implementada`

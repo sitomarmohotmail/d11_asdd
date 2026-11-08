@@ -47,7 +47,7 @@ Agente: `asdd-qa`. Informe: `specs/NNN-qa.md`.
 | Requisito DEBE sin test que lo verifique | BLOQUEANTE |
 | Criterio de aceptación sin test (o sin comprobación de calidad) | BLOQUEANTE (no aplica a criterios de tipo *accesibilidad* o *manual*: los evalúa la puerta 5) |
 | `vendor/bin/phpcs` con errores | BLOQUEANTE |
-| `vendor/bin/phpstan analyse web/modules/custom web/themes/custom` con errores | ALTA |
+| `vendor/bin/phpstan analyse` (nivel de `phpstan.neon.dist`) con errores | ALTA |
 | Requisito DEBERÍA sin test | MEDIA |
 | Requisito PODRÍA sin test | BAJA (informativo) |
 | Tabla de trazabilidad de la spec desactualizada | MEDIA |

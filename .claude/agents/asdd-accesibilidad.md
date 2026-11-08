@@ -49,6 +49,29 @@ después (`rm specs/NNN-axe.json`).
 Clasifica cada violación de axe según su origen: código propio (hallazgo) o
 core/contrib (observación OBS, salvo que el tema hijo pueda corregirla).
 
+### 2b. Medición del foco y del contraste (obligatoria)
+axe con 0 violaciones **no basta**: en el piloto de la spec 001 la portada
+daba 0 y había tres fallos AA de foco y contraste. Con puppeteer (script en el
+scratchpad):
+1. **Inventario completo**: lista todos los elementos enfocables de cada página
+   y en cada estado relevante, no una muestra:
+   - estado inicial;
+   - menú desplegado por debajo de 992 px;
+   - tras provocar mensajes (p. ej. login fallido): enlaces del aviso y botón
+     de cerrar (`.btn-close`);
+   - formularios: campos, casillas, botones, pestañas.
+2. Para cada elemento, enfócalo con teclado (Tab/Mayús+Tab, para que aplique
+   `:focus-visible`), espera a que terminen las transiciones y mide el
+   indicador (`outline`, `box-shadow`, borde) y su contraste con el fondo
+   adyacente (≥ 3:1). Mide también el texto y los enlaces (≥ 4,5:1).
+3. Reflujo: sin scroll horizontal a 320 px (`scrollWidth <= clientWidth`).
+4. Si la corrección es CSS, comprueba que **cada selector coincide con las
+   clases reales del DOM** (en el piloto `.btn:focus-visible` no cubría
+   `.btn-close`) y que **gana en la cascada** a la regla del tema base
+   (especificidad y orden de carga).
+
+Borra tus scripts y JSON temporales al terminar.
+
 ### 3. Lista manual para la persona
 Genera las comprobaciones que no se pueden automatizar, concretas para esta
 spec (qué página, qué tecla, qué debe ocurrir). Siempre incluye, si aplica:

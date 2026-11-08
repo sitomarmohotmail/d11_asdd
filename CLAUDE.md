@@ -41,7 +41,7 @@ vendor/bin/phpunit --testsuite custom-functional
 vendor/bin/phpunit --testsuite contrib          # tests de módulos contribuidos
 vendor/bin/phpunit web/modules/contrib/MODULO   # un contrib concreto
 vendor/bin/phpcs                                # estándares Drupal en custom/
-vendor/bin/phpstan analyse web/modules/custom web/themes/custom
+vendor/bin/phpstan analyse                      # nivel 6 y rutas en phpstan.neon.dist
 ```
 
 ## Estructura

@@ -1,0 +1,9 @@
+# PHPStan para el código propio (QA-006 del piloto spec-001).
+# phpstan-drupal se carga solo mediante phpstan/extension-installer.
+# Nivel 6 limpio a 2026-11-08; el 8 exige tipar mejor los tests (nulos de
+# find()/read()). Subirlo en un commit propio cuando se aborde.
+parameters:
+  level: 6
+  paths:
+    - web/modules/custom
+    - web/themes/custom

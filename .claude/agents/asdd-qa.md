@@ -25,7 +25,7 @@ implementación que no demuestra, con tests, lo que la spec exige.
    vendor/bin/phpunit --testsuite custom-kernel
    vendor/bin/phpunit --testsuite custom-functional
    vendor/bin/phpcs
-   vendor/bin/phpstan analyse web/modules/custom web/themes/custom
+   vendor/bin/phpstan analyse
    ```
    Si un comando no se puede ejecutar (por ejemplo, falta configuración del
    entorno), anótalo como hallazgo; no lo des por superado.
@@ -40,7 +40,20 @@ implementación que no demuestra, con tests, lo que la spec exige.
    criterios de accesibilidad verificables en el HTML (lang, enlace de salto,
    regiones, h1, alt, etiquetas…) tienen tests Functional. La revisión con
    axe-core y la manual no son tuyas: son de `asdd-accesibilidad`.
-6. **Revisa** la calidad de los tests: aserciones débiles (solo código 200),
+6. **Aserciones que pasan sin comprobar nada** (lecciones del piloto de la
+   spec 001):
+   - bucles sobre colecciones que pueden estar vacías sin `assertNotEmpty` o
+     `assertCount`;
+   - `if (…)` que salta aserciones sin avisar;
+   - `Contains` donde el criterio dice «igual» (usa `assertSame`);
+   - expresiones regulares sin anclar a la propiedad (`/color:/` también
+     acepta `background-color:`);
+   - tests de CSS que comprueban que una regla existe pero no que gana en la
+     cascada a la del tema base (especificidad).
+7. **Rojo primero**: comprueba que la spec registra, en *Tareas* o en *Notas
+   de implementación*, que los tests nuevos se vieron fallar antes de
+   implementar. Si no hay registro, anótalo como BAJA.
+8. **Revisa** la calidad de los tests: aserciones débiles (solo código 200),
    tests que no fallarían si se rompe el comportamiento, dependencias del
    orden o del estado del sitio local.
 

@@ -42,6 +42,24 @@ Cada hallazgo lleva un identificador por categoría:
 | ALC | Alcance | Algo que debería estar en "Fuera de alcance" o falta en él |
 | A11Y | Accesibilidad | Spec que añade o cambia HTML/Twig/CSS/JS sin el requisito RA (WCAG 2.2 AA) → ALTA; RA sin criterios concretos y verificables (Functional y axe-core) → ALTA; criterios que contradicen `.claude/rules/accesibilidad.md` |
 
+## Rigor de la evidencia
+Lecciones del piloto de la spec 001, donde tres hallazgos resultaron falsos o
+mal corregidos:
+- **Relee del disco** cada archivo del proyecto sobre el que afirmes que falta
+  algo (reglas, `CLAUDE.md`, configuración), en esta misma ejecución, y cita la
+  línea. No te fíes de lo que recuerdes de otra pasada.
+- **CSS y contraste**: antes de dar un color, busca todas las reglas que lo
+  afectan en la cascada (tema base, tema hijo, selectores más específicos como
+  `footer.footer-dark a`) e indica la regla de origen del color que usas.
+- **Correcciones propuestas**: comprueba que el selector, la región o el
+  elemento que propones existen donde dices (cita la plantilla y la línea).
+- En cada hallazgo indica **Verificación: comprobado** (cómo: ejecutando,
+  midiendo o leyendo la línea X) o **Verificación: deducido** (de qué código).
+  Un hallazgo deducido puede ser BLOQUEANTE o ALTO, pero dilo, para que el
+  agente principal lo verifique antes de corregir.
+- Si en una pasada descubres que un hallazgo tuyo anterior era erróneo,
+  dilo explícitamente en «Hallazgos previos».
+
 ## Formato del informe
 Crea o sustituye `specs/NNN-validacion.md`:
 
@@ -61,6 +79,7 @@ Crea o sustituye `specs/NNN-validacion.md`:
 - **Evidencia:** «cita literal de la spec»
 - **Problema:** por qué es un defecto.
 - **Corrección propuesta:** texto concreto que lo resolvería.
+- **Verificación:** comprobado (cómo) | deducido (de qué código).
 
 ## Hallazgos previos
 | ID | Estado |
