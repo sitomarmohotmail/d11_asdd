@@ -1,93 +1,49 @@
 # Puertas de calidad (ASDD)
 
-Umbrales que deciden si una spec puede pasar a la fase siguiente. Los aplican
-los agentes `asdd-validacion`, `asdd-qa`, `asdd-seguridad` y
-`asdd-accesibilidad`, y también el agente
-principal antes de cambiar el `estado` de una spec.
-
 Adaptado de [efactory-llc/asdd](https://github.com/efactory-llc/asdd) (MIT).
+Nivel de cada spec (S/M/L) y ciclo: `specs/README.md`.
 
 ## Severidades
-| Severidad | Significado | Efecto |
-|---|---|---|
-| BLOQUEANTE | No se puede usar la spec o el código tal como están | Para el ciclo. La persona debe intervenir. |
-| ALTA | Riesgo serio de implementar algo incorrecto o inseguro | Hay que resolverlo antes de avanzar. |
-| MEDIA | Problema de calidad que provocará retrabajo | Se debería resolver. Se puede avanzar con el visto bueno de la persona. |
-| BAJA | Mejora menor | Se anota para la próxima revisión. |
-
-## 1. Puerta de validación (borrador → aprobada)
-Agente: `asdd-validacion`. Informe: `specs/NNN-validacion.md`.
-
-| Condición | Acción |
+| Severidad | Efecto |
 |---|---|
-| Algún hallazgo BLOQUEANTE o ALTO | La spec **no** puede pasar a `aprobada` |
-| Requisito DEBE sin ningún criterio que lo cubra | BLOQUEANTE |
-| Criterio que no sigue un patrón EARS | ALTA |
-| Solo hallazgos MEDIOS o BAJOS | Se puede aprobar; la persona decide |
+| BLOQUEANTE | Para el ciclo hasta resolverlo. |
+| ALTA | Se resuelve en la spec antes de avanzar. |
+| MEDIA | Se resuelve en la spec o la persona acepta el riesgo. |
+| BAJA | No se corrige en la spec: una línea en `specs/pendientes.md`. |
 
-La aprobación (`estado: aprobada`) **siempre la da la persona**, nunca un agente.
+## 1. Validación (borrador → aprobada) · niveles M y L
+Una pasada de `asdd-validacion`.
+- Requisito DEBE sin criterio, o criterio no verificable → BLOQUEANTE.
+- Criterio fuera de EARS, ambigüedad que cambia la implementación, spec con
+  interfaz sin RA → ALTA.
+- El agente principal comprueba en el código cada BLOQUEANTE/ALTO y lo
+  corrige. Solo se repite la pasada si un BLOQUEANTE no queda cubierto por
+  un test.
+- Solo la persona cambia el estado a `aprobada`.
 
-## 2. Puerta de deuda técnica (antes de empezar una spec)
-Antes de escribir tests de una spec nueva:
+## 2. QA (→ implementada) · todos los niveles
+`scripts/check.sh --spec specs/NNN-….md [URL…]` en verde:
+- suites `custom-unit`, `custom-kernel`, `custom-functional` sin fallos;
+- `phpcs` y `phpstan` (nivel de `phpstan.neon.dist`) sin errores;
+- `drush config:status` sin diferencias;
+- todos los tests de la trazabilidad existen;
+- si hay interfaz: axe 0 violaciones, sin scroll horizontal y foco visible
+  (≥ 3:1) en todos los elementos, a 1280 y 320 px.
 
-| Condición | Acción |
-|---|---|
-| `vendor/bin/phpunit --testsuite custom-unit` con fallos | BLOQUEANTE |
-| `vendor/bin/phpunit --testsuite custom-kernel` con fallos | BLOQUEANTE |
-| `vendor/bin/phpunit --testsuite custom-functional` con fallos | BLOQUEANTE |
+Además, cada requisito DEBE tiene al menos un criterio con test. Antes de
+escribir tests de una spec nueva, las suites deben estar en verde.
 
-Los fallos previos se arreglan primero, en su propia spec o commit.
+## 3. Seguridad · nivel L con superficie de ataque
+Una pasada de `asdd-seguridad`. BLOQUEANTE: secretos versionados, ruta o
+formulario sin control de acceso. ALTA: XSS, SQL sin placeholders, CSRF,
+vulnerabilidad en `composer audit` que afecte al proyecto.
 
-## 3. Puerta de QA (en-curso → revisión de seguridad)
-Agente: `asdd-qa`. Informe: `specs/NNN-qa.md`.
+## 4. Accesibilidad · nivel L con interacción nueva
+Una pasada de `asdd-accesibilidad` (lo automático ya lo cubre `check.sh`).
+ALTA: incumplimiento WCAG 2.2 AA en código propio. Lo heredado de core o
+contrib que no se pueda corregir sin sobrescribir plantillas es OBS y no
+bloquea. La lista manual la confirma la persona.
 
-| Condición | Acción |
-|---|---|
-| Algún test de las suites `custom-*` falla | BLOQUEANTE |
-| Requisito DEBE sin test que lo verifique | BLOQUEANTE |
-| Criterio de aceptación sin test (o sin comprobación de calidad) | BLOQUEANTE (no aplica a criterios de tipo *accesibilidad* o *manual*: los evalúa la puerta 5) |
-| `vendor/bin/phpcs` con errores | BLOQUEANTE |
-| `vendor/bin/phpstan analyse` (nivel de `phpstan.neon.dist`) con errores | ALTA |
-| Requisito DEBERÍA sin test | MEDIA |
-| Requisito PODRÍA sin test | BAJA (informativo) |
-| Tabla de trazabilidad de la spec desactualizada | MEDIA |
-
-Decisión: **SUPERADA** (sin BLOQUEANTES ni ALTOS), **SUPERADA CON AVISOS**
-(solo MEDIOS o BAJOS) o **BLOQUEADA**.
-
-## 4. Puerta de seguridad (→ implementada)
-Agente: `asdd-seguridad`. Informe: `specs/NNN-seguridad.md`.
-
-| Condición | Acción |
-|---|---|
-| Secreto o credencial en el código versionado | BLOQUEANTE |
-| Ruta o formulario sin control de acceso | BLOQUEANTE |
-| XSS: `\|raw`, `Markup::create()` o `#markup` con datos de usuario sin filtrar | ALTA |
-| SQL construido concatenando entrada del usuario | ALTA |
-| Vulnerabilidad conocida en `composer audit` que afecta al proyecto | ALTA |
-| Formulario o acción que cambia estado sin protección CSRF | ALTA |
-| Otros riesgos con controles compensatorios | MEDIA / BAJA |
-
-Decisión: **SUPERADA**, **SUPERADA CON AVISOS** o **BLOQUEADA**.
-
-## 5. Puerta de accesibilidad (→ implementada)
-Solo para specs que añaden o cambian HTML, Twig, CSS o JS.
-Agente: `asdd-accesibilidad`. Informe: `specs/NNN-accesibilidad.md`.
-Norma y lista de comprobación: `.claude/rules/accesibilidad.md` (WCAG 2.2 AA).
-
-| Condición | Acción |
-|---|---|
-| Spec con interfaz sin requisito RA | ALTA (lo detecta `asdd-validacion`) |
-| Incumplimiento WCAG 2.2 AA confirmado en código propio | ALTA |
-| Violación de axe-core en código propio | ALTA |
-| Revisión automática con axe-core no ejecutada | ALTA |
-| Incumplimiento AA heredado de contrib que el tema hijo puede corregir | MEDIA |
-| Lista de comprobación manual sin confirmar por la persona | Resultado PENDIENTE DE REVISIÓN MANUAL |
-
-Una spec con interfaz solo pasa a `implementada` cuando esta puerta está
-SUPERADA (o SUPERADA CON AVISOS) **y** la persona ha confirmado la lista manual.
-
-## Specs ya implementadas (revisión retrospectiva)
-Si se pasan los agentes sobre una spec ya `implementada`, los hallazgos no
-reabren el estado automáticamente: se listan en el informe y la persona decide
-si se corrigen (subiendo la `version` de la spec) o se aceptan.
+## Specs ya implementadas
+Revisarlas de nuevo no reabre su estado: la persona decide si se corrige
+(subiendo la `version`) o se acepta.

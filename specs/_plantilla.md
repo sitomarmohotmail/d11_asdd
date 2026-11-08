@@ -3,6 +3,7 @@ id: NNN
 titulo: Título corto
 version: 1.0
 estado: borrador
+nivel: S | M | L
 tipo: modulo | tema
 proyecto: nombre_maquina
 ---
@@ -10,54 +11,39 @@ proyecto: nombre_maquina
 # NNN · Título corto
 
 ## Contexto
-¿Qué problema resuelve y para quién?
+¿Qué problema resuelve y para quién? (2–4 frases)
 
 ## Requisitos
-Cada requisito lleva prioridad: **DEBE** (obligatorio, bloquea QA si no tiene
-test), **DEBERÍA** (recomendable) o **PODRÍA** (opcional).
+Prioridad: **DEBE**, **DEBERÍA** o **PODRÍA**.
 
 - **R1** *(DEBE)* —
-- **R2** *(DEBERÍA)* —
-- **RA** *(DEBE)* — El sistema deberá cumplir WCAG 2.2 nivel AA en todo lo que
-  añade o modifica esta spec. *(Solo si la spec añade o cambia HTML, Twig, CSS
-  o JS; si no, bórralo. Ver `.claude/rules/accesibilidad.md`.)*
+- **RA** *(DEBE)* — Cumple WCAG 2.2 AA en lo que añade o modifica.
+  *(Solo si toca HTML, Twig, CSS o JS; ver `.claude/rules/accesibilidad.md`.)*
 
 ## Criterios de aceptación (EARS)
-Usa un patrón EARS por criterio (ver `specs/README.md`). Indica los requisitos
-que cubre y el tipo de test: Unit, Kernel, Functional o calidad.
+Un criterio por comportamiento verificable, con los requisitos que cubre y el
+tipo de test (Unit, Kernel, Functional o check.sh).
 
 - **CA1** *(R1 · Kernel)* — **Cuando** …, **el sistema deberá** …
-- **CA2** *(R1 · Functional)* — **Si** …, **entonces el sistema deberá** …
-- **CA-A1** *(RA · Functional)* — **Cuando** un visitante abra ‹página›, **el
-  sistema deberá** ‹comprobación de accesibilidad verificable en el HTML›.
-- **CA-A2** *(RA · accesibilidad)* — **Cuando** se ejecute axe-core sobre
-  ‹páginas›, **el sistema deberá** mostrar 0 violaciones WCAG 2.2 A/AA en el
-  código propio.
+- **CA-A1** *(RA · check.sh)* — **Cuando** se ejecute `scripts/check.sh` sobre
+  ‹páginas›, **el sistema deberá** dar 0 problemas de axe, reflujo y foco.
 
 ## Fuera de alcance
 -
 
-## Decisiones
-1.
-
 ## Plan técnico
-_(lo completa el agente tras aprobar la spec)_
+_(tras aprobar)_ Archivos y para qué.
 
 ## Tareas
-- [ ] Validación (`asdd-validacion`) sin hallazgos BLOQUEANTES ni ALTOS
-- [ ] Tests para CA1 (en rojo)
-- [ ] Implementación CA1 (tests en verde)
-- [ ] QA (`asdd-qa`) superado
-- [ ] Seguridad (`asdd-seguridad`) superada
-- [ ] Accesibilidad (`asdd-accesibilidad`) superada y lista manual confirmada
+- [ ] Tests (rojo: N fallos)
+- [ ] Implementación
+- [ ] `scripts/check.sh --spec specs/NNN-….md` en verde
 
-## Trazabilidad (requisito → criterio → test)
+## Trazabilidad
 | Requisito | Criterio | Test |
 |-----------|----------|------|
-| R1 | CA1 | |
+| R1 | CA1 | `Kernel\FooTest::testBar` |
 
-## Informes
-- Validación: `specs/NNN-validacion.md`
-- QA: `specs/NNN-qa.md`
-- Seguridad: `specs/NNN-seguridad.md`
-- Accesibilidad: `specs/NNN-accesibilidad.md`
+## Puertas
+- Validación: _(nivel M/L: resultado de `asdd-validacion`)_
+- QA: _(salida resumida de `scripts/check.sh`)_

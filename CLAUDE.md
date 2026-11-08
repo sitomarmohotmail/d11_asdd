@@ -11,20 +11,19 @@
 - Commits en español, referenciando la spec: `spec-001: descripción`.
 
 ## Proceso ASDD (adopción parcial de efactory-llc/asdd)
-- Criterios de aceptación en formato **EARS** y requisitos con prioridad
-  DEBE / DEBERÍA / PODRÍA (ver `specs/README.md`).
-- Subagentes en `.claude/agents/`, que se lanzan a mano en su paso:
-  - `asdd-validacion` — sobre la spec en borrador, antes de pedir aprobación.
-  - `asdd-qa` — tras implementar (tests, phpcs, phpstan y cobertura por requisito).
-  - `asdd-seguridad` — tras QA.
-  - `asdd-accesibilidad` — tras seguridad, si la spec toca HTML/Twig/CSS/JS.
-- Umbrales en `.claude/rules/quality-gates.md`. Una spec solo pasa a
-  `implementada` con QA, seguridad y accesibilidad sin hallazgos BLOQUEANTES ni ALTOS.
-- **Accesibilidad WCAG 2.2 AA** obligatoria en el tema, módulos y componentes
-  con HTML, CSS o JS: requisito RA en la spec y reglas en
-  `.claude/rules/accesibilidad.md`. axe-core: `npm run a11y -- URL`
-  (Node con nvm: `. ~/.nvm/nvm.sh`).
-- Solo la persona aprueba una spec; ningún agente cambia el estado a `aprobada`.
+- **Gastar pocos tokens**: cada spec tiene nivel **S / M / L** (ver
+  `specs/README.md`). S sin agentes; M una pasada de `asdd-validacion`; L
+  añade `asdd-seguridad` y/o `asdd-accesibilidad` solo si hay superficie de
+  ataque o interacción nueva. Una pasada por agente; las correcciones se
+  verifican con tests, no repitiendo el agente. Mensajes al usuario breves.
+- Criterios **EARS** (uno por comportamiento) y prioridades DEBE / DEBERÍA / PODRÍA.
+- QA = `scripts/check.sh --spec specs/NNN-….md [URL…]` (tests, phpcs,
+  phpstan, config:status, trazabilidad, axe + reflujo + foco). Durante el
+  desarrollo, tests por grupo: `vendor/bin/phpunit --group GRUPO`.
+- Hallazgos BAJOS → `specs/pendientes.md`, no se corrigen en la spec.
+- **Accesibilidad WCAG 2.2 AA** en todo lo que toca HTML/Twig/CSS/JS
+  (requisito RA, `.claude/rules/accesibilidad.md`). Node con nvm: `. ~/.nvm/nvm.sh`.
+- Umbrales en `.claude/rules/quality-gates.md`. Solo la persona aprueba una spec.
 
 ## Entorno local (debug)
 - URL: http://d11assd.local (Apache + PHP 8.5 + MySQL 8.4 del sistema)
