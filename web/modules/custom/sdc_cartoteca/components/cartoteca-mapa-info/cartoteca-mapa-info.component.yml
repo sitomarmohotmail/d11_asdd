@@ -1,0 +1,20 @@
+$schema: 'https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/modules/sdc/src/Component/metadata.schema.json'
+name: 'Cartoteca Mapa Info'
+status: experimental
+group: sdc_cartoteca
+props:
+  type: object
+  properties:
+    fields:
+      type: array
+      description: 'Array de pares {label, value} con los metadatos del mapa.'
+    state:
+      type: string
+      enum: [initial, loaded, not_found, error]
+      description: 'Estado del componente.'
+    message:
+      type: string
+      description: 'Mensaje cuando el estado no es "loaded".'
+libraryOverrides:
+  dependencies:
+    - sdc_cartoteca/cartoteca-mapa-info

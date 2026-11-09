@@ -1,0 +1,79 @@
+/* Slider de imágenes de la Cartoteca IECA */
+
+.sdc-cartoteca__slider {
+  container-type: inline-size;
+}
+
+/* Escenario */
+.sdc-cartoteca__stage {
+  overflow: hidden;
+  background-color: var(--bs-gray-100, #f8f9fa);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sdc-cartoteca__image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: 60cqi;
+  display: block;
+}
+
+/* Flechas */
+.sdc-cartoteca__btn-prev,
+.sdc-cartoteca__btn-next {
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.sdc-cartoteca__btn-prev:focus-visible,
+.sdc-cartoteca__btn-next:focus-visible {
+  outline: 3px solid var(--bs-primary, #0d6efd);
+  outline-offset: 2px;
+}
+
+/* Miniaturas */
+.sdc-cartoteca__thumb {
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  outline: 2px solid transparent;
+  transition: outline-color 0.15s;
+}
+
+.sdc-cartoteca__thumb--active,
+.sdc-cartoteca__thumb:focus-visible {
+  outline-color: var(--bs-primary, #0d6efd);
+}
+
+.sdc-cartoteca__thumb-img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+}
+
+/* Controles */
+.sdc-cartoteca__controls {
+  border-top: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.sdc-cartoteca__resolution {
+  min-width: 8rem;
+}
+
+@container (max-width: 320px) {
+  .sdc-cartoteca__controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdc-cartoteca__slide {
+    transition: none;
+  }
+}

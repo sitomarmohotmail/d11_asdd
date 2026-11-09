@@ -9,3 +9,5 @@ Una línea por pendiente: origen · descripción. Se agrupan en specs futuras.
 - 001 v1.2 · CA22 usa el patrón «Si… entonces» para un caso normal (Esc con el menú cerrado).
 - 001 v1.2 · CA-A7 se solapa con CA-A3 y CA20.
 - 001 v1.2 · CA6 y las tareas no citan ESLint sobre `js/navbar.js` (lo cubre `check.sh` por spec-002).
+- 007 · DRU-001: `sdc_cartoteca.info.yml` debe declarar `dependencies: - drupal:sdc` para garantizar que el módulo SDC de core esté activo.
+- 007 · DRU-002: eliminar `CartotecaAjaxController.php` del plan técnico (ya resuelto en v1.0); el AJAX va por Form API.

@@ -1,0 +1,17 @@
+cartoteca-image-slider:
+  js:
+    components/cartoteca-image-slider/cartoteca-image-slider.js: {}
+  css:
+    component:
+      components/cartoteca-image-slider/cartoteca-image-slider.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+cartoteca-mapa-info:
+  css:
+    component:
+      components/cartoteca-mapa-info/cartoteca-mapa-info.css: {}
+  dependencies:
+    - core/drupal
+

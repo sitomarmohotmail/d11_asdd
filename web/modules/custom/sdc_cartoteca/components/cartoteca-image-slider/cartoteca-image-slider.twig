@@ -1,0 +1,118 @@
+{#
+  Componente: cartoteca-image-slider
+  Props:
+    slides  — array de diapositivas (cada una con claves de tamaño o 'default')
+    state   — 'initial' | 'loaded' | 'not_found' | 'error'
+#}
+{% set hasMultiple = slides|length > 1 %}
+{% set isLoaded = state == 'loaded' %}
+{% set firstSlide = slides[0] ?? {} %}
+{% set firstSrc = firstSlide.medium ?? firstSlide.small ?? firstSlide.big ?? firstSlide['original-view'] ?? firstSlide.default ?? '' %}
+
+<div {{ attributes.addClass('sdc-cartoteca__slider', 'card', 'h-100') }}>
+
+  {# Escenario de diapositivas #}
+  <div class="sdc-cartoteca__stage position-relative"
+       {% if hasMultiple %}
+         role="region"
+         aria-roledescription="{{ 'Carrusel de imágenes'|t }}"
+         aria-label="{{ 'Imágenes del mapa'|t }}"
+       {% endif %}>
+
+    {% for index, slide in slides %}
+      {% set src = slide.medium ?? slide.small ?? slide.big ?? slide['original-view'] ?? slide.default ?? '' %}
+      {% set isDefault = slide.default is defined and slide.medium is not defined %}
+      <div class="sdc-cartoteca__slide{% if index > 0 %} d-none{% endif %}"
+           {% if hasMultiple %}
+             role="group"
+             aria-roledescription="{{ 'Diapositiva'|t }}"
+             aria-label="{{ index + 1 }} {{ 'de'|t }} {{ slides|length }}"
+             {% if index > 0 %}aria-hidden="true"{% endif %}
+           {% endif %}
+           data-slide-index="{{ index }}"
+           data-sizes="{{ slide|json_encode }}">
+        <img
+          src="{{ src }}"
+          alt="{% if isDefault %}{{ 'Imagen no disponible'|t }}{% else %}{{ 'Imagen del mapa, diapositiva'|t }} {{ index + 1 }}{% endif %}"
+          class="sdc-cartoteca__image card-img-top img-fluid"
+          loading="lazy"
+        />
+      </div>
+    {% endfor %}
+
+    {# Flechas de navegación (solo con múltiples imágenes) #}
+    {% if hasMultiple %}
+      <button type="button"
+              class="sdc-cartoteca__btn-prev btn btn-sm btn-outline-secondary position-absolute top-50 start-0 translate-middle-y ms-1"
+              aria-label="{{ 'Imagen anterior'|t }}"
+              data-direction="prev">
+        <span aria-hidden="true">&#8249;</span>
+      </button>
+      <button type="button"
+              class="sdc-cartoteca__btn-next btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-1"
+              aria-label="{{ 'Imagen siguiente'|t }}"
+              data-direction="next">
+        <span aria-hidden="true">&#8250;</span>
+      </button>
+    {% endif %}
+  </div>
+
+  {# Miniaturas (solo con múltiples imágenes) #}
+  {% if hasMultiple %}
+    <div class="sdc-cartoteca__thumbnails d-flex flex-wrap gap-1 p-2"
+         role="list"
+         aria-label="{{ 'Miniaturas'|t }}">
+      {% for index, slide in slides %}
+        {% set thumbSrc = slide.small ?? slide.medium ?? slide.default ?? '' %}
+        <button type="button"
+                class="sdc-cartoteca__thumb p-0 border-0 bg-transparent{% if index == 0 %} sdc-cartoteca__thumb--active{% endif %}"
+                role="listitem"
+                aria-label="{{ 'Ver imagen'|t }} {{ index + 1 }}"
+                aria-pressed="{{ index == 0 ? 'true' : 'false' }}"
+                data-slide-index="{{ index }}">
+          <img src="{{ thumbSrc }}"
+               alt=""
+               aria-hidden="true"
+               class="sdc-cartoteca__thumb-img"
+               width="48"
+               height="48" />
+        </button>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Selector de resolución y descarga #}
+  {% if isLoaded %}
+    {% set firstSizes = firstSlide|keys|filter(k => k in ['original-view', 'big', 'medium', 'small'])|list %}
+    {% if firstSizes is not empty %}
+      <div class="sdc-cartoteca__controls card-body py-2 d-flex flex-wrap align-items-center gap-2"
+           data-active-slide="0">
+        <label for="sdc-resolution-select" class="form-label mb-0 text-nowrap">
+          {{ 'Resolución:'|t }}
+        </label>
+        <select id="sdc-resolution-select"
+                class="sdc-cartoteca__resolution form-select form-select-sm w-auto"
+                aria-label="{{ 'Seleccionar resolución de descarga'|t }}">
+          {% set sizeLabels = {
+            'original-view': 'Vista original'|t,
+            'big':           'Grande'|t,
+            'medium':        'Mediana'|t,
+            'small':         'Pequeña'|t,
+          } %}
+          {% for sizeKey, sizeLabel in sizeLabels %}
+            {% if firstSlide[sizeKey] is defined %}
+              <option value="{{ firstSlide[sizeKey] }}">{{ sizeLabel }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <a href="{{ firstSlide['original-view'] ?? firstSlide.big ?? firstSlide.medium ?? firstSlide.small ?? '#' }}"
+           class="sdc-cartoteca__download btn btn-sm btn-outline-primary"
+           download
+           aria-label="{{ 'Descargar imagen seleccionada'|t }}">
+          {{ 'Descargar imagen'|t }}
+        </a>
+      </div>
+    {% endif %}
+  {% endif %}
+
+</div>

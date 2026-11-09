@@ -1,0 +1,5 @@
+services:
+  sdc_cartoteca.api_service:
+    class: Drupal\sdc_cartoteca\Service\CartotecaApiService
+    arguments:
+      - '@http_client'

@@ -1,0 +1,19 @@
+$schema: 'https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/modules/sdc/src/Component/metadata.schema.json'
+name: 'Cartoteca Image Slider'
+status: experimental
+group: sdc_cartoteca
+props:
+  type: object
+  required:
+    - slides
+  properties:
+    slides:
+      type: array
+      description: 'Array de diapositivas. Cada una es un objeto con claves de tamaño (original-view, big, medium, small) o la clave "default" para la imagen por defecto.'
+    state:
+      type: string
+      enum: [initial, loaded, not_found, error]
+      description: 'Estado del componente.'
+libraryOverrides:
+  dependencies:
+    - sdc_cartoteca/cartoteca-image-slider

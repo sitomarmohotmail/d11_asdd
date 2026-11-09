@@ -1,0 +1,27 @@
+/* Panel de información del mapa de la Cartoteca IECA */
+
+.sdc-cartoteca__info {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.sdc-cartoteca__fields {
+  --bs-dl-gap: 0.5rem;
+}
+
+.sdc-cartoteca__field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--bs-secondary, #6c757d);
+}
+
+.sdc-cartoteca__field-value {
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.sdc-cartoteca__message {
+  padding-block: 2rem;
+}
