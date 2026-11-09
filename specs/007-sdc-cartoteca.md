@@ -1,7 +1,7 @@
 ---
 id: 007
 titulo: Módulo sdc_cartoteca — bloque buscador de mapas con componentes SDC
-version: 1.0
+version: 1.5
 estado: aprobada
 nivel: L
 tipo: modulo
@@ -29,11 +29,16 @@ empaquetada en el módulo.
   (`plugin_id: sdc_cartoteca`) colocable en cualquier región.
 - **R2** *(DEBE)* — El bloque deberá incluir un campo de texto obligatorio de
   máximo 15 caracteres y un botón "Buscar" para introducir el número de
-  control; si se envía vacío, el sistema deberá mostrar un error de validación.
+  control; si se envía vacío, el sistema deberá mostrar el error de validación
+  **inline**, en rojo y directamente debajo del campo, sin notificación en la
+  barra superior de mensajes. Requiere el módulo core `inline_form_errors`.
 - **R3** *(DEBE)* — Al enviar el formulario, el sistema deberá convertir el
-  valor a mayúsculas y consultar la API externa
+  valor a mayúsculas, construir la URL
   `https://ws089.juntadeandalucia.es/institutodeestadisticaycartografia/cartoteca/api/v1/mapa-apitest?_format=json&numero_de_control={VALOR}`
-  desde el servidor (PHP + Guzzle), sin exponer la URL al cliente.
+  y pasarla a los componentes SDC mediante el evento personalizado
+  `cartoteca:load`. La consulta a la API la realiza el JS de cada componente
+  con `fetch`; la URL base se expone al cliente vía
+  `drupalSettings.sdc_cartoteca.apiBase`.
 - **R4** *(DEBE)* — El módulo deberá proporcionar el componente SDC
   `sdc_cartoteca:cartoteca-image-slider` que muestre: todas las imágenes
   disponibles en la suma de `field_imagen_destacada_media` (un único elemento
@@ -50,16 +55,20 @@ empaquetada en el módulo.
 - **R6** *(DEBE)* — En la carga inicial del bloque, el componente de imágenes
   deberá mostrar `imagen-no-disponible.jpg` y el componente de datos deberá
   mostrar el mensaje "Esperando selección".
-- **R7** *(DEBE)* — Tras obtener la respuesta de la API, los dos componentes
-  deberán actualizarse mediante AJAX sin recarga de página.
+- **R7** *(DEBE)* — Tras recibir el evento `cartoteca:load`, cada componente
+  SDC deberá hacer `fetch` de la URL, parsear la respuesta y actualizar su
+  contenido sin recargar la página.
 - **R8** *(DEBE)* — Si la API devuelve un error HTTP o un array vacío `[]`
   (mapa no encontrado), el sistema deberá restaurar la imagen por defecto en
   el componente de imágenes y mostrar el mensaje "No se han encontrado datos
   para ese número de control o el mapa no existe" en el componente de datos.
-- **R9** *(DEBERÍA)* — Los componentes deberán usar las clases de utilidad del
-  tema hijo `d11assd_theme` (Bootstrap 5) y ser responsivos a 320 px y 1280 px.
+- **R9** *(DEBE)* — Los componentes deberán usar las clases de utilidad del
+  tema hijo `d11assd_theme` (Bootstrap 5) y ser responsivos a 320 px y 1280 px
+  sin desbordamiento horizontal.
 - **RA** *(DEBE)* — El sistema deberá cumplir WCAG 2.2 nivel AA en todo lo que
-  añade o modifica esta spec.
+  añade o modifica esta spec: semántica HTML correcta (encabezados `<h*>`,
+  roles ARIA, `scope` en tablas, `aria-label`/`aria-labelledby`), contraste
+  suficiente, foco visible, navegación por teclado y reflujo a 320 px.
 
 ## Criterios de aceptación (EARS)
 
@@ -71,16 +80,17 @@ empaquetada en el módulo.
   con `maxlength="15"` y un `<button type="submit">Buscar</button>`, ambos con
   etiquetas visibles y correctamente asociadas.
 - **CA2b** *(R2 · Functional)* — **Si** el formulario se envía con el campo
-  vacío, **entonces el sistema deberá** mostrar un mensaje de error de
-  validación asociado al campo sin llamar a la API.
+  vacío, **entonces el sistema deberá** mostrar el mensaje de error de
+  validación directamente debajo del campo (inline, no en la barra superior)
+  sin llamar a la API, tanto en envío normal como en AJAX.
 - **CA3** *(R3 · Kernel)* — **Cuando** se envía el formulario con el valor
   `ieca1988118769` (minúsculas), **el sistema deberá** convertirlo a
   `IECA1988118769` (mayúsculas) antes de llamar a la API y retornar un array
   con los campos parseados.
-- **CA3b** *(R3 · Functional)* — **Cuando** el formulario se envía, **el
-  sistema deberá** devolver al navegador únicamente la respuesta AJAX, sin
-  incluir en ningún campo del HTML ni del JSON la URL de la API externa
-  `https://ws089.juntadeandalucia.es/…`.
+- **CA3b** *(R3 · Functional)* — **Cuando** la página carga, **el sistema
+  deberá** incluir la URL base de la API en
+  `drupalSettings.sdc_cartoteca.apiBase` (en el `<script>` de Drupal), no en
+  atributos de valor de campos de formulario ni en el HTML renderizado por PHP.
 - **CA4** *(R4 · Functional)* — **Cuando** la API devuelve datos, **el sistema
   deberá** construir la lista de diapositivas concatenando: primero
   `field_imagen_destacada_media`, luego cada elemento de `field_imagenes_media`
@@ -101,6 +111,13 @@ empaquetada en el módulo.
   deberá** renderizar el componente `cartoteca-mapa-info` mostrando solo los
   campos con valor no vacío; los campos vacíos, `null` o array vacío no
   generarán ningún elemento HTML (ni etiqueta ni valor).
+- **CA7c** *(R5 · Visual)* — **Cuando** `cartoteca-mapa-info` muestra los
+  metadatos, **el sistema deberá** presentarlos en una tabla con cabecera
+  "Datos del mapa" y filas de fondo intercalado (Bootstrap `.table-striped`)
+  para facilitar la lectura.
+- **CA7d** *(R4 · Visual)* — **El sistema deberá** mostrar el título
+  "Imágenes del mapa" en la cabecera del componente `cartoteca-image-slider`,
+  visible en todo momento (estado inicial, cargando y cargado).
 - **CA7b** *(R5 · Unit)* — **Cuando** `CartotecaApiService` normaliza la
   respuesta JSON, **el sistema deberá** eliminar del array resultante todas
   las claves cuyo valor sea `null`, cadena vacía `""` o array vacío `[]`.
@@ -109,8 +126,9 @@ empaquetada en el módulo.
   en el componente de imágenes y el texto "Esperando selección" en el
   componente de datos.
 - **CA9** *(R7 · Functional)* — **Cuando** el formulario se envía, **el sistema
-  deberá** actualizar los dos componentes mediante `AjaxResponse` sin recargar
-  la página, usando `ReplaceCommand` sobre los wrappers del bloque.
+  deberá** disparar el evento `cartoteca:load` en cada componente SDC; el
+  componente deberá hacer `fetch` de la URL y actualizar su contenido sin
+  recargar la página.
 - **CA10a** *(R8 · Unit)* — **Si** la API devuelve un array vacío `[]`,
   **entonces el sistema deberá** tratar la respuesta como "mapa no encontrado",
   devolver la imagen por defecto en el componente de imágenes y mostrar el
@@ -125,6 +143,14 @@ empaquetada en el módulo.
 - **CA-A1** *(RA · check.sh)* — **Cuando** se ejecute `scripts/check.sh` sobre
   la página que contiene el bloque, **el sistema deberá** dar 0 problemas de
   axe, reflujo y foco a 1280 y 320 px.
+- **CA-A2** *(RA · Functional)* — **Cuando** los componentes se renderizan,
+  **el sistema deberá** mostrar el título de cada componente dentro de un
+  elemento `<h2>` (WCAG 1.3.1 / 2.4.6): "Imágenes del mapa" en
+  `cartoteca-image-slider` y "Datos del mapa" en `cartoteca-mapa-info`.
+- **CA-A3** *(RA · Functional)* — **Cuando** `cartoteca-mapa-info` renderiza
+  la tabla de metadatos, **el sistema deberá** incluir `aria-label="Datos del
+  mapa"` en el elemento `<table>` y usar `<th scope="row">` para cada etiqueta
+  de campo (WCAG 1.3.1).
 
 ## Fuera de alcance
 
@@ -144,18 +170,19 @@ web/modules/custom/sdc_cartoteca/
   sdc_cartoteca.libraries.yml
   src/
     Plugin/Block/CartotecaBlock.php        ← BlockBase + FormInterface
-    Form/CartotecaSearchForm.php           ← formulario con #ajax en submit
-    Service/CartotecaApiService.php        ← Guzzle, parseo JSON → array normalizado
+    Form/CartotecaSearchForm.php           ← formulario; submit interceptado en JS
+    Service/CartotecaApiService.php        ← Guzzle, parseo JSON → array (referencia)
   components/
     cartoteca-image-slider/
       cartoteca-image-slider.component.yml
       cartoteca-image-slider.twig
       cartoteca-image-slider.css
-      cartoteca-image-slider.js            ← slider + selector resolución
+      cartoteca-image-slider.js            ← slider + loader (fetch + parseo)
     cartoteca-mapa-info/
       cartoteca-mapa-info.component.yml
       cartoteca-mapa-info.twig
       cartoteca-mapa-info.css
+      cartoteca-mapa-info.js              ← loader (fetch + parseo de campos)
   images/
     imagen-no-disponible.jpg               ← imagen por defecto (Terra / CC)
   templates/
@@ -200,22 +227,34 @@ Lista de diapositivas (en orden):
 - Si hay más de una diapositiva → slider con `aria-roledescription="carousel"`,
   flechas con `aria-label` y miniaturas como lista de `<button>`
 
-### AJAX
+### Carga asíncrona (client-side fetch)
 
-El botón Buscar lleva `#ajax` con un callback en `CartotecaSearchForm`.
-El callback llama a `CartotecaApiService`, renderiza los dos componentes SDC y
-devuelve un `AjaxResponse` con dos `ReplaceCommand` sobre los wrappers
-`#cartoteca-images-wrapper` y `#cartoteca-info-wrapper`.
+PHP renderiza la estructura inicial de los componentes con `url=''`.
+El formulario lleva `novalidate`; la validación del campo la gestiona JS.
+
+Al hacer submit, `cartoteca-search-form.js` construye la URL con
+`drupalSettings.sdc_cartoteca.apiBase` y despacha
+`CustomEvent('cartoteca:load', { detail: { url } })` en cada componente SDC
+(`.sdc-cartoteca__slider` y `.sdc-cartoteca__info`).
+
+Cada componente escucha su propio `cartoteca:load`, muestra un spinner,
+hace `fetch(url)`, parsea el JSON y vuelca el HTML renderizado.
+El botón "Limpiar" despacha `cartoteca:load` con `url=''`, restaurando el
+estado inicial sin recarga.
+
+El parseo del JSON (imágenes y campos de metadatos) reside en el JS de cada
+componente; `CartotecaApiService.php` se mantiene para los tests unitarios
+existentes pero ya no lo usa el formulario.
 
 ## Tareas
 
-- [ ] Tests (rojo: N fallos)
-- [ ] Imagen por defecto descargada en `images/`
-- [ ] `CartotecaApiService` (parseo + tests unitarios)
-- [ ] `CartotecaSearchForm` (Form API + AJAX)
-- [ ] `CartotecaBlock` (bloque + wrappers)
-- [ ] SDC `cartoteca-image-slider` (Twig + CSS + JS)
-- [ ] SDC `cartoteca-mapa-info` (Twig + CSS)
+- [x] Tests (verde)
+- [x] Imagen por defecto descargada en `images/`
+- [x] `CartotecaApiService` (parseo + tests unitarios)
+- [x] `CartotecaSearchForm` (Form API; submit interceptado en JS)
+- [x] `CartotecaBlock` (bloque + wrappers)
+- [x] SDC `cartoteca-image-slider` (Twig + CSS + JS; loader fetch)
+- [x] SDC `cartoteca-mapa-info` (Twig + CSS + JS; loader fetch)
 - [ ] `scripts/check.sh --spec specs/007-sdc-cartoteca.md http://d11assd.local/` en verde
 
 ## Trazabilidad
@@ -226,7 +265,7 @@ devuelve un `AjaxResponse` con dos `ReplaceCommand` sobre los wrappers
 | R2 | CA2 | `Functional\CartotecaFunctionalTest::testFormRendered` |
 | R2 | CA2b | `Functional\CartotecaFunctionalTest::testFormRequiredValidation` |
 | R3 | CA3 | `Unit\CartotecaApiServiceTest::testApiCall` / `Kernel\CartotecaBlockTest::testApiParsing` |
-| R3 | CA3b | `Functional\CartotecaFunctionalTest::testApiUrlNotExposed` |
+| R3 | CA3b | `Functional\CartotecaFunctionalTest::testApiUrlInDrupalSettings` |
 | R4 | CA4 | `Functional\CartotecaFunctionalTest::testSliderRendered` |
 | R4 | CA4b | `Unit\CartotecaApiServiceTest::testNoImagesUsesDefault` |
 | R4 | CA5 | `Functional\CartotecaFunctionalTest::testSliderControls` |

@@ -13,11 +13,16 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 /**
+ * Tests unitarios de CartotecaApiService.
+ *
  * @group sdc_cartoteca
  * @coversDefaultClass \Drupal\sdc_cartoteca\Service\CartotecaApiService
  */
 class CartotecaApiServiceTest extends UnitTestCase {
 
+  /**
+   * Crea un mock de ResponseInterface con el cuerpo dado.
+   */
   private function makeResponse(string $body): ResponseInterface {
     $stream = $this->createMock(StreamInterface::class);
     $stream->method('__toString')->willReturn($body);
@@ -30,38 +35,43 @@ class CartotecaApiServiceTest extends UnitTestCase {
     return $response;
   }
 
+  /**
+   * Devuelve datos válidos simulados de la API (un registro, sin envolver).
+   *
+   * Los campos de texto simple se dan como [{value: ...}] para que
+   * detectAndExtract los reconozca correctamente.
+   */
   private function validApiData(): array {
     return [
-      'field_001_numero_de_control' => 'IECA1988118769',
+      'field_001_numero_de_control' => [['value' => 'IECA1988118769']],
       'field_245_mencion_del_titulo' => [
-        'a' => '[Mapamundi]',
-        'b' => [],
-        'c' => 'Isidoro de Sevilla',
+        [
+          'field_245_a' => [['value' => '[Mapamundi]']],
+          'field_245_c' => [['value' => 'Isidoro de Sevilla']],
+        ],
       ],
-      'field_autor' => 'Sevilla, Isidoro de',
-      'field_906_fecha_completa' => ['b' => '627? (1050?)'],
-      'field_siglo_de_inicio' => 'XI',
-      'field_siglo_de_fin' => 'XI',
-      'field_lugar' => 'Mapamundi',
-      'field_comunidad_autonoma' => 'Varias',
-      'field_provincia' => 'Varias',
-      'field_municipio' => 'Varios',
-      'field_pais_web' => 'Varios',
-      'field_escala_numerica' => 'Sin escala',
-      'field_300_descripcion_fisica' => [
-        'a' => '1 mapa',
-        'b' => 'ms., tinta negra y roja sobre pergamino',
-        'c' => 'hoja de 32 x 25 cm',
+      'field_autor' => [['value' => 'Sevilla, Isidoro de']],
+      'field_906_fecha_completa' => [
+        ['field_906_b' => [['value' => '627? (1050?)']]],
       ],
-      'field_500_notas_generales' => ['a' => 'Nota descriptiva del mapamundi.'],
-      'field_idioma_web' => 'Latín',
-      'field_categoria' => 'Mapas',
-      'field_fuente_de_adquisicion' => 'Biblioteca Nacional de España',
+      'field_siglo_de_inicio' => [['value' => 'XI']],
+      'field_siglo_de_fin' => [['value' => 'XI']],
+      'field_lugar' => [['label' => 'Mapamundi']],
+      'field_comunidad_autonoma' => [['label' => 'Varias']],
+      'field_provincia' => [['label' => 'Varias']],
+      'field_municipio' => [['label' => 'Varios']],
+      'field_pais_web' => [['label' => 'Varios']],
+      'field_escala_numerica' => [['value' => 'Sin escala']],
+      'field_idioma_web' => [['label' => 'Latín']],
+      'field_categoria' => [['label' => 'Mapas']],
+      'field_fuente_de_adquisicion' => [['label' => 'Biblioteca Nacional de España']],
       'field_imagen_destacada_media' => [
-        'original-view' => 'https://example.com/original',
-        'big' => 'https://example.com/big',
-        'medium' => 'https://example.com/medium',
-        'small' => 'https://example.com/small',
+        [
+          'original-view' => 'https://example.com/original',
+          'big' => 'https://example.com/big',
+          'medium' => 'https://example.com/medium',
+          'small' => 'https://example.com/small',
+        ],
       ],
       'field_imagenes_media' => [],
       'field_imagenes_b_n' => [],
@@ -83,7 +93,7 @@ class CartotecaApiServiceTest extends UnitTestCase {
           fn($opts) => ($opts['query']['numero_de_control'] ?? '') === 'IECA1988118769',
         ),
       )
-      ->willReturn($this->makeResponse(json_encode($this->validApiData())));
+      ->willReturn($this->makeResponse(json_encode([$this->validApiData()])));
 
     $service = new CartotecaApiService($client);
     $result = $service->fetchMapa('ieca1988118769');
@@ -143,7 +153,7 @@ class CartotecaApiServiceTest extends UnitTestCase {
 
     $client = $this->createMock(ClientInterface::class);
     $client->method('request')
-      ->willReturn($this->makeResponse(json_encode($data)));
+      ->willReturn($this->makeResponse(json_encode([$data])));
 
     $service = new CartotecaApiService($client);
     $result = $service->fetchMapa('IECA1988118769');
@@ -161,21 +171,23 @@ class CartotecaApiServiceTest extends UnitTestCase {
     $data = $this->validApiData();
     $data['field_lugar'] = [];
     $data['field_comunidad_autonoma'] = '';
-    $data['field_provincia'] = null;
+    $data['field_provincia'] = NULL;
 
     $client = $this->createMock(ClientInterface::class);
     $client->method('request')
-      ->willReturn($this->makeResponse(json_encode($data)));
+      ->willReturn($this->makeResponse(json_encode([$data])));
 
     $service = new CartotecaApiService($client);
     $result = $service->fetchMapa('IECA1988118769');
 
     $labels = array_column($result['fields'], 'label');
+    // Campos vaciados: no deben aparecer.
     $this->assertNotContains('Lugar', $labels);
-    $this->assertNotContains('Comunidad autónoma', $labels);
+    $this->assertNotContains('Comunidad autonoma', $labels);
     $this->assertNotContains('Provincia', $labels);
-    $this->assertContains('Nº de control', $labels);
-    $this->assertContains('Título', $labels);
+    // Campos con valor: deben aparecer (etiquetas generadas por fieldLabel()).
+    $this->assertContains('Autor', $labels);
+    $this->assertContains('Siglo de inicio', $labels);
   }
 
 }

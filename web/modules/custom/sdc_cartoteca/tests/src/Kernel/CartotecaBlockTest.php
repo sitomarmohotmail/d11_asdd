@@ -8,14 +8,18 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\sdc_cartoteca\Service\CartotecaApiService;
 
 /**
+ * Tests de kernel del bloque y servicio Cartoteca.
+ *
  * @group sdc_cartoteca
  */
 class CartotecaBlockTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'sdc_cartoteca',
     'block',
-    'sdc',
     'system',
     'user',
   ];

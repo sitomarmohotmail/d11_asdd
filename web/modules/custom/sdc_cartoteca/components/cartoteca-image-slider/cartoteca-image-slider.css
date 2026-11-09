@@ -4,22 +4,32 @@
   container-type: inline-size;
 }
 
+/* Título */
+.sdc-cartoteca__slider-title {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #495057);
+  background-color: var(--bs-secondary-bg, #e9ecef);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 /* Escenario */
 .sdc-cartoteca__stage {
-  overflow: hidden;
-  background-color: var(--bs-gray-100, #f8f9fa);
-  min-height: 200px;
   display: flex;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
+  min-height: 200px;
+  background-color: var(--bs-gray-100, #f8f9fa);
 }
 
 .sdc-cartoteca__image {
+  display: block;
   width: 100%;
   height: auto;
-  object-fit: contain;
   max-height: 60cqi;
-  display: block;
+  object-fit: contain;
 }
 
 /* Flechas */
@@ -37,11 +47,11 @@
 
 /* Miniaturas */
 .sdc-cartoteca__thumb {
-  cursor: pointer;
-  border-radius: 4px;
   overflow: hidden;
-  outline: 2px solid transparent;
+  cursor: pointer;
   transition: outline-color 0.15s;
+  border-radius: 4px;
+  outline: 2px solid transparent;
 }
 
 .sdc-cartoteca__thumb--active,

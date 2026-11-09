@@ -1,3 +1,14 @@
+cartoteca-search-form:
+  js:
+    js/cartoteca-search-form.js: {}
+  css:
+    component:
+      css/cartoteca-search-form.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+
 cartoteca-image-slider:
   js:
     components/cartoteca-image-slider/cartoteca-image-slider.js: {}
@@ -9,9 +20,11 @@ cartoteca-image-slider:
     - core/once
 
 cartoteca-mapa-info:
+  js:
+    components/cartoteca-mapa-info/cartoteca-mapa-info.js: {}
   css:
     component:
       components/cartoteca-mapa-info/cartoteca-mapa-info.css: {}
   dependencies:
     - core/drupal
-
+    - core/once

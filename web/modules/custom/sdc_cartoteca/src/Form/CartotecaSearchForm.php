@@ -4,34 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\sdc_cartoteca\Form;
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\sdc_cartoteca\Service\CartotecaApiService;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Formulario de búsqueda de mapas de la Cartoteca IECA.
  *
- * El campo y el botón están al nivel raíz para un getValue() limpio.
- * Los dos componentes SDC están en un contenedor Bootstrap row/col-md-6.
- * Progressive enhancement: sin JS hace un rebuild completo de la página.
+ * PHP solo renderiza la estructura inicial de los componentes SDC.
+ * La consulta a la API, el parseo y el renderizado los gestiona el JS de
+ * cada componente, que recibe la URL a través del evento 'cartoteca:load'.
  */
 class CartotecaSearchForm extends FormBase {
 
-  public function __construct(
-    private CartotecaApiService $apiService,
-  ) {}
+  private const API_BASE = 'https://ws089.juntadeandalucia.es/institutodeestadisticaycartografia/cartoteca/api/v1/mapa-apitest?_format=json';
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new static(
-      $container->get('sdc_cartoteca.api_service'),
-    );
-  }
+  private const DEFAULT_IMAGE = '/modules/custom/sdc_cartoteca/images/imagen-no-disponible.jpg';
 
   /**
    * {@inheritdoc}
@@ -44,13 +31,18 @@ class CartotecaSearchForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $result = $form_state->get('cartoteca_result');
-
     $form['#attributes']['class'][] = 'sdc-cartoteca__form';
+    $form['#attributes']['data-cartoteca-instance'] = '';
+    $form['#attributes']['novalidate'] = 'novalidate';
+    $form['#attached']['library'][] = 'sdc_cartoteca/cartoteca-search-form';
+    $form['#attached']['drupalSettings']['sdc_cartoteca'] = [
+      'apiBase' => self::API_BASE,
+      'defaultImage' => self::DEFAULT_IMAGE,
+    ];
 
     $form['numero_control'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Número de control'),
+      '#title' => $this->t('Número de control IECA1988118769'),
       '#maxlength' => 15,
       '#required' => TRUE,
       '#attributes' => [
@@ -65,13 +57,13 @@ class CartotecaSearchForm extends FormBase {
       '#type' => 'submit',
       '#value' => $this->t('Buscar'),
       '#attributes' => ['class' => ['btn', 'btn-primary']],
-      '#ajax' => [
-        'callback' => '::ajaxCallback',
-        'progress' => [
-          'type' => 'throbber',
-          'message' => $this->t('Buscando…'),
-        ],
-        'disable-refocus' => TRUE,
+    ];
+    $form['actions']['limpiar'] = [
+      '#type' => 'button',
+      '#value' => $this->t('Limpiar'),
+      '#attributes' => [
+        'class' => ['btn', 'btn-outline-secondary'],
+        'data-cartoteca-limpiar' => '',
       ],
     ];
 
@@ -86,91 +78,40 @@ class CartotecaSearchForm extends FormBase {
     $form['results']['images_wrapper'] = [
       '#type' => 'container',
       '#attributes' => [
-        'id' => 'cartoteca-images-wrapper',
         'class' => ['col-md-6'],
+        'data-cartoteca-images' => '',
       ],
     ];
-    $form['results']['images_wrapper']['component'] =
-      $this->buildSliderComponent($result);
+    $form['results']['images_wrapper']['component'] = [
+      '#type' => 'component',
+      '#component' => 'sdc_cartoteca:cartoteca-image-slider',
+      '#props' => [
+        'url' => '',
+        'default_image' => self::DEFAULT_IMAGE,
+      ],
+    ];
 
     $form['results']['info_wrapper'] = [
       '#type' => 'container',
       '#attributes' => [
-        'id' => 'cartoteca-info-wrapper',
         'class' => ['col-md-6'],
+        'data-cartoteca-info' => '',
       ],
     ];
-    $form['results']['info_wrapper']['component'] =
-      $this->buildInfoComponent($result);
+    $form['results']['info_wrapper']['component'] = [
+      '#type' => 'component',
+      '#component' => 'sdc_cartoteca:cartoteca-mapa-info',
+      '#props' => ['url' => ''],
+    ];
 
     return $form;
-  }
-
-  /**
-   * Callback AJAX: devuelve los dos componentes actualizados.
-   */
-  public function ajaxCallback(
-    array &$form,
-    FormStateInterface $form_state,
-  ): AjaxResponse {
-    $response = new AjaxResponse();
-    $response->addCommand(new ReplaceCommand(
-      '#cartoteca-images-wrapper',
-      $form['results']['images_wrapper'],
-    ));
-    $response->addCommand(new ReplaceCommand(
-      '#cartoteca-info-wrapper',
-      $form['results']['info_wrapper'],
-    ));
-    return $response;
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $numeroControl = (string) $form_state->getValue('numero_control');
-    $result = $this->apiService->fetchMapa($numeroControl);
-    $form_state->set('cartoteca_result', $result);
-    $form_state->setRebuild(TRUE);
-  }
-
-  /**
-   * Construye el render array del componente slider.
-   */
-  private function buildSliderComponent(?array $result): array {
-    return [
-      '#type' => 'component',
-      '#component' => 'sdc_cartoteca:cartoteca-image-slider',
-      '#props' => [
-        'slides' => $result['slides'] ?? [
-          ['default' => CartotecaApiService::DEFAULT_IMAGE],
-        ],
-        'state' => $result['status'] ?? 'initial',
-      ],
-    ];
-  }
-
-  /**
-   * Construye el render array del componente de información.
-   */
-  private function buildInfoComponent(?array $result): array {
-    $state = $result['status'] ?? 'initial';
-    $message = match ($state) {
-      'loaded' => '',
-      'initial' => (string) $this->t('Esperando selección'),
-      default => $result['message'] ?? '',
-    };
-
-    return [
-      '#type' => 'component',
-      '#component' => 'sdc_cartoteca:cartoteca-mapa-info',
-      '#props' => [
-        'fields' => $result['fields'] ?? [],
-        'state' => $state,
-        'message' => $message,
-      ],
-    ];
+    // La búsqueda y el renderizado los gestiona JavaScript.
   }
 
 }

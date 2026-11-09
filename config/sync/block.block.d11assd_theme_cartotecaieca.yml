@@ -1,0 +1,33 @@
+uuid: 63d43e08-4d85-4d20-a53c-93c3189a5dcd
+langcode: es
+status: true
+dependencies:
+  module:
+    - node
+    - sdc_cartoteca
+    - system
+  theme:
+    - d11assd_theme
+id: d11assd_theme_cartotecaieca
+theme: d11assd_theme
+region: content
+weight: 0
+provider: null
+plugin: sdc_cartoteca
+settings:
+  id: sdc_cartoteca
+  label: 'Cartoteca IECA'
+  label_display: visible
+  provider: sdc_cartoteca
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /node/1
+  'entity_bundle:node':
+    id: 'entity_bundle:node'
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'
+    bundles:
+      pagina: pagina

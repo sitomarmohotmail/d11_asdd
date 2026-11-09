@@ -1,42 +1,21 @@
 {#
   Componente: cartoteca-mapa-info
   Props:
-    fields  — array de pares {label, value}
-    state   — 'initial' | 'loaded' | 'not_found' | 'error'
-    message — texto cuando state != 'loaded'
+    url — URL de la API. El JS fetcha y renderiza al recibir cartoteca:load.
 #}
-<div {{ attributes.addClass('sdc-cartoteca__info', 'card', 'h-100') }}>
+<div {{ attributes.addClass('sdc-cartoteca__info', 'card', 'h-100') }}
+     data-cartoteca-url="{{ url ?? '' }}">
 
-  <div class="sdc-cartoteca__info-body card-body">
+  <h2 class="sdc-cartoteca__info-title card-header h6 mb-0">
+    {{ 'Datos del mapa'|t }}
+  </h2>
 
-    {% if state == 'loaded' and fields is not empty %}
-
-      <dl class="sdc-cartoteca__fields row row-cols-1 gy-1 mb-0">
-        {% for field in fields %}
-          <div class="col">
-            <dt class="sdc-cartoteca__field-label text-muted small mb-0">
-              {{- field.label -}}
-            </dt>
-            <dd class="sdc-cartoteca__field-value mb-0">
-              {{- field.value -}}
-            </dd>
-          </div>
-        {% endfor %}
-      </dl>
-
-    {% else %}
-
-      <p class="sdc-cartoteca__message text-center text-muted fst-italic mb-0
-                 {% if state in ['not_found', 'error'] %} text-danger-emphasis{% endif %}">
-        {% if message %}
-          {{ message }}
-        {% else %}
-          {{ 'Esperando selección'|t }}
-        {% endif %}
+  <div class="sdc-cartoteca__info-body">
+    <div class="card-body">
+      <p class="sdc-cartoteca__message text-center text-muted fst-italic mb-0">
+        {{ 'Esperando selección'|t }}
       </p>
-
-    {% endif %}
-
+    </div>
   </div>
 
 </div>

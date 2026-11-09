@@ -34,7 +34,7 @@ class ConfigSyncTest extends KernelTestBase {
 
     $theme = $storage->read('system.theme');
     $this->assertSame('d11assd_theme', $theme['default']);
-    $this->assertSame('claro', $theme['admin']);
+    $this->assertSame('gin', $theme['admin']);
 
     $extensions = $storage->read('core.extension');
     $this->assertArrayHasKey('d11assd_theme', $extensions['theme']);
@@ -67,6 +67,7 @@ class ConfigSyncTest extends KernelTestBase {
       'account_menu' => 'Menú de la cuenta de usuario',
       'branding' => 'Marca del sitio',
       'breadcrumbs' => 'Ruta de navegación',
+      'cartotecaieca' => 'Cartoteca IECA',
       'content' => 'Contenido principal de la página',
       'footer' => 'Pie de página',
       'help' => 'Ayuda',
@@ -82,7 +83,9 @@ class ConfigSyncTest extends KernelTestBase {
       'config/optional' => new FileStorage(DRUPAL_ROOT . '/themes/custom/d11assd_theme/config/optional'),
       'config/sync' => $this->syncStorage(),
     ];
-    $expected_counts = ['config/optional' => 13, 'config/sync' => 12];
+    // config/optional: 12 bloques base + search_form = 13.
+    // config/sync: 12 bloques base + cartotecaieca (spec-007) = 13.
+    $expected_counts = ['config/optional' => 13, 'config/sync' => 13];
     foreach ($storages as $label => $storage) {
       $names = $storage->listAll('block.block.d11assd_theme_');
       // Search is not enabled, so its block is not exported (QA-009).

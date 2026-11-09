@@ -5,16 +5,9 @@ group: sdc_cartoteca
 props:
   type: object
   properties:
-    fields:
-      type: array
-      description: 'Array de pares {label, value} con los metadatos del mapa.'
-    state:
+    url:
       type: string
-      enum: [initial, loaded, not_found, error]
-      description: 'Estado del componente.'
-    message:
-      type: string
-      description: 'Mensaje cuando el estado no es "loaded".'
+      description: 'URL completa de la API Cartoteca. Vacío en estado inicial; el JS fetcha cuando se recibe el evento cartoteca:load.'
 libraryOverrides:
   dependencies:
     - sdc_cartoteca/cartoteca-mapa-info

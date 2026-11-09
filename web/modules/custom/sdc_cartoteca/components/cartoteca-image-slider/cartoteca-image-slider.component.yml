@@ -4,16 +4,13 @@ status: experimental
 group: sdc_cartoteca
 props:
   type: object
-  required:
-    - slides
   properties:
-    slides:
-      type: array
-      description: 'Array de diapositivas. Cada una es un objeto con claves de tamaño (original-view, big, medium, small) o la clave "default" para la imagen por defecto.'
-    state:
+    url:
       type: string
-      enum: [initial, loaded, not_found, error]
-      description: 'Estado del componente.'
+      description: 'URL completa de la API Cartoteca. Vacío en estado inicial; el JS fetcha cuando se recibe el evento cartoteca:load.'
+    default_image:
+      type: string
+      description: 'Ruta a la imagen por defecto (estado inicial o sin resultados).'
 libraryOverrides:
   dependencies:
     - sdc_cartoteca/cartoteca-image-slider

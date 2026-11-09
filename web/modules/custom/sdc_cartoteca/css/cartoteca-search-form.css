@@ -1,0 +1,5 @@
+/* Formulario de búsqueda de la Cartoteca: error inline de validación */
+
+.sdc-cartoteca__field-error {
+  display: block;
+}

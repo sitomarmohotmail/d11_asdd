@@ -5,21 +5,29 @@
   max-height: 70vh;
 }
 
-.sdc-cartoteca__fields {
-  --bs-dl-gap: 0.5rem;
-}
-
-.sdc-cartoteca__field-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+.sdc-cartoteca__info-title {
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--bs-secondary, #6c757d);
+  color: var(--bs-secondary-color, #495057);
+  background-color: var(--bs-secondary-bg, #e9ecef);
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
-.sdc-cartoteca__field-value {
+.sdc-cartoteca__fields th.sdc-cartoteca__field-label {
+  width: 40%;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--bs-secondary, #6c757d);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sdc-cartoteca__fields td.sdc-cartoteca__field-value {
+  vertical-align: middle;
+  overflow-wrap: anywhere;
   font-size: 0.95rem;
-  word-break: break-word;
 }
 
 .sdc-cartoteca__message {

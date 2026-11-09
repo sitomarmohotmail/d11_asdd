@@ -45,11 +45,12 @@ class CartotecaApiService {
       if (!is_array($data) || empty($data)) {
         return $this->notFoundResult();
       }
-
+      $slides = $this->normalizeImages($data[0]);
+      $fields = $this->normalizeFields($data[0]);
       return [
         'status' => 'loaded',
-        'slides' => $this->normalizeImages($data),
-        'fields' => $this->normalizeFields($data),
+        'slides' => $slides,
+        'fields' => $fields,
         'message' => '',
       ];
     }
@@ -64,7 +65,7 @@ class CartotecaApiService {
   private function normalizeImages(array $raw): array {
     $slides = [];
 
-    $destacada = $raw['field_imagen_destacada_media'] ?? [];
+    $destacada = $raw['field_imagen_destacada_media'][0] ?? [];
     if (!empty($destacada) && is_array($destacada) && $this->hasSizes($destacada)) {
       $slides[] = $this->extractSizes($destacada);
     }
@@ -110,71 +111,138 @@ class CartotecaApiService {
   }
 
   /**
-   * Mapea los campos MARC del JSON a pares etiqueta-valor, omitiendo vacíos.
+   * Mapea los campos field_* del JSON a pares etiqueta-valor normalizados.
    */
   private function normalizeFields(array $raw): array {
+    static $skip = [
+      'field_imagenes_media',
+      'field_imagen_destacada_media',
+      'field_imagenes_b_n',
+    ];
+
     $fields = [];
-
-    $this->add($fields, 'Nº de control', $raw['field_001_numero_de_control'] ?? NULL);
-
-    $t245 = $raw['field_245_mencion_del_titulo'] ?? [];
-    $titulo = trim(($this->str($t245['a'] ?? '')) . ' ' . ($this->str($t245['b'] ?? '')));
-    $this->add($fields, 'Título', $titulo ?: NULL);
-    $this->add($fields, 'Mención de responsabilidad', $t245['c'] ?? NULL);
-
-    $this->add($fields, 'Autor', $raw['field_autor'] ?? NULL);
-
-    $periodo = $raw['field_906_fecha_completa']['b'] ?? NULL;
-    if (empty($periodo)) {
-      $i = $this->str($raw['field_fecha_inicio'] ?? '');
-      $f = $this->str($raw['field_fecha_fin'] ?? '');
-      $periodo = ($i && $f && $i !== $f) ? "$i - $f" : ($i ?: NULL);
+    foreach ($raw as $key => $records) {
+      if (!str_starts_with($key, 'field_') || in_array($key, $skip, TRUE)) {
+        continue;
+      }
+      $value = $this->detectAndExtract($key, $records);
+      if ($value !== NULL && $value !== '') {
+        $fields[] = ['label' => $this->fieldLabel($key), 'value' => $value];
+      }
     }
-    $this->add($fields, 'Período', $periodo);
-
-    $si = $this->str($raw['field_siglo_de_inicio'] ?? '');
-    $sf = $this->str($raw['field_siglo_de_fin'] ?? '');
-    $siglo = ($si && $sf && $si !== $sf) ? "$si - $sf" : ($si ?: NULL);
-    $this->add($fields, 'Siglo', $siglo);
-
-    $this->add($fields, 'Lugar', $raw['field_lugar'] ?? NULL);
-    $this->add($fields, 'Comunidad autónoma', $raw['field_comunidad_autonoma'] ?? NULL);
-    $this->add($fields, 'Provincia', $raw['field_provincia'] ?? NULL);
-    $this->add($fields, 'Municipio', $raw['field_municipio'] ?? NULL);
-    $this->add($fields, 'País', $raw['field_pais_web'] ?? NULL);
-
-    $escala = $raw['field_escala_numerica'] ?? NULL;
-    if (empty($escala)) {
-      $escala = $raw['field_255_datos_matematicos_cartograficos']['a'] ?? NULL;
-    }
-    $this->add($fields, 'Escala', $escala);
-
-    $desc300 = $raw['field_300_descripcion_fisica'] ?? [];
-    $descParts = array_filter(array_map(
-      fn($k) => $this->str($desc300[$k] ?? ''),
-      ['a', 'b', 'c'],
-    ));
-    $this->add($fields, 'Descripción física', $descParts ? implode(', ', $descParts) : NULL);
-
-    $this->add($fields, 'Notas generales', $raw['field_500_notas_generales']['a'] ?? NULL);
-    $this->add($fields, 'Idioma', $raw['field_idioma_web'] ?? NULL);
-    $this->add($fields, 'Categoría', $raw['field_categoria'] ?? NULL);
-    $this->add($fields, 'Fuente', $raw['field_fuente_de_adquisicion'] ?? NULL);
-
     return $fields;
   }
 
   /**
-   * Añade un par etiqueta-valor si el valor no es vacío.
+   * Genera el título de un campo a partir de su clave.
+   *
+   * Field_906_fecha_completa  → "Fecha completa"
+   * field_siglo_de_inicio     → "Siglo de inicio"
    */
-  private function add(array &$fields, string $label, mixed $value): void {
-    if (is_array($value)) {
-      $value = empty($value) ? NULL : implode(', ', array_filter(array_map([$this, 'str'], $value)));
+  private function fieldLabel(string $key): string {
+    $name = substr($key, 6);
+    $name = (string) preg_replace('/^\d+_/', '', $name);
+    return ucfirst(str_replace('_', ' ', $name));
+  }
+
+  /**
+   * Detecta el tipo de campo por su estructura y extrae el valor.
+   *
+   * Tipos:
+   *  - [{label}]                        → campo de taxonomía / referencia
+   *  - [{value}]                        → campo de valor simple
+   *  - [{field_NNN_x: [{value}], ...}]  → subcampos MARC.
+   */
+  private function detectAndExtract(string $key, mixed $records): ?string {
+    if (!is_array($records) || empty($records)) {
+      return NULL;
     }
-    $value = $this->str((string) ($value ?? ''));
-    if ($value !== '') {
-      $fields[] = ['label' => $label, 'value' => $value];
+    $first = $records[0] ?? NULL;
+    if (!is_array($first)) {
+      return $this->str((string) $first) ?: NULL;
     }
+    // Campo de imagen: saltar.
+    if (isset($first['original-view']) || isset($first['big'])) {
+      return NULL;
+    }
+    // Campo de taxonomía / referencia: [{label: '...'}].
+    if (array_key_exists('label', $first)) {
+      $vals = $this->extractLabels($records);
+      return $vals ? implode('; ', $vals) : NULL;
+    }
+    // Campo de valor simple: [{value: '...'}].
+    if (array_key_exists('value', $first) && !is_array($first['value'])) {
+      return $this->str($first['value']) ?: NULL;
+    }
+    // Campo MARC con subcampos: el prefijo se deduce de la clave exterior.
+    if (preg_match('/^(field_\d+)_/', $key, $m)) {
+      $vals = $this->extractSubfields($records, $m[1]);
+      return $vals ? implode('; ', $vals) : NULL;
+    }
+    return NULL;
+  }
+
+  /**
+   * Extrae subcampos MARC de un array de registros.
+   *
+   * Cada registro es un array con claves del tipo {prefix}_{sub} donde el
+   * valor está en [0]['value']. Las claves _indicador_1 e _indicador_2
+   * se omiten siempre.
+   *
+   * @param array $records
+   *   Array de registros del campo.
+   * @param string $prefix
+   *   Prefijo del campo (p.ej. 'field_245')
+   * @param string[] $only
+   *   Si no vacío, solo recoge estos subcampos (p.ej. ['a','c'])
+   *
+   * @return string[]
+   *   Un string por registro con subcampos unidos por espacio.
+   */
+  private function extractSubfields(array $records, string $prefix, array $only = []): array {
+    $result = [];
+    foreach ($records as $record) {
+      if (!is_array($record)) {
+        continue;
+      }
+      $parts = [];
+      foreach ($record as $key => $subfield) {
+        if ($key === 'title' || $key === 'metatag'
+            || str_ends_with($key, '_indicador_1')
+            || str_ends_with($key, '_indicador_2')) {
+          continue;
+        }
+        if ($only !== []) {
+          $suffix = substr($key, strlen($prefix) + 1);
+          if (!in_array($suffix, $only, TRUE)) {
+            continue;
+          }
+        }
+        $val = $this->str($subfield[0]['value'] ?? '');
+        if ($val !== '') {
+          $parts[] = $val;
+        }
+      }
+      if ($parts !== []) {
+        $result[] = implode(' ', $parts);
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * Extrae los valores 'label' de campos de tipo referencia/taxonomía.
+   *
+   * Estructura: $raw['field_*'] = [{'label': '...', ...}, ...]
+   *
+   * @return string[]
+   *   Un string por elemento; vacíos omitidos.
+   */
+  private function extractLabels(array $records): array {
+    return array_values(array_filter(array_map(
+      fn($r) => $this->str(is_array($r) ? ($r['label'] ?? '') : $r),
+      $records,
+    )));
   }
 
   /**
