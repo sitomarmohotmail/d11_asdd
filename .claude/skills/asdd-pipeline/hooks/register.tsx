@@ -11,6 +11,12 @@ const specsAtom = atom({ plugin: 'asdd-pipeline', key: 'specs' } as const, [] as
 const filterAtom = atom({ plugin: 'asdd-pipeline', key: 'filter' } as const, null as string | null, {
   shape: 'filter-2',
 })
+const expandedAtom = atom({ plugin: 'asdd-pipeline', key: 'expanded' } as const, [] as string[], {
+  shape: 'expanded-1',
+})
+const levelFilterAtom = atom({ plugin: 'asdd-pipeline', key: 'levelFilter' } as const, null as string | null, {
+  shape: 'levelFilter-1',
+})
 
 // ── SVG pipeline diagram ──────────────────────────────────────────────────────
 
@@ -178,6 +184,8 @@ export const register: Register = (on, options) => {
   const configuredDir: string = (options?.userConfig as any)?.specsDir || ''
   const specsDir: string = configuredDir || DEFAULT_SPECS_DIR
   const isConfigured: boolean = Boolean(configuredDir)
+  const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'd11assd'
+  const panelUrl: string = (options?.userConfig as any)?.panelUrl || ''
 
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -186,7 +194,6 @@ export const register: Register = (on, options) => {
     })
     const specs = await loadSpecs($, specsDir)
     await update($, specsAtom, () => specs)
-    void $.ui.open({ id: PANE, title: 'ASSD Dashboard' })
     return next(e)
   })
 
@@ -197,19 +204,55 @@ export const register: Register = (on, options) => {
     return { text: 'Panel ASSD abierto.' }
   })
 
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e) => {
+    const { Box, Text, Button } = $.ui.resolve(e)
+    const panes = await $.ui.panes()
+    const isOpen = panes.some(p => p.id === PANE)
+    return (
+      <Box flexDirection="row" alignItems="center" gap={1}>
+        <Button
+          label={isOpen ? '⬡ ASSD ▼' : '⬡ ASSD'}
+          variant={isOpen ? 'primary' : 'secondary'}
+          onPress={async () => {
+            if (isOpen) {
+              await $.ui.close({ id: PANE })
+            } else {
+              const specs = await loadSpecs($, specsDir)
+              await update($, specsAtom, () => specs)
+              await $.ui.open({ id: PANE, title: 'ASSD Dashboard' })
+            }
+          }}
+        />
+      </Box>
+    )
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     // specsDir captured from closure
     const { Box, Text, Button, Svg, Link } = $.ui.resolve(e)
     const specs = await read($, specsAtom)
     const filter = await read($, filterAtom)
+    const levelFilter = await read($, levelFilterAtom)
+    const expandedList = await read($, expandedAtom)
+    const expanded = new Set(expandedList)
+    const toggleCollapse = (id: string) =>
+      update($, expandedAtom, list =>
+        list.includes(id) ? list.filter(x => x !== id) : [...list, id]
+      )
 
     const counts = {
       borrador:     specs.filter(s => s.estado === 'borrador').length,
       aprobada:     specs.filter(s => s.estado === 'aprobada').length,
       implementada: specs.filter(s => s.estado === 'implementada').length,
     }
-    const filtered = filter ? specs.filter(s => s.estado === filter) : specs
-    const setFilter = (s: string) => update($, filterAtom, f => (f === s ? null : s))
+    const levelCounts: Record<string, number> = { S: 0, M: 0, L: 0 }
+    for (const s of specs) levelCounts[s.nivel] = (levelCounts[s.nivel] ?? 0) + 1
+
+    const filtered = specs
+      .filter(s => !filter      || s.estado === filter)
+      .filter(s => !levelFilter || s.nivel  === levelFilter)
+    const setFilter      = (s: string) => update($, filterAtom,      f => (f === s ? null : s))
+    const setLevelFilter = (n: string) => update($, levelFilterAtom, f => (f === n ? null : n))
 
     type Estado = keyof typeof STATE
     type Nivel  = keyof typeof LEVEL
@@ -223,8 +266,9 @@ export const register: Register = (on, options) => {
         {/* ── Header ── */}
         <Box flexDirection="row" gap={2} alignItems="center">
           <Text bold color="#dce3f4">ASSD Dashboard</Text>
-          <Text dimColor>d11assd · {specs.length} specs</Text>
-          {filter && <Text color="#d4910f">· {filter}</Text>}
+          <Text dimColor>{projectName} · {specs.length} specs</Text>
+          {filter      && <Text color="#d4910f">· {filter}</Text>}
+          {levelFilter && <Text color={LEVEL[levelFilter as keyof typeof LEVEL]?.fg ?? '#dce3f4'}>· nivel {levelFilter}</Text>}
         </Box>
 
         {/* ── Aviso de configuración pendiente (solo si no cargó specs) ── */}
@@ -243,22 +287,47 @@ export const register: Register = (on, options) => {
           alt="Pipeline ASDD: Borrador → Aprobada → Implementada"
         />
 
-        {/* ── Filter chips ── */}
-        <Box flexDirection="row" gap={1} flexWrap="wrap">
-          {(['borrador', 'aprobada', 'implementada'] as Estado[]).map(s => (
-            <Button
-              key={`f-${s}`}
-              label={`${s} ${counts[s]}`}
-              variant={filter === s ? 'primary' : 'secondary'}
-              onPress={() => setFilter(s)}
-            />
-          ))}
-          {filter && (
-            <Button
-              key="f-clear"
-              label="Ver todas"
-              onPress={() => update($, filterAtom, () => null)}
-            />
+        {/* ── Filter chips: estado ── */}
+        <Box flexDirection="column" gap={1}>
+          <Box flexDirection="row" gap={1} flexWrap="wrap">
+            {(['borrador', 'aprobada', 'implementada'] as Estado[]).map(s => (
+              <Button
+                key={`f-${s}`}
+                label={`${s} ${counts[s]}`}
+                variant={filter === s ? 'primary' : 'secondary'}
+                onPress={() => setFilter(s)}
+              />
+            ))}
+          </Box>
+
+          {/* ── Filter chips: nivel ── */}
+          <Box flexDirection="row" gap={1} alignItems="center" flexWrap="wrap">
+            {(['S', 'M', 'L'] as Nivel[]).map(n => {
+              const lc2 = LEVEL[n]
+              return (
+                <Button
+                  key={`fn-${n}`}
+                  label={`${n} ${levelCounts[n] ?? 0}`}
+                  variant={levelFilter === n ? 'primary' : 'secondary'}
+                  onPress={() => setLevelFilter(n)}
+                />
+              )
+            })}
+            <Text dimColor>  S=sin agentes · M=validación · L=seg+a11y</Text>
+          </Box>
+
+          {/* ── Limpiar filtros ── */}
+          {(filter || levelFilter) && (
+            <Box flexDirection="row" gap={1}>
+              <Button
+                key="f-clear"
+                label="Limpiar filtros"
+                onPress={() => {
+                  void update($, filterAtom,      () => null)
+                  void update($, levelFilterAtom, () => null)
+                }}
+              />
+            </Box>
           )}
         </Box>
 
@@ -281,7 +350,9 @@ export const register: Register = (on, options) => {
           // Track steps: borrador=1, aprobada=2, implementada=3
           const step = spec.estado === 'implementada' ? 3 : spec.estado === 'aprobada' ? 2 : 1
           const stepChar = (n: number) => n <= step ? '█' : '░'
-          const stepColor = (n: number) => n <= step ? '#0ea567' : '#2a3448'
+          const stepColor = (n: number) => n <= step ? '#0ea567' : '#c8d0e0'
+
+          const isCollapsed = !expanded.has(spec.id)
 
           return (
             <Box
@@ -294,36 +365,51 @@ export const register: Register = (on, options) => {
               paddingX={2}
               paddingY={1}
             >
-              {/* ── card-top: id — version  tipo  |  gates  nivel ── */}
-              <Box flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
-                <Text color="#4d5a7a">{spec.id} — v{spec.version}</Text>
-                {spec.tipo ? <Text color="#44475a">{spec.tipo}</Text> : null}
-                <Box flexGrow={1} />
+              {/* ── card-top: id — version — tipo  |  nivel  toggle ── */}
+              <Box flexDirection="column" gap={0}>
+                <Box flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
+                  <Text bold color="#dce3f4">{spec.id} — v{spec.version}</Text>
+                  {spec.tipo ? <Text bold color="#dce3f4">— {spec.tipo}</Text> : null}
+                  <Box flexGrow={1} />
+                  {/* Nivel badge */}
+                  <Box borderStyle="single" borderColor={l.bd} backgroundColor={l.bg} paddingX={1}>
+                    <Text bold color={l.fg}>{spec.nivel}</Text>
+                  </Box>
+                  {/* Toggle */}
+                  <Button
+                    key={`toggle-${spec.id}`}
+                    label={isCollapsed ? '▶' : '▼'}
+                    variant="secondary"
+                    onPress={() => toggleCollapse(spec.id)}
+                  />
+                </Box>
                 {/* Puertas de calidad */}
-                {allGates.map(g => (
-                  <Text key={g.key} color={doneGates.has(g.key) ? '#50fa7b' : '#44475a'}>
-                    {doneGates.has(g.key) ? '✓' : '○'}{g.label}
-                  </Text>
-                ))}
-                {/* Nivel badge */}
-                <Box borderStyle="single" borderColor={l.bd} backgroundColor={l.bg} paddingX={1}>
-                  <Text bold color={l.fg}>{spec.nivel}</Text>
+                <Box flexDirection="row" gap={1} flexWrap="wrap">
+                  {allGates.map(g => (
+                    <Text key={g.key} bold color={doneGates.has(g.key) ? '#50fa7b' : '#dce3f4'}>
+                      {doneGates.has(g.key) ? '✓' : '○'}{g.label}
+                    </Text>
+                  ))}
                 </Box>
               </Box>
 
-              {/* ── card-title ── */}
-              <Text color="#dce3f4">{spec.titulo}</Text>
+              {/* ── card-title + progress (ocultos si contraído) ── */}
+              {!isCollapsed && (
+                <>
+                  <Text color="#dce3f4">{spec.titulo}</Text>
 
-              {/* ── card-track: pipeline progress bar ── */}
-              <Box flexDirection="row" alignItems="center" gap={0}>
-                <Text color={stepColor(1)}>{stepChar(1)}</Text>
-                <Text color="#2a3448">─</Text>
-                <Text color={stepColor(2)}>{stepChar(2)}</Text>
-                <Text color="#2a3448">─</Text>
-                <Text color={stepColor(3)}>{stepChar(3)}</Text>
-                <Text color="#2a3448">   </Text>
-                <Text color={s.fg}>● {spec.estado}</Text>
-              </Box>
+                  {/* ── card-track: pipeline progress bar ── */}
+                  <Box flexDirection="row" alignItems="center" gap={0}>
+                    <Text color={stepColor(1)}>{stepChar(1)}</Text>
+                    <Text color="#c8d0e0">─</Text>
+                    <Text color={stepColor(2)}>{stepChar(2)}</Text>
+                    <Text color="#c8d0e0">─</Text>
+                    <Text color={stepColor(3)}>{stepChar(3)}</Text>
+                    <Text color="#c8d0e0">   </Text>
+                    <Text color={s.fg}>● {spec.estado}</Text>
+                  </Box>
+                </>
+              )}
             </Box>
           )
         })}
@@ -338,9 +424,11 @@ export const register: Register = (on, options) => {
               await update($, specsAtom, () => fresh)
             }}
           />
-          <Link href="https://d11assd.local/assd_tools/index.html">
-            <Text color="#5a86fa">⬡ Panel completo</Text>
-          </Link>
+          {panelUrl && (
+            <Link href={panelUrl}>
+              <Text color="#5a86fa">⬡ Panel completo</Text>
+            </Link>
+          )}
         </Box>
 
       </Box>

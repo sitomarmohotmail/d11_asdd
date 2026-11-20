@@ -23,14 +23,18 @@ Se carga automáticamente al abrir el proyecto con Claude Code. Para abrirlo man
 
 ### Configuración (solo la primera vez)
 
-El plugin necesita saber dónde están las specs del proyecto en tu máquina:
+El plugin tiene dos opciones configurables por usuario:
 
 ```bash
 claude plugin configure asdd-pipeline
-# → introduce la ruta a tu directorio specs/, ej: /home/usuario/d11assd/specs
 ```
 
-El valor queda guardado por usuario y no hay que repetirlo. Si no se configura, el plugin lo indicará en el propio panel.
+| Campo | Descripción | Ejemplo |
+|---|---|---|
+| `specsDir` | Ruta absoluta al directorio `specs/` del proyecto | `/home/usuario/d11assd/specs` |
+| `panelUrl` | URL del panel web ASSD. Si se deja vacío, el enlace no aparece. | `https://d11assd.local/assd_tools/index.html` |
+
+Los valores quedan guardados por usuario y no hay que repetirlos. Si `specsDir` no se configura, el plugin lo indicará en el propio panel.
 
 ## ASSD Dashboard (`assd_tools/`)
 
