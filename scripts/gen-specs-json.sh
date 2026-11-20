@@ -1,9 +1,22 @@
 #!/bin/bash
-# Genera web/assd_tools/specs.json leyendo el frontmatter de specs/*.md
+# Genera assd_tools/specs.json leyendo el frontmatter de specs/*.md
 # Uso: scripts/gen-specs-json.sh
+# Las rutas se leen de assd_tools/config.json (relativas a ese directorio).
+# Se pueden sobreescribir con variables de entorno: SPECS_DIR, OUTPUT.
 
-SPECS_DIR="/var/www/d11assd/specs"
-OUTPUT="/var/www/d11assd/assd_tools/specs.json"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TOOLS_DIR="$SCRIPT_DIR/../assd_tools"
+CONFIG="$TOOLS_DIR/config.json"
+
+if [ -f "$CONFIG" ] && command -v jq &>/dev/null; then
+  SPECS_REL=$(jq -r '.specs_dir  // "../specs"'   "$CONFIG")
+  OUT_FILE=$( jq -r '.output_json // "specs.json"' "$CONFIG")
+  SPECS_DIR="${SPECS_DIR:-$(cd "$TOOLS_DIR/$SPECS_REL" && pwd)}"
+  OUTPUT="${OUTPUT:-$TOOLS_DIR/$OUT_FILE}"
+else
+  SPECS_DIR="${SPECS_DIR:-$SCRIPT_DIR/../specs}"
+  OUTPUT="${OUTPUT:-$TOOLS_DIR/specs.json}"
+fi
 
 items=()
 
