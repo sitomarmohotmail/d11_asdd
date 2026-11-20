@@ -27,6 +27,15 @@
     "file": "003-tema-admin-gin.md"
   },
   {
+    "id": "004",
+    "titulo": "Módulo de desarrollo Devel",
+    "nivel": "S",
+    "tipo": "modulo",
+    "estado": "aprobada",
+    "version": "1.0",
+    "file": "004-devel.md"
+  },
+  {
     "id": "005",
     "titulo": "Módulo Admin Toolbar",
     "nivel": "S",
@@ -34,15 +43,6 @@
     "estado": "implementada",
     "version": "1.0",
     "file": "005-admin-toolbar.md"
-  },
-  {
-    "id": "006",
-    "titulo": "Navigation Extra Tools 1.3.2",
-    "nivel": "S",
-    "tipo": "contrib",
-    "estado": "borrador",
-    "version": "1.0",
-    "file": "004-devel.md"
   },
   {
     "id": "006",
