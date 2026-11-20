@@ -13,6 +13,8 @@ declare module 'claude-code' {
     'asdd-pipeline': {
       specs: Shaped<Spec[]>
       filter: Shaped<string | null>
+      expanded: Shaped<string[]>
+      levelFilter: Shaped<string | null>
     }
   }
 }
