@@ -1,0 +1,65 @@
+[
+  {
+    "id": "001",
+    "titulo": "Tema hijo de Bootstrap5",
+    "nivel": "L",
+    "tipo": "tema",
+    "estado": "implementada",
+    "version": "1.2",
+    "file": "001-tema-hijo.md"
+  },
+  {
+    "id": "002",
+    "titulo": "Linters de CSS, JS y Twig en la puerta de QA",
+    "nivel": "S",
+    "tipo": "modulo",
+    "estado": "implementada",
+    "version": "1.0",
+    "file": "002-linters-front.md"
+  },
+  {
+    "id": "003",
+    "titulo": "Tema de administración Gin",
+    "nivel": "S",
+    "tipo": "tema",
+    "estado": "implementada",
+    "version": "1.0",
+    "file": "003-tema-admin-gin.md"
+  },
+  {
+    "id": "005",
+    "titulo": "Módulo Admin Toolbar",
+    "nivel": "S",
+    "tipo": "modulo",
+    "estado": "implementada",
+    "version": "1.0",
+    "file": "005-admin-toolbar.md"
+  },
+  {
+    "id": "006",
+    "titulo": "Navigation Extra Tools 1.3.2",
+    "nivel": "S",
+    "tipo": "contrib",
+    "estado": "borrador",
+    "version": "1.0",
+    "file": "004-devel.md"
+  },
+  {
+    "id": "006",
+    "titulo": "Navigation Extra Tools 1.3.2",
+    "nivel": "S",
+    "tipo": "contrib",
+    "estado": "borrador",
+    "version": "1.0",
+    "file": "006-navigation-extra-tools.md"
+  },
+  {
+    "id": "007",
+    "titulo": "Módulo sdc_cartoteca — bloque buscador de mapas con componentes SDC",
+    "nivel": "L",
+    "tipo": "modulo",
+    "estado": "aprobada",
+    "version": "1.5",
+    "file": "007-sdc-cartoteca.md"
+  }
+]

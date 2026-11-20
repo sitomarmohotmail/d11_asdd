@@ -1,0 +1,58 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/var/www/d11assd/scripts/agent-hook.sh start",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/var/www/d11assd/scripts/agent-hook.sh start",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/var/www/d11assd/scripts/agent-hook.sh stop",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/var/www/d11assd/scripts/agent-hook.sh stop",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | grep -q '/specs/[0-9].*\\.md$' && bash /var/www/d11assd/scripts/gen-specs-json.sh > /dev/null 2>&1 || true",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
