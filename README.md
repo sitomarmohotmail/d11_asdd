@@ -42,15 +42,6 @@ Dashboard web con pipeline visual, editor de specs y chat integrado con Claude.
 
 Acceso local: `http://d11assd.local/asdd_tools/`
 
-### Chat con Claude
-
-El dashboard incluye un chat con la API de Anthropic con contexto del proyecto inyectado automáticamente. Requiere una API key:
-
-```bash
-echo "sk-ant-TUKEY" > asdd_tools/.api-key
-```
-
-El fichero `.api-key` está en `.gitignore` — cada desarrollador pone la suya. No hace falta ningún servidor adicional; el chat funciona directamente a través de PHP.
 
 ## Tests
 

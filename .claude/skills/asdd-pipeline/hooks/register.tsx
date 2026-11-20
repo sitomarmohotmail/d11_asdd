@@ -185,7 +185,9 @@ export const register: Register = (on, options) => {
   const specsDir: string = configuredDir || DEFAULT_SPECS_DIR
   const isConfigured: boolean = Boolean(configuredDir)
   const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'd11assd'
-  const panelUrl: string = (options?.userConfig as any)?.panelUrl || ''
+  const rootDir: string = specsDir.replace(/\/specs\/?$/, '')
+  const defaultPanelUrl: string = `https://${projectName}.local/asdd_tools/index.html`
+  const panelUrl: string = (options?.userConfig as any)?.panelUrl || defaultPanelUrl
 
   on('session.start', async ($, e, next) => {
     await $.command.register({

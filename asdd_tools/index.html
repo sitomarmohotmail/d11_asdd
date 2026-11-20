@@ -781,147 +781,23 @@ main {
 .agent-legend .agent-icon { font-size: 13px; padding: 5px 12px; }
 .agent-legend .agent-icon .ai { font-size: 17px; }
 
-/* ── Chat panel ───────────────────────────────────────── */
-.chat-section {
-  border-top: 2px solid var(--border);
+/* ── Footer ───────────────────────────────────────────── */
+.site-footer {
   display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  max-height: 60vh;
-}
-.chat-bar {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 8px 20px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  gap: 10px;
-}
-.chat-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fg2);
-  letter-spacing: .05em;
-}
-.chat-toggle-btn {
-  margin-left: auto;
-  background: none; border: none; cursor: pointer;
-  color: var(--muted); font-size: 14px; padding: 2px 6px;
-  border-radius: 4px; transition: color .12s, background .12s;
-}
-.chat-toggle-btn:hover { color: var(--fg); background: var(--surface2); }
-.chat-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-}
-.chat-body.collapsed { display: none; }
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  scrollbar-color: var(--border) transparent;
-}
-.chat-welcome {
-  color: var(--muted);
-  font-size: 14px;
-  text-align: center;
-  padding: 20px 0;
-}
-.chat-welcome strong { color: var(--fg2); }
-.chat-msg {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 85%;
-}
-.chat-msg.user { align-self: flex-end; align-items: flex-end; }
-.chat-msg.assistant { align-self: flex-start; align-items: flex-start; }
-.chat-bubble {
-  padding: 10px 14px;
-  border-radius: 14px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-.chat-msg.user .chat-bubble {
-  background: var(--l-m-bg);
-  border: 1px solid var(--l-m-bd);
-  color: var(--fg);
-  border-bottom-right-radius: 4px;
-}
-.chat-msg.assistant .chat-bubble {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--fg);
-  border-bottom-left-radius: 4px;
-}
-.chat-bubble p { margin: 0 0 8px; }
-.chat-bubble p:last-child { margin-bottom: 0; }
-.chat-bubble pre {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 10px 12px; overflow-x: auto;
-  font-size: 12.5px; margin: 8px 0;
-}
-.chat-bubble code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
-.chat-bubble :not(pre) > code {
-  background: var(--surface2); padding: 1px 5px; border-radius: 4px;
-}
-.chat-label {
-  font-size: 11px;
-  color: var(--muted);
-  padding: 0 4px;
-}
-.chat-input-row {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--surface);
+  padding: 10px 24px;
   border-top: 1px solid var(--border);
-  align-items: flex-end;
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--muted);
   flex-shrink: 0;
 }
-.chat-input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 12px;
-  color: var(--fg);
-  font-family: inherit;
-  font-size: 14px;
-  resize: none;
-  max-height: 120px;
-  outline: none;
-  transition: border-color .15s;
-  line-height: 1.5;
-}
-.chat-input:focus { border-color: var(--l-m-bd); }
-.chat-send {
-  flex-shrink: 0;
-  width: 36px; height: 36px;
-  background: var(--l-m-bg);
-  border: 1px solid var(--l-m-bd);
-  border-radius: 10px;
+.site-footer a {
   color: var(--l-m-fg);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background .12s;
+  text-decoration: none;
 }
-.chat-send:hover { background: var(--l-m-bd); }
-.chat-send:disabled { opacity: .4; cursor: default; }
-.chat-key-warn {
-  padding: 8px 16px;
-  background: var(--aprobada-bg);
-  border-top: 1px solid var(--aprobada-bd);
-  color: var(--aprobada-fg);
-  font-size: 13px;
-}
-.chat-key-warn code { font-family: 'JetBrains Mono', monospace; }
+.site-footer a:hover { text-decoration: underline; }
 </style>
 
 <header class="hd">
@@ -964,32 +840,11 @@ main {
   </section>
 </main>
 
-<!-- ── Chat panel ─────────────────────────────────────────── -->
-<section class="chat-section" id="chat-section">
-  <div class="chat-bar">
-    <span class="chat-title">Claude</span>
-    <button class="chat-toggle-btn" id="chat-toggle" aria-label="Colapsar chat">▼</button>
-  </div>
-  <div class="chat-body" id="chat-body">
-    <div class="chat-messages" id="chat-messages">
-      <div class="chat-welcome">
-        <p>Hola. Soy Claude con contexto del proyecto <strong>d11assd</strong>. ¿En qué te ayudo?</p>
-      </div>
-    </div>
-    <div class="chat-input-row">
-      <textarea class="chat-input" id="chat-input" rows="1"
-        placeholder="Escribe un mensaje… (Enter envía, Shift+Enter nueva línea)"></textarea>
-      <button class="chat-send" id="chat-send" aria-label="Enviar">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M14 8L2 2l2.5 6L2 14l12-6z" fill="currentColor"/>
-        </svg>
-      </button>
-    </div>
-    <div class="chat-key-warn" id="chat-key-warn" hidden>
-      API key no configurada. Crea el fichero <code>asdd_tools/.api-key</code> con tu clave de Anthropic.
-    </div>
-  </div>
-</section>
+
+<footer class="site-footer">
+  <span>ASDD Dashboard</span>
+  <span>Desarrollado con <a href="https://claude.ai/" target="_blank" rel="noopener">Claude</a></span>
+</footer>
 
 <div class="dp-overlay" id="dp-overlay"></div>
 <div class="dp-panel" id="dp-panel"></div>
@@ -1557,113 +1412,6 @@ document.addEventListener('keydown', e => {
   setTimeout(pollSpecs, 5000);
 })();
 
-// ── Chat panel ────────────────────────────────────────────
-(function () {
-  const messagesEl = document.getElementById('chat-messages');
-  const inputEl    = document.getElementById('chat-input');
-  const sendBtn    = document.getElementById('chat-send');
-  const toggleBtn  = document.getElementById('chat-toggle');
-  const bodyEl     = document.getElementById('chat-body');
-  const keyWarnEl  = document.getElementById('chat-key-warn');
-  let history = [];
-  let streaming = false;
-
-  marked.setOptions({ breaks: true });
-
-  function addMsg(role, text) {
-    const wrap = document.createElement('div');
-    wrap.className = `chat-msg ${role}`;
-    const label = document.createElement('span');
-    label.className = 'chat-label';
-    label.textContent = role === 'user' ? 'Tú' : 'Claude';
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
-    if (role === 'assistant') {
-      bubble.innerHTML = marked.parse(text);
-    } else {
-      bubble.textContent = text;
-    }
-    wrap.append(label, bubble);
-    messagesEl.appendChild(wrap);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return bubble;
-  }
-
-  async function send() {
-    const text = inputEl.value.trim();
-    if (!text || streaming) return;
-    inputEl.value = '';
-    inputEl.style.height = 'auto';
-
-    history.push({ role: 'user', content: text });
-    addMsg('user', text);
-
-    streaming = true;
-    sendBtn.disabled = true;
-    const bubble = addMsg('assistant', '');
-    let full = '';
-
-    try {
-      const res = await fetch('/asdd_tools/chat.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
-      });
-
-      const reader = res.body.getReader();
-      const dec    = new TextDecoder();
-      let buf = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        // SSE blocks separados por \n\n
-        const blocks = buf.split('\n\n');
-        buf = blocks.pop(); // último bloque puede estar incompleto
-        for (const block of blocks) {
-          const lines   = block.split('\n');
-          const evLine  = lines.find(l => l.startsWith('event: '));
-          const dataLine = lines.find(l => l.startsWith('data: '));
-          if (!dataLine) continue;
-          const ev      = evLine ? evLine.slice(7).trim() : 'delta';
-          const payload = JSON.parse(dataLine.slice(6));
-          if (ev === 'error') {
-            bubble.innerHTML = `<em style="color:var(--aprobada-fg)">${payload}</em>`;
-            if (String(payload).includes('.api-key')) keyWarnEl.hidden = false;
-            break;
-          }
-          if (ev === 'delta') {
-            full += payload;
-            bubble.innerHTML = marked.parse(full);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-          }
-        }
-      }
-      if (full) history.push({ role: 'assistant', content: full });
-
-    } catch (err) {
-      bubble.innerHTML = `<em style="color:var(--aprobada-fg)">Error: ${err.message}</em>`;
-    } finally {
-      streaming = false;
-      sendBtn.disabled = false;
-      inputEl.focus();
-    }
-  }
-
-  sendBtn.addEventListener('click', send);
-  inputEl.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-  });
-  inputEl.addEventListener('input', () => {
-    inputEl.style.height = 'auto';
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-  });
-  toggleBtn.addEventListener('click', () => {
-    const col = bodyEl.classList.toggle('collapsed');
-    toggleBtn.textContent = col ? '▲' : '▼';
-  });
-})();
 </script>
 
 </body></html>
