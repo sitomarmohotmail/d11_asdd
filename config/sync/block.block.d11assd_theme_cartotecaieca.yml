@@ -7,9 +7,9 @@ dependencies:
     - sdc_cartoteca
     - system
   theme:
-    - d11assd_theme
-id: d11assd_theme_cartotecaieca
-theme: d11assd_theme
+    - d11asdd_theme
+id: d11asdd_theme_cartotecaieca
+theme: d11asdd_theme
 region: content
 weight: 0
 provider: null

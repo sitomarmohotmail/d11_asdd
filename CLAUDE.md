@@ -1,4 +1,4 @@
-# d11assd — Drupal 11 con ASDD (Agentic Spec-Driven Development)
+# d11asdd — Drupal 11 con ASDD (Agentic Spec-Driven Development)
 
 ## Reglas para el agente
 - **Nada de código sin spec aprobada** en `specs/` (ver `specs/README.md`).
@@ -26,7 +26,7 @@
 - Umbrales en `.claude/rules/quality-gates.md`. Solo la persona aprueba una spec.
 
 ## Entorno local (debug)
-- URL: http://d11assd.local (Apache + PHP 8.5 + MySQL 8.4 del sistema)
+- URL: http://d11asdd.local (Apache + PHP 8.5 + MySQL 8.4 del sistema)
 - Drush: `vendor/bin/drush`
 - Debug: `settings.local.php` (no versionado) + development_settings (Twig debug,
   sin caché). Xdebug a demanda en el puerto 9003 (trigger `XDEBUG_TRIGGER`).

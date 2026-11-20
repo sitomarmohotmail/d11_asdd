@@ -32,22 +32,22 @@
 | QA-008 (de QA, afecta a CA-A4d) · `footer .nav-link` vencía a `footer a:focus-visible` | — | 2.4.7 | `footer .nav-link:focus-visible` añadido a la regla de `currentColor` (`style.css:57`) | Hoy el pie no tiene enlaces `.nav-link` (solo «Drupal», que es un `a` y da 14,63:1). La regla está y el test la cubre | Correcto |
 
 ## Alcance
-**URL revisadas** (visitante anónimo, `d11assd_theme.settings` con los valores de R10). `style.css?to728f` cargado, con las reglas nuevas:
-- `http://d11assd.local/`, a 1280 px y a 320 px (también con el menú desplegado).
-- `http://d11assd.local/user/login`, a 1280 px y a 320 px.
-- `http://d11assd.local/user/login` después de un login fallido (`nadie` / `incorrecta`, enviado con Intro), a 1280 px y a 320 px.
+**URL revisadas** (visitante anónimo, `d11asdd_theme.settings` con los valores de R10). `style.css?to728f` cargado, con las reglas nuevas:
+- `http://d11asdd.local/`, a 1280 px y a 320 px (también con el menú desplegado).
+- `http://d11asdd.local/user/login`, a 1280 px y a 320 px.
+- `http://d11asdd.local/user/login` después de un login fallido (`nadie` / `incorrecta`, enviado con Intro), a 1280 px y a 320 px.
 - Pruebas extra con Puppeteer (scripts temporales en el scratchpad): recorrido con Tab y Mayús+Tab midiendo el estilo de foco, recorte del contorno por antecesores con `overflow`, clic de ratón en el botón de cerrar, cierre del aviso con Intro, fondos de barra alternativos (solo en el DOM), casilla `.form-check-input` insertada en el DOM, reflujo a 640 y 320 px y `forced-colors: active`.
 
 **Archivos analizados**
-- `web/themes/custom/d11assd_theme/css/style.css` (versión actual, 80 líneas).
-- `web/themes/custom/d11assd_theme/tests/src/Unit/ThemeCssTest.php` (ejecutado: OK, 2 tests, 19 aserciones).
+- `web/themes/custom/d11asdd_theme/css/style.css` (versión actual, 80 líneas).
+- `web/themes/custom/d11asdd_theme/tests/src/Unit/ThemeCssTest.php` (ejecutado: OK, 2 tests, 19 aserciones).
 - `specs/001-tema-hijo.md` (CA-A4d, CA-A4e, *Archivos afectados* y trazabilidad).
 - Heredados: `web/themes/contrib/bootstrap5/css/style.css` (`.btn-close:focus`, `.form-check-input:focus`, `.nav-link:focus-visible`).
 
 **Búsquedas estáticas** (`outline: none|0`, `tabindex` > 0, `<img` en Twig, `innerHTML` / `.focus()` en JS) en `web/themes/custom` y `web/modules/custom`. Única coincidencia: un comentario de `ThemeCssTest.php:73` que cita la regla de Bootstrap5. No es CSS. El tema sigue sin Twig ni JS propios. CA-A4b se cumple.
 
 ## Revisión automática (axe-core)
-Comandos: `npm run --silent a11y -- --json specs/001-axe.json http://d11assd.local/ http://d11assd.local/user/login`, lo mismo con `--width 320`, y Puppeteer con axe (etiquetas WCAG 2.0/2.1/2.2 A y AA) en la página del login fallido. Los JSON temporales ya están borrados.
+Comandos: `npm run --silent a11y -- --json specs/001-axe.json http://d11asdd.local/ http://d11asdd.local/user/login`, lo mismo con `--width 320`, y Puppeteer con axe (etiquetas WCAG 2.0/2.1/2.2 A y AA) en la página del login fallido. Los JSON temporales ya están borrados.
 
 | URL | Ancho | HTTP | Violaciones | A revisar | Reglas superadas | Criterios WCAG |
 |---|---|---|---|---|---|---|
@@ -174,12 +174,12 @@ El aviso de la 2.ª pasada para QA sobre *Archivos afectados* ya está resuelto:
 
 > Revisión centrada en lo nuevo de la v1.2: menú plegable operable con teclado
 > (R11), objetivos táctiles ≥ 24×24 px (R12), cierre con Esc (R13) y la
-> librería `d11assd_theme/navbar`. Los criterios CA17–CA22, CA20 y CA-A7 los
+> librería `d11asdd_theme/navbar`. Los criterios CA17–CA22, CA20 y CA-A7 los
 > comprueba `check.sh --menu`. La lista anterior (v1.1) y sus OBS siguen en pie.
 
 ### Alcance
-- URL: `http://d11assd.local/` a 320 px y 1280 px con `--menu --focus`.
-- Archivos: `js/navbar.js`, `d11assd_theme.libraries.yml`, `d11assd_theme.info.yml`.
+- URL: `http://d11asdd.local/` a 320 px y 1280 px con `--menu --focus`.
+- Archivos: `js/navbar.js`, `d11asdd_theme.libraries.yml`, `d11asdd_theme.info.yml`.
 
 ### Revisión automática (axe-core + --menu)
 | URL | Ancho | Violaciones | Menú: problemas | Foco: sin indicador | Reflujo |

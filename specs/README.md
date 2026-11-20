@@ -62,8 +62,8 @@ reglas en `.claude/rules/accesibilidad.md`). Herramienta:
 
 ```bash
 nvm use && npm ci && npx puppeteer browsers install chrome   # una vez
-npm run a11y -- --focus http://d11assd.local/                 # axe + reflujo + foco
-npm run a11y -- --focus --width 320 http://d11assd.local/
+npm run a11y -- --focus http://d11asdd.local/                 # axe + reflujo + foco
+npm run a11y -- --focus --width 320 http://d11asdd.local/
 ```
 
 La lista manual (teclado, lector de pantalla, zoom) solo se pide en nivel L.

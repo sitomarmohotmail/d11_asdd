@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\d11assd_theme\Unit;
+namespace Drupal\Tests\d11asdd_theme\Unit;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the files of d11assd_theme (spec 001: CA9, CA9b).
+ * Tests the files of d11asdd_theme (spec 001: CA9, CA9b).
  */
-#[Group('d11assd_theme')]
+#[Group('d11asdd_theme')]
 class ThemeFilesTest extends UnitTestCase {
 
   /**
@@ -44,7 +44,7 @@ class ThemeFilesTest extends UnitTestCase {
    * CA9b: the global-styling library only declares .css files.
    */
   public function testGlobalStylingOnlyDeclaresCss(): void {
-    $libraries = Yaml::decode(file_get_contents($this->themePath() . '/d11assd_theme.libraries.yml'));
+    $libraries = Yaml::decode(file_get_contents($this->themePath() . '/d11asdd_theme.libraries.yml'));
     $library = $libraries['global-styling'];
 
     $this->assertArrayNotHasKey('js', $library, 'global-styling declares no JavaScript.');

@@ -1,11 +1,11 @@
 #!/bin/bash
-# Genera assd_tools/specs.json leyendo el frontmatter de specs/*.md
+# Genera asdd_tools/specs.json leyendo el frontmatter de specs/*.md
 # Uso: scripts/gen-specs-json.sh
-# Las rutas se leen de assd_tools/config.json (relativas a ese directorio).
+# Las rutas se leen de asdd_tools/config.json (relativas a ese directorio).
 # Se pueden sobreescribir con variables de entorno: SPECS_DIR, OUTPUT.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TOOLS_DIR="$SCRIPT_DIR/../assd_tools"
+TOOLS_DIR="$SCRIPT_DIR/../asdd_tools"
 CONFIG="$TOOLS_DIR/config.json"
 
 if [ -f "$CONFIG" ] && command -v jq &>/dev/null; then

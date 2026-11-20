@@ -7,11 +7,11 @@ dependencies:
   module:
     - system
   theme:
-    - d11assd_theme
+    - d11asdd_theme
 _core:
   default_config_hash: oKs68wQYrkbRETmX35e2Dmk83x-pAFzAjHjLhgZMD5s
-id: d11assd_theme_account_menu
-theme: d11assd_theme
+id: d11asdd_theme_account_menu
+theme: d11asdd_theme
 region: nav_additional
 weight: -7
 provider: null

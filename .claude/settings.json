@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/var/www/d11assd/scripts/agent-hook.sh start",
+            "command": "/var/www/d11asdd/scripts/agent-hook.sh start",
             "async": true
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/var/www/d11assd/scripts/agent-hook.sh start",
+            "command": "/var/www/d11asdd/scripts/agent-hook.sh start",
             "async": true
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/var/www/d11assd/scripts/agent-hook.sh stop",
+            "command": "/var/www/d11asdd/scripts/agent-hook.sh stop",
             "async": true
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/var/www/d11assd/scripts/agent-hook.sh stop",
+            "command": "/var/www/d11asdd/scripts/agent-hook.sh stop",
             "async": true
           }
         ]
@@ -48,7 +48,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // \"\"' | grep -q '/specs/[0-9].*\\.md$' && bash /var/www/d11assd/scripts/gen-specs-json.sh > /dev/null 2>&1 || true",
+            "command": "jq -r '.tool_input.file_path // \"\"' | grep -q '/specs/[0-9].*\\.md$' && bash /var/www/d11asdd/scripts/gen-specs-json.sh > /dev/null 2>&1 || true",
             "async": true
           }
         ]

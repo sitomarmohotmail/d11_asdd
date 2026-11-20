@@ -3,7 +3,7 @@ import type { Register } from 'claude-code'
 import type { Spec } from '../types'
 
 const PANE = 'asdd-pipeline'
-const DEFAULT_SPECS_DIR = '/var/www/d11assd/specs'
+const DEFAULT_SPECS_DIR = '/var/www/d11asdd/specs'
 
 const specsAtom = atom({ plugin: 'asdd-pipeline', key: 'specs' } as const, [] as Spec[], {
   shape: 'specs-2',
@@ -184,26 +184,26 @@ export const register: Register = (on, options) => {
   const configuredDir: string = (options?.userConfig as any)?.specsDir || ''
   const specsDir: string = configuredDir || DEFAULT_SPECS_DIR
   const isConfigured: boolean = Boolean(configuredDir)
-  const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'd11assd'
+  const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'd11asdd'
   const rootDir: string = specsDir.replace(/\/specs\/?$/, '')
   const defaultPanelUrl: string = `https://${projectName}.local/asdd_tools/index.html`
   const panelUrl: string = (options?.userConfig as any)?.panelUrl || defaultPanelUrl
 
   on('session.start', async ($, e, next) => {
     await $.command.register({
-      name: 'assd_dashboard',
-      description: 'Abrir el panel visual de specs ASSD',
+      name: 'asdd_dashboard',
+      description: 'Abrir el panel visual de specs ASDD',
     })
     const specs = await loadSpecs($, specsDir)
     await update($, specsAtom, () => specs)
     return next(e)
   })
 
-  on('command.run', { command: 'assd_dashboard' }, async ($) => {
+  on('command.run', { command: 'asdd_dashboard' }, async ($) => {
     const specs = await loadSpecs($, specsDir)
     await update($, specsAtom, () => specs)
-    await $.ui.open({ id: PANE, title: 'ASSD Dashboard' })
-    return { text: 'Panel ASSD abierto.' }
+    await $.ui.open({ id: PANE, title: 'ASDD Dashboard' })
+    return { text: 'Panel ASDD abierto.' }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e) => {
@@ -213,7 +213,7 @@ export const register: Register = (on, options) => {
     return (
       <Box flexDirection="row" alignItems="center" gap={1}>
         <Button
-          label={isOpen ? '⬡ ASSD ▼' : '⬡ ASSD'}
+          label={isOpen ? '⬡ ASDD ▼' : '⬡ ASDD'}
           variant={isOpen ? 'primary' : 'secondary'}
           onPress={async () => {
             if (isOpen) {
@@ -221,7 +221,7 @@ export const register: Register = (on, options) => {
             } else {
               const specs = await loadSpecs($, specsDir)
               await update($, specsAtom, () => specs)
-              await $.ui.open({ id: PANE, title: 'ASSD Dashboard' })
+              await $.ui.open({ id: PANE, title: 'ASDD Dashboard' })
             }
           }}
         />
@@ -267,7 +267,7 @@ export const register: Register = (on, options) => {
 
         {/* ── Header ── */}
         <Box flexDirection="row" gap={2} alignItems="center">
-          <Text bold color="#dce3f4">ASSD Dashboard</Text>
+          <Text bold color="#dce3f4">ASDD Dashboard</Text>
           <Text dimColor>{projectName} · {specs.length} specs</Text>
           {filter      && <Text color="#d4910f">· {filter}</Text>}
           {levelFilter && <Text color={LEVEL[levelFilter as keyof typeof LEVEL]?.fg ?? '#dce3f4'}>· nivel {levelFilter}</Text>}

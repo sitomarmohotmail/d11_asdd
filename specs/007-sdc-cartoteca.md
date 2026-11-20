@@ -63,7 +63,7 @@ empaquetada en el módulo.
   el componente de imágenes y mostrar el mensaje "No se han encontrado datos
   para ese número de control o el mapa no existe" en el componente de datos.
 - **R9** *(DEBE)* — Los componentes deberán usar las clases de utilidad del
-  tema hijo `d11assd_theme` (Bootstrap 5) y ser responsivos a 320 px y 1280 px
+  tema hijo `d11asdd_theme` (Bootstrap 5) y ser responsivos a 320 px y 1280 px
   sin desbordamiento horizontal.
 - **RA** *(DEBE)* — El sistema deberá cumplir WCAG 2.2 nivel AA en todo lo que
   añade o modifica esta spec: semántica HTML correcta (encabezados `<h*>`,
@@ -255,7 +255,7 @@ existentes pero ya no lo usa el formulario.
 - [x] `CartotecaBlock` (bloque + wrappers)
 - [x] SDC `cartoteca-image-slider` (Twig + CSS + JS; loader fetch)
 - [x] SDC `cartoteca-mapa-info` (Twig + CSS + JS; loader fetch)
-- [ ] `scripts/check.sh --spec specs/007-sdc-cartoteca.md http://d11assd.local/` en verde
+- [ ] `scripts/check.sh --spec specs/007-sdc-cartoteca.md http://d11asdd.local/` en verde
 
 ## Trazabilidad
 

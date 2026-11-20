@@ -1,10 +1,10 @@
-# Schema for the configuration files of the D11assd theme (spec 001, R10).
+# Schema for the configuration files of the D11asdd theme (spec 001, R10).
 # Drupal does not inherit the settings of the base theme, so the Bootstrap5
-# settings are declared here for d11assd_theme.settings.
+# settings are declared here for d11asdd_theme.settings.
 
-d11assd_theme.settings:
+d11asdd_theme.settings:
   type: theme_settings
-  label: 'D11assd theme settings'
+  label: 'D11asdd theme settings'
   mapping:
     b5_body_schema:
       type: string

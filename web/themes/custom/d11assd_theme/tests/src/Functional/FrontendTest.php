@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\d11assd_theme\Functional;
+namespace Drupal\Tests\d11asdd_theme\Functional;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Url;
@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
  * Spec 001: CA4, CA5a, CA12, CA13, CA15, CA7a, CA7b, CA8, CA-A1, CA-A1b,
  * CA-A1c, CA-A1d, CA-A2.
  */
-#[Group('d11assd_theme')]
+#[Group('d11asdd_theme')]
 class FrontendTest extends BrowserTestBase {
 
   /**
@@ -33,14 +33,14 @@ class FrontendTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'd11assd_theme';
+  protected $defaultTheme = 'd11asdd_theme';
 
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->config('system.site')->set('name', 'Sitio D11assd')->save();
+    $this->config('system.site')->set('name', 'Sitio D11asdd')->save();
     $this->container->get('theme_installer')->install(['claro']);
     $this->config('system.theme')->set('admin', 'claro')->save();
 
@@ -78,8 +78,8 @@ class FrontendTest extends BrowserTestBase {
     $this->drupalGet('<front>');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('themes/contrib/bootstrap5/css/style.css');
-    $this->assertSession()->responseContains('themes/custom/d11assd_theme/css/style.css');
-    $this->assertSession()->elementTextContains('css', 'body', 'Sitio D11assd');
+    $this->assertSession()->responseContains('themes/custom/d11asdd_theme/css/style.css');
+    $this->assertSession()->elementTextContains('css', 'body', 'Sitio D11asdd');
   }
 
   /**
@@ -93,7 +93,7 @@ class FrontendTest extends BrowserTestBase {
     $this->drupalGet('/admin/content');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('core/themes/claro/');
-    $this->assertSession()->responseNotContains('themes/custom/d11assd_theme/css/style.css');
+    $this->assertSession()->responseNotContains('themes/custom/d11asdd_theme/css/style.css');
   }
 
   /**
@@ -102,9 +102,9 @@ class FrontendTest extends BrowserTestBase {
   public function testBlocksInRegions(): void {
     $this->drupalGet('<front>');
     $assert = $this->assertSession();
-    $assert->elementExists('css', 'nav.navbar #block-d11assd-theme-branding');
-    $assert->elementExists('css', 'nav.navbar #block-d11assd-theme-main-navigation');
-    $assert->elementExists('css', 'main #block-d11assd-theme-content');
+    $assert->elementExists('css', 'nav.navbar #block-d11asdd-theme-branding');
+    $assert->elementExists('css', 'nav.navbar #block-d11asdd-theme-main-navigation');
+    $assert->elementExists('css', 'main #block-d11asdd-theme-content');
   }
 
   /**
@@ -114,7 +114,7 @@ class FrontendTest extends BrowserTestBase {
     $this->drupalGet('user/login');
     $this->submitForm(['name' => 'nadie', 'pass' => 'incorrecta'], 'Log in');
     $assert = $this->assertSession();
-    // The d11assd_theme_messages block (system_messages_block) renders its
+    // The d11asdd_theme_messages block (system_messages_block) renders its
     // fallback wrapper; Bootstrap5 renders each message as role="alert".
     $assert->elementExists('css', 'main [data-drupal-messages-fallback]');
     // The alert is rendered right after the fallback wrapper, inside the same
@@ -131,7 +131,7 @@ class FrontendTest extends BrowserTestBase {
     $link = $this->assertSession()->elementExists('xpath', '//a[@rel="home"][.//img]');
     $this->assertSame(Url::fromRoute('<front>')->toString(), $link->getAttribute('href'), 'The logo links to the front page.');
     $logo = $link->find('css', 'img');
-    $this->assertStringContainsString('/themes/custom/d11assd_theme/logo.svg', (string) $logo->getAttribute('src'));
+    $this->assertStringContainsString('/themes/custom/d11asdd_theme/logo.svg', (string) $logo->getAttribute('src'));
     $this->assertNotEmpty(trim((string) $logo->getAttribute('alt')), 'The logo has alt text.');
   }
 
@@ -186,7 +186,7 @@ class FrontendTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'HIT');
 
     $this->drupalLogin($this->drupalCreateUser(['administer themes']));
-    $this->drupalGet('admin/appearance/settings/d11assd_theme');
+    $this->drupalGet('admin/appearance/settings/d11asdd_theme');
     $this->submitForm([
       'b5_body_bg_schema' => 'light',
       'b5_navbar_bg_schema' => 'primary',
@@ -263,11 +263,11 @@ class FrontendTest extends BrowserTestBase {
     $this->assertNotNull($controlled, "Element #$controls_id referenced by aria-controls exists.");
 
     $this->assertNotNull(
-      $controlled->find('css', '#block-d11assd-theme-main-navigation'),
+      $controlled->find('css', '#block-d11asdd-theme-main-navigation'),
       "#$controls_id contains the main navigation block."
     );
     $this->assertNotNull(
-      $controlled->find('css', '#block-d11assd-theme-account-menu'),
+      $controlled->find('css', '#block-d11asdd-theme-account-menu'),
       "#$controls_id contains the account menu block."
     );
   }
@@ -277,7 +277,7 @@ class FrontendTest extends BrowserTestBase {
    */
   public function testNavbarScriptLoaded(): void {
     $this->drupalGet('<front>');
-    $this->assertSession()->responseContains('themes/custom/d11assd_theme/js/navbar.js');
+    $this->assertSession()->responseContains('themes/custom/d11asdd_theme/js/navbar.js');
   }
 
 }

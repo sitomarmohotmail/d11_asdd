@@ -9,10 +9,10 @@
  * @param {Drupal} Drupal - Espacio de nombres de Drupal.
  * @param {once} once - Utilidad once() del núcleo de Drupal.
  */
-(function d11assdNavbar(Drupal, once) {
-  Drupal.behaviors.d11assdNavbar = {
+(function d11asddNavbar(Drupal, once) {
+  Drupal.behaviors.d11asddNavbar = {
     attach(context) {
-      once('d11assd-navbar', 'nav.navbar', context).forEach((navbar) => {
+      once('d11asdd-navbar', 'nav.navbar', context).forEach((navbar) => {
         const toggler = navbar.querySelector('.navbar-toggler');
         if (!toggler) {
           return;

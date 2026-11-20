@@ -9,7 +9,7 @@
 #   --group    limita los tests Functional a un grupo (desarrollo). Sin él se
 #              ejecuta la suite completa (cierre de spec).
 #   --no-a11y  omite axe-core (specs sin interfaz).
-#   URL…       páginas para axe (por defecto http://d11assd.local/).
+#   URL…       páginas para axe (por defecto http://d11asdd.local/).
 #
 # Sale con 1 si falla cualquier comprobación.
 set -u
@@ -24,7 +24,7 @@ while [ $# -gt 0 ]; do
     *) urls+=("$1"); shift ;;
   esac
 done
-[ ${#urls[@]} -eq 0 ] && urls=("http://d11assd.local/")
+[ ${#urls[@]} -eq 0 ] && urls=("http://d11asdd.local/")
 
 failed=0
 results=()

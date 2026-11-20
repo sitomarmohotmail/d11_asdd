@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\d11assd_theme\Kernel;
+namespace Drupal\Tests\d11asdd_theme\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\d11assd_theme\Traits\ThemeSettingsValuesTrait;
+use Drupal\Tests\d11asdd_theme\Traits\ThemeSettingsValuesTrait;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * Spec 001: CA5b, CA10, CA7c, CA-A6.
  */
-#[Group('d11assd_theme')]
+#[Group('d11asdd_theme')]
 class ConfigSyncTest extends KernelTestBase {
 
   use ThemeSettingsValuesTrait;
@@ -27,17 +27,17 @@ class ConfigSyncTest extends KernelTestBase {
   }
 
   /**
-   * CA5b: config/sync sets d11assd_theme as default and Claro as admin.
+   * CA5b: config/sync sets d11asdd_theme as default and Claro as admin.
    */
   public function testExportedThemeConfiguration(): void {
     $storage = $this->syncStorage();
 
     $theme = $storage->read('system.theme');
-    $this->assertSame('d11assd_theme', $theme['default']);
+    $this->assertSame('d11asdd_theme', $theme['default']);
     $this->assertSame('gin', $theme['admin']);
 
     $extensions = $storage->read('core.extension');
-    $this->assertArrayHasKey('d11assd_theme', $extensions['theme']);
+    $this->assertArrayHasKey('d11asdd_theme', $extensions['theme']);
   }
 
   /**
@@ -46,9 +46,9 @@ class ConfigSyncTest extends KernelTestBase {
   public function testExportedBlocks(): void {
     $sync = $this->syncStorage();
     $enabled = array_keys($sync->read('core.extension')['module']);
-    $optional = new FileStorage(DRUPAL_ROOT . '/themes/custom/d11assd_theme/config/optional');
+    $optional = new FileStorage(DRUPAL_ROOT . '/themes/custom/d11asdd_theme/config/optional');
 
-    $names = $optional->listAll('block.block.d11assd_theme_');
+    $names = $optional->listAll('block.block.d11asdd_theme_');
     $this->assertNotEmpty($names);
     foreach ($names as $name) {
       $modules = $optional->read($name)['dependencies']['module'] ?? [];
@@ -80,18 +80,18 @@ class ConfigSyncTest extends KernelTestBase {
       'search_form' => 'Formulario de búsqueda',
     ];
     $storages = [
-      'config/optional' => new FileStorage(DRUPAL_ROOT . '/themes/custom/d11assd_theme/config/optional'),
+      'config/optional' => new FileStorage(DRUPAL_ROOT . '/themes/custom/d11asdd_theme/config/optional'),
       'config/sync' => $this->syncStorage(),
     ];
     // config/optional: 12 bloques base + search_form = 13.
     // config/sync: 12 bloques base + cartotecaieca (spec-007) = 13.
     $expected_counts = ['config/optional' => 13, 'config/sync' => 13];
     foreach ($storages as $label => $storage) {
-      $names = $storage->listAll('block.block.d11assd_theme_');
+      $names = $storage->listAll('block.block.d11asdd_theme_');
       // Search is not enabled, so its block is not exported (QA-009).
       $this->assertCount($expected_counts[$label], $names, "$label has the expected number of blocks.");
       foreach ($names as $name) {
-        $key = substr($name, strlen('block.block.d11assd_theme_'));
+        $key = substr($name, strlen('block.block.d11asdd_theme_'));
         $this->assertArrayHasKey($key, $labels, "$label: $name has an expected Spanish label.");
         $block = $storage->read($name);
         $this->assertSame('es', $block['langcode'], "$label: $name has langcode es.");
@@ -104,14 +104,14 @@ class ConfigSyncTest extends KernelTestBase {
    * CA7c: theme settings exist in config/install and config/sync with R10.
    */
   public function testThemeSettingsExported(): void {
-    $install = new FileStorage(DRUPAL_ROOT . '/themes/custom/d11assd_theme/config/install');
+    $install = new FileStorage(DRUPAL_ROOT . '/themes/custom/d11asdd_theme/config/install');
     $storages = [
       'config/install' => $install,
       'config/sync' => $this->syncStorage(),
     ];
     foreach ($storages as $label => $storage) {
-      $settings = $storage->read('d11assd_theme.settings');
-      $this->assertIsArray($settings, "d11assd_theme.settings exists in $label.");
+      $settings = $storage->read('d11asdd_theme.settings');
+      $this->assertIsArray($settings, "d11asdd_theme.settings exists in $label.");
       foreach (self::R10_SETTINGS as $key => $value) {
         $this->assertSame($value, $settings[$key] ?? NULL, "$label: $key has the R10 value.");
       }

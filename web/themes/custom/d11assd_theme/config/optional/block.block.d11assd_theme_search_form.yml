@@ -4,9 +4,9 @@ dependencies:
   module:
   - search
   theme:
-  - d11assd_theme
-id: d11assd_theme_search_form
-theme: d11assd_theme
+  - d11asdd_theme
+id: d11asdd_theme_search_form
+theme: d11asdd_theme
 region: nav_additional
 weight: 0
 provider: null

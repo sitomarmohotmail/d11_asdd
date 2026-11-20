@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\d11assd_theme\Traits;
+namespace Drupal\Tests\d11asdd_theme\Traits;
 
 /**
- * Default Bootstrap5 settings of d11assd_theme (spec 001, R10).
+ * Default Bootstrap5 settings of d11asdd_theme (spec 001, R10).
  */
 trait ThemeSettingsValuesTrait {
 

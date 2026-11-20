@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  PHPUnit del proyecto d11assd. Ejecutar desde la raíz del proyecto:
+  PHPUnit del proyecto d11asdd. Ejecutar desde la raíz del proyecto:
     vendor/bin/phpunit (opción testsuite) custom-unit
     vendor/bin/phpunit web/modules/contrib/MODULO
 -->

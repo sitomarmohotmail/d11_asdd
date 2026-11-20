@@ -32,7 +32,7 @@ core ni contrib.
 | DEP | Dependencias | Resultado de `composer audit` que afecte a paquetes que usa la spec; librerías externas cargadas desde CDN sin necesidad |
 | FIL | Archivos | Subidas sin validar extensión o tamaño; rutas de archivo construidas con entrada del usuario |
 
-Comandos útiles (desde `/var/www/d11assd`):
+Comandos útiles (desde `/var/www/d11asdd`):
 ```bash
 composer audit --no-interaction
 grep -rn --include='*.twig' '|raw' web/modules/custom web/themes/custom

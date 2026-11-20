@@ -4,9 +4,9 @@ dependencies:
   module:
   - system
   theme:
-  - d11assd_theme
-id: d11assd_theme_breadcrumbs
-theme: d11assd_theme
+  - d11asdd_theme
+id: d11asdd_theme_breadcrumbs
+theme: d11asdd_theme
 region: breadcrumb
 weight: 0
 provider: null

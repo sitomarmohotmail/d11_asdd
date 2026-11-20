@@ -45,7 +45,7 @@ function parseArgs(argv) {
 
 // Chrome se abre con --no-sandbox, así que solo se permiten el sitio local y
 // archivos locales (páginas de prueba), nunca webs externas.
-const ALLOWED_HOSTS = new Set(['d11assd.local', 'localhost', '127.0.0.1', '[::1]']);
+const ALLOWED_HOSTS = new Set(['d11asdd.local', 'localhost', '127.0.0.1', '[::1]']);
 
 function isAllowed(url) {
   let parsed;
@@ -138,7 +138,7 @@ async function checkFocus(page) {
  *
  * CA19 (1280 px): botón no visible, menú visible.
  * CA17/CA17b (320 px): Intro abre el menú, aria-expanded="true", Tab llega
- *   al primer enlace de #block-d11assd-theme-main-navigation.
+ *   al primer enlace de #block-d11asdd-theme-main-navigation.
  * CA18/CA18b (320 px): Espacio cierra el menú, aria-expanded="false", Tab
  *   no entra en el elemento controlado.
  * CA20: axe (target-size) sobre la página con el menú abierto.

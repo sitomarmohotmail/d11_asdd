@@ -5,7 +5,7 @@
 # Stdin: JSON de PreToolUse / PostToolUse con tool_name=Agent|Bash
 # Arg 1: "start" (PreToolUse) | "stop" (PostToolUse)
 
-RUNNING_JSON="/var/www/d11assd/assd_tools/running.json"
+RUNNING_JSON="/var/www/d11asdd/asdd_tools/running.json"
 
 input=$(cat)
 tool_name=$(echo "$input" | jq -r '.tool_name // ""')

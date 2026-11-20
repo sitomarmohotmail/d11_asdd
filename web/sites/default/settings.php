@@ -921,7 +921,7 @@ $databases['default']['default'] = [
   'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
 ];
 $settings['config_sync_directory'] = '../config/sync';
-$settings['trusted_host_patterns'] = array_filter(explode(',', getenv('DRUPAL_TRUSTED_HOSTS') ?: '^d11assd\.local$,^localhost$,^127\.0\.0\.1$'));
+$settings['trusted_host_patterns'] = array_filter(explode(',', getenv('DRUPAL_TRUSTED_HOSTS') ?: '^d11asdd\.local$,^localhost$,^127\.0\.0\.1$'));
 
 if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
   include $app_root . '/' . $site_path . '/settings.local.php';

@@ -1,4 +1,4 @@
-# Bootstrap5 settings of the D11assd theme (spec 001, R10).
+# Bootstrap5 settings of the D11asdd theme (spec 001, R10).
 # Based on bootstrap5.settings, with two deliberate changes:
 # - b5_body_schema / b5_body_bg_schema: 'none' instead of '' (an empty value
 #   generates an incomplete "bg-" class on <body>).

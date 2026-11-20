@@ -5,7 +5,7 @@ version: 1.2
 estado: implementada
 nivel: L
 tipo: tema
-proyecto: d11assd_theme
+proyecto: d11asdd_theme
 ---
 
 # 001 · Tema hijo de Bootstrap5
@@ -25,23 +25,23 @@ tema servirá también de base para mostrar los componentes SDC de los módulos
 propios.
 
 ## Requisitos
-- **R1** *(DEBE)* — Existe el tema `d11assd_theme` en
-  `web/themes/custom/d11assd_theme`, con nombre visible "D11assd" y
+- **R1** *(DEBE)* — Existe el tema `d11asdd_theme` en
+  `web/themes/custom/d11asdd_theme`, con nombre visible "D11asdd" y
   `base theme: bootstrap5`.
 - **R2** *(DEBE)* — El tema es compatible con Drupal `^11` y declara su
   dependencia del tema base para que Drupal lo exija al instalarlo.
 - **R3** *(DEBE)* — Hereda las regiones de Bootstrap5 (header, nav_branding,
   nav_main, nav_additional, breadcrumb, content, sidebar_first,
   sidebar_second, footer) y las declara en su `.info.yml`.
-- **R4** *(DEBE)* — Añade una librería propia `d11assd_theme/global-styling`
+- **R4** *(DEBE)* — Añade una librería propia `d11asdd_theme/global-styling`
   con `css/style.css`. Se carga en todas las páginas que se renderizan con
-  `d11assd_theme`, además de las librerías de Bootstrap5.
+  `d11asdd_theme`, además de las librerías de Bootstrap5.
 - **R5** *(DEBE)* — El tema usa CSS y JS sin compilar: sin SCSS ni
-  dependencias de Node.js dentro de `web/themes/custom/d11assd_theme`.
+  dependencias de Node.js dentro de `web/themes/custom/d11asdd_theme`.
   *(v1.2: antes decía «solo CSS»; se amplía por R13.)*
 - **R6** *(DEBE)* — Es el tema por defecto del sitio. Claro sigue siendo el
   tema de administración.
-- **R7** *(DEBE)* — Los bloques del tema (`config/optional/block.block.d11assd_theme_*.yml`)
+- **R7** *(DEBE)* — Los bloques del tema (`config/optional/block.block.d11asdd_theme_*.yml`)
   se colocan en las regiones de Bootstrap5, para que la portada muestre la
   marca del sitio, el menú principal, los mensajes y el contenido. Los bloques
   de Olivero y Bootstrap5 se mantienen; desinstalar esos temas queda fuera de
@@ -51,8 +51,8 @@ propios.
 - **R9** *(DEBE)* — La configuración resultante (tema activo, bloques y
   ajustes del tema) se exporta a `config/sync`.
 - **R10** *(DEBE)* — El tema hijo tiene sus propios ajustes de Bootstrap5
-  (`d11assd_theme.settings`) con su esquema
-  (`config/schema/d11assd_theme.schema.yml`, tipo `theme_settings`). Motivo:
+  (`d11asdd_theme.settings`) con su esquema
+  (`config/schema/d11asdd_theme.schema.yml`, tipo `theme_settings`). Motivo:
   Drupal no hereda los ajustes del tema base; sin ellos las plantillas de
   Bootstrap5 generan clases vacías (`navbar-`, `bg-`, `footer-`) y el contenido
   pierde el `container`. Los valores parten de los de Bootstrap5, con dos
@@ -70,14 +70,14 @@ propios.
   | `b5_top_container_config` | `''` | `''` | |
   | `b5_theme_mode` | `light` | `light` | |
 
-  Los valores se pueden cambiar desde `/admin/appearance/settings/d11assd_theme`
+  Los valores se pueden cambiar desde `/admin/appearance/settings/d11asdd_theme`
   (formulario heredado de Bootstrap5) y los cambios se aplican sin tocar código.
 
   El esquema declara, además de las claves de core (`theme_settings`) y las
   nueve `b5_*`, las tres claves `subtheme_folder`, `subtheme_name` y
   `subtheme_machine_name` (tipo `string`). Las añade al guardar el formulario
   el generador de subtemas de Bootstrap5 (`SettingsManager.php`), y core las
-  guarda en `d11assd_theme.settings` (`theme_settings_convert_to_config()`).
+  guarda en `d11asdd_theme.settings` (`theme_settings_convert_to_config()`).
   No se incluyen en `config/install`.
 - **R11** *(DEBE, v1.2)* — Por debajo del punto de ruptura de la barra
   (`navbar-expand-lg`, < 992 px), el menú plegable de Bootstrap5 se abre y se
@@ -115,59 +115,59 @@ QA.
 
 ### Tema y librerías
 - **CA1** *(R1, R2 · Kernel)* — **Cuando** Drupal liste los temas
-  disponibles, **el sistema deberá** incluir `d11assd_theme` con nombre
-  "D11assd", `bootstrap5` como tema base y un `core_version_requirement` que
+  disponibles, **el sistema deberá** incluir `d11asdd_theme` con nombre
+  "D11asdd", `bootstrap5` como tema base y un `core_version_requirement` que
   incluya `^11`.
-- **CA2** *(R2, R3 · Kernel)* — **Cuando** se instale `d11assd_theme` en un
+- **CA2** *(R2, R3 · Kernel)* — **Cuando** se instale `d11asdd_theme` en un
   sitio que no lo tiene, **el sistema deberá** instalar también `bootstrap5` y
   exponer en el tema hijo las nueve regiones de R3.
 - **CA3** *(R4 · Kernel)* — **El sistema deberá** definir la librería
-  `d11assd_theme/global-styling` con el archivo `css/style.css`.
-- **CA4** *(R4, R6 · Functional)* — **Mientras** `d11assd_theme` sea el tema
+  `d11asdd_theme/global-styling` con el archivo `css/style.css`.
+- **CA4** *(R4, R6 · Functional)* — **Mientras** `d11asdd_theme` sea el tema
   por defecto, **cuando** un visitante anónimo abra la portada, **el sistema
   deberá** responder 200, cargar `themes/contrib/bootstrap5/css/style.css` y
-  `themes/custom/d11assd_theme/css/style.css`, y mostrar el nombre del sitio.
+  `themes/custom/d11asdd_theme/css/style.css`, y mostrar el nombre del sitio.
 - **CA9** *(R5 · Unit)* — **El sistema deberá** no contener en
-  `web/themes/custom/d11assd_theme` archivos `.scss` ni `.sass`, ni
+  `web/themes/custom/d11asdd_theme` archivos `.scss` ni `.sass`, ni
   `package.json`, ni un directorio `node_modules`.
 - **CA9b** *(R5 · Unit)* — **El sistema deberá** declarar en
-  `d11assd_theme.libraries.yml` solo archivos con extensión `.css` en la
+  `d11asdd_theme.libraries.yml` solo archivos con extensión `.css` en la
   librería `global-styling`.
 
 ### Temas activos y configuración exportada
 - **CA5a** *(R6 · Functional)* — **Cuando** un usuario autenticado con los
   permisos `access content overview` y `view the administration theme` abra
   `/admin/content`, **el sistema deberá** renderizar la página con Claro y no
-  cargar `themes/custom/d11assd_theme/css/style.css`.
+  cargar `themes/custom/d11asdd_theme/css/style.css`.
 - **CA5b** *(R6, R9 · Kernel)* — **El sistema deberá** tener en
-  `config/sync/system.theme.yml` `default: d11assd_theme` y `admin: claro`.
+  `config/sync/system.theme.yml` `default: d11asdd_theme` y `admin: claro`.
 - **CA10** *(R9 · Kernel)* — **El sistema deberá** tener en `config/sync` un
-  `block.block.d11assd_theme_*.yml` por cada bloque de `config/optional` del
+  `block.block.d11asdd_theme_*.yml` por cada bloque de `config/optional` del
   tema cuyas dependencias de módulo estén activas en
   `config/sync/core.extension.yml`.
 
 ### Bloques
-- **CA11** *(R7 · Kernel)* — **Cuando** se instale `d11assd_theme`, **el
-  sistema deberá** crear los bloques `d11assd_theme_branding` en
-  `nav_branding`, `d11assd_theme_main_navigation` en `nav_main`,
-  `d11assd_theme_account_menu` en `nav_additional`,
-  `d11assd_theme_breadcrumbs` en `breadcrumb`, `d11assd_theme_messages`,
-  `d11assd_theme_page_title`, `d11assd_theme_local_tasks`,
-  `d11assd_theme_local_actions` y `d11assd_theme_content` en `content`, y
-  `d11assd_theme_footer` y `d11assd_theme_powered_by_drupal` en `footer`.
-  `d11assd_theme_help` (en `content`) y `d11assd_theme_search_form` (en
+- **CA11** *(R7 · Kernel)* — **Cuando** se instale `d11asdd_theme`, **el
+  sistema deberá** crear los bloques `d11asdd_theme_branding` en
+  `nav_branding`, `d11asdd_theme_main_navigation` en `nav_main`,
+  `d11asdd_theme_account_menu` en `nav_additional`,
+  `d11asdd_theme_breadcrumbs` en `breadcrumb`, `d11asdd_theme_messages`,
+  `d11asdd_theme_page_title`, `d11asdd_theme_local_tasks`,
+  `d11asdd_theme_local_actions` y `d11asdd_theme_content` en `content`, y
+  `d11asdd_theme_footer` y `d11asdd_theme_powered_by_drupal` en `footer`.
+  `d11asdd_theme_help` (en `content`) y `d11asdd_theme_search_form` (en
   `nav_additional`) solo se crean si su módulo (Help y Search,
   respectivamente) está activo.
 - **CA12** *(R7 · Functional)* — **Cuando** un visitante anónimo abra la
   portada, **el sistema deberá** mostrar el bloque
-  `#block-d11assd-theme-branding` dentro de `<nav class="navbar">`, el menú
-  principal `#block-d11assd-theme-main-navigation` dentro de
-  `<nav class="navbar">` y el bloque `#block-d11assd-theme-content` dentro de
+  `#block-d11asdd-theme-branding` dentro de `<nav class="navbar">`, el menú
+  principal `#block-d11asdd-theme-main-navigation` dentro de
+  `<nav class="navbar">` y el bloque `#block-d11asdd-theme-content` dentro de
   `<main>`.
 - **CA13** *(R7 · Functional)* — **Cuando** un visitante anónimo envíe en
   `/user/login` un usuario o una contraseña incorrectos, **el sistema
   deberá** mostrar el mensaje de error dentro de `<main>`, en el bloque
-  `d11assd_theme_messages`.
+  `d11asdd_theme_messages`.
 
 ### Logo y captura
 - **CA14** *(R8 · Kernel)* — **El sistema deberá** incluir en el tema
@@ -175,36 +175,36 @@ QA.
   archivos homónimos de `web/themes/contrib/bootstrap5`.
 - **CA15** *(R8 · Functional)* — **Cuando** un visitante anónimo abra la
   portada, **el sistema deberá** mostrar como logo
-  `/themes/custom/d11assd_theme/logo.svg`.
+  `/themes/custom/d11asdd_theme/logo.svg`.
 
 ### Ajustes de Bootstrap5 (R10)
-- **CA7a** *(R10 · Functional)* — **Mientras** `d11assd_theme.settings`
+- **CA7a** *(R10 · Functional)* — **Mientras** `d11asdd_theme.settings`
   tenga los valores de R10, **cuando** un visitante anónimo abra la portada,
   **el sistema deberá** generar `navbar-dark`, `text-light` y `bg-dark` en
   `<nav class="navbar">`; `footer-dark`, `text-light` y `bg-dark` en
   `<footer>`; la clase `container` en el `div` hijo directo de
   `<nav class="navbar">`, de `<main>` y de `<footer>`; y
   `data-bs-theme="light"` en `<html>`.
-- **CA7b** *(R10 · Functional)* — **Mientras** `d11assd_theme.settings`
+- **CA7b** *(R10 · Functional)* — **Mientras** `d11asdd_theme.settings`
   tenga los valores de R10, **cuando** un visitante anónimo abra la portada,
   **el sistema deberá** no generar ningún token de clase exactamente igual a
   `navbar-`, `footer-` o `bg-` en `<body>`, `<nav class="navbar">` ni
   `<footer>`.
 - **CA7c** *(R9, R10 · Kernel)* — **El sistema deberá** incluir
-  `d11assd_theme.settings` en `config/install` del tema y en `config/sync`,
+  `d11asdd_theme.settings` en `config/install` del tema y en `config/sync`,
   ambos con los valores de R10 para las nueve claves `b5_*`.
-- **CA7d** *(R10 · Kernel)* — **Cuando** se instale `d11assd_theme` con la
+- **CA7d** *(R10 · Kernel)* — **Cuando** se instale `d11asdd_theme` con la
   comprobación estricta de esquema activa, **el sistema deberá** validar
-  `d11assd_theme.settings` contra su esquema sin errores.
+  `d11asdd_theme.settings` contra su esquema sin errores.
 - **CA7e** *(R10 · Functional)* — **Cuando** un usuario autenticado con el
   permiso `administer themes` guarde sin cambios el formulario
-  `/admin/appearance/settings/d11assd_theme`, con la comprobación estricta de
-  esquema activa, **el sistema deberá** guardar `d11assd_theme.settings` sin
+  `/admin/appearance/settings/d11asdd_theme`, con la comprobación estricta de
+  esquema activa, **el sistema deberá** guardar `d11asdd_theme.settings` sin
   errores de esquema, incluidas las claves `subtheme_*`.
 - **CA8** *(R10 · Functional)* — **Mientras** `page_cache` y
   `dynamic_page_cache` estén activos y la portada esté en caché para el
   visitante anónimo, **cuando** un usuario autenticado con el permiso
-  `administer themes` guarde en `/admin/appearance/settings/d11assd_theme`
+  `administer themes` guarde en `/admin/appearance/settings/d11asdd_theme`
   `b5_body_bg_schema: light`, `b5_navbar_bg_schema: primary`,
   `b5_footer_bg_schema: secondary` y
   `b5_top_container: container-fluid m-0 p-0`, **el sistema deberá** mostrar
@@ -239,17 +239,17 @@ QA.
   en `config/sync`, para que los nombres de las regiones de navegación
   («Navegación principal», «Menú de la cuenta de usuario») estén en el idioma
   de la página (WCAG 3.1.2).
-- **CA-A3** *(RA · accesibilidad)* — **Mientras** `d11assd_theme.settings`
+- **CA-A3** *(RA · accesibilidad)* — **Mientras** `d11asdd_theme.settings`
   tenga los valores de R10, **cuando** se ejecuten como visitante anónimo
-  `npm run a11y -- http://d11assd.local/` y
-  `npm run a11y -- --width 320 http://d11assd.local/`, **el sistema deberá**
+  `npm run a11y -- http://d11asdd.local/` y
+  `npm run a11y -- --width 320 http://d11asdd.local/`, **el sistema deberá**
   informar 0 violaciones WCAG 2.2 A/AA, salvo las clasificadas como OBS
   según RA.
 - **CA-A4** *(RA, R10 · accesibilidad)* — **Donde** `css/style.css` o los
   valores de R10 definan colores, **el sistema deberá** mantener un contraste
   de al menos 4,5:1 en texto normal y 3:1 en texto grande para cada par
   texto/fondo de la barra, el pie y el contenido, incluidos los enlaces.
-- **CA-A4c** *(RA · accesibilidad)* — **Mientras** `d11assd_theme.settings`
+- **CA-A4c** *(RA · accesibilidad)* — **Mientras** `d11asdd_theme.settings`
   tenga los valores de R10, **el sistema deberá** mostrar subrayados
   (`text-decoration: underline`) los enlaces de `<footer>`, aunque la regla
   `footer.footer-dark a` de Bootstrap5 quite el subrayado (WCAG 1.4.1).
@@ -277,8 +277,8 @@ portada. No forman parte de PHPUnit.
   portada, **el sistema deberá** generar dentro de `<nav class="navbar">` un
   `<button>` con la clase `navbar-toggler`, `type="button"`,
   `aria-expanded="false"` y un `aria-controls` igual al `id` de un elemento
-  existente que contenga `#block-d11assd-theme-main-navigation` y
-  `#block-d11assd-theme-account-menu`.
+  existente que contenga `#block-d11asdd-theme-main-navigation` y
+  `#block-d11asdd-theme-account-menu`.
 - **CA17** *(R11 · check.sh)* — **Mientras** el ancho de la ventana sea
   320 px y el menú esté cerrado, **cuando** el botón del menú tenga el foco y
   se pulse Intro, **el sistema deberá** poner `aria-expanded="true"` en el
@@ -286,7 +286,7 @@ portada. No forman parte de PHPUnit.
 - **CA17b** *(R11 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
   esté abierto, **cuando** el botón del menú tenga el foco y se pulse Tab,
   **el sistema deberá** poner el foco en el primer enlace de
-  `#block-d11assd-theme-main-navigation`.
+  `#block-d11asdd-theme-main-navigation`.
 - **CA18** *(R11 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
   esté abierto, **cuando** el botón del menú tenga el foco y se pulse
   Espacio, **el sistema deberá** poner `aria-expanded="false"` y ocultar el
@@ -302,7 +302,7 @@ portada. No forman parte de PHPUnit.
   el menú abierto) y a 1280 px, **el sistema deberá** dar al botón del menú,
   a cada enlace de `<nav class="navbar">` y a cada enlace de `<footer>` que
   no esté dentro de una frase (exención «en línea» de R12; hoy, el enlace
-  «Drupal» del bloque `d11assd_theme_powered_by_drupal`) un área de al menos 24 × 24 px CSS, o una
+  «Drupal» del bloque `d11asdd_theme_powered_by_drupal`) un área de al menos 24 × 24 px CSS, o una
   separación tal que un círculo de 24 px centrado en él no corte a otro
   objetivo.
 - **CA21** *(R13 · check.sh)* — **Mientras** el ancho sea 320 px y el menú
@@ -313,13 +313,13 @@ portada. No forman parte de PHPUnit.
   el botón no visible (1280 px), **entonces el sistema deberá** dejar el foco
   donde estaba.
 - **CA23** *(R13, R5 · Kernel)* — **El sistema deberá** definir la librería
-  `d11assd_theme/navbar` con un único archivo `js/navbar.js` y las
+  `d11asdd_theme/navbar` con un único archivo `js/navbar.js` y las
   dependencias `core/drupal`, `core/once` y `bootstrap5/bootstrap5-js-latest`
   (aporta el global `bootstrap` que usa la decisión 8), y declararla en
-  `libraries` de `d11assd_theme.info.yml`.
+  `libraries` de `d11asdd_theme.info.yml`.
 - **CA23b** *(R13 · Functional)* — **Cuando** un visitante anónimo abra la
   portada, **el sistema deberá** cargar
-  `themes/custom/d11assd_theme/js/navbar.js`.
+  `themes/custom/d11asdd_theme/js/navbar.js`.
 - **CA-A7** *(RA · check.sh)* — **Cuando** se ejecute `scripts/check.sh`
   sobre la portada a 320 px con el menú abierto, **el sistema deberá** dar 0
   violaciones de axe (incluida `target-size`), sin scroll horizontal y con
@@ -348,7 +348,7 @@ portada. No forman parte de PHPUnit.
 - v1.2: cerrar el menú al hacer clic fuera o al salir el foco con Tab.
 
 ## Decisiones
-1. Nombre de máquina: `d11assd_theme`.
+1. Nombre de máquina: `d11asdd_theme`.
 2. Solo CSS y JS sin compilar en el tema, sin SCSS (R5). Node.js se usa únicamente como
    herramienta de desarrollo en la raíz del proyecto (`npm run a11y`, CA-A3),
    nunca dentro del tema.
@@ -377,17 +377,17 @@ portada. No forman parte de PHPUnit.
    lógica de apertura ni tocar `aria-expanded` a mano.
 
 ## Plan técnico
-Archivos en `web/themes/custom/d11assd_theme/`:
+Archivos en `web/themes/custom/d11asdd_theme/`:
 
 | Archivo | Para qué |
 |---------|----------|
-| `d11assd_theme.info.yml` | Declara el tema: `base theme: bootstrap5`, `dependencies`, regiones (R1–R3) y librería (R4). |
-| `d11assd_theme.libraries.yml` | Librería `global-styling` con `css/style.css` (R4). |
+| `d11asdd_theme.info.yml` | Declara el tema: `base theme: bootstrap5`, `dependencies`, regiones (R1–R3) y librería (R4). |
+| `d11asdd_theme.libraries.yml` | Librería `global-styling` con `css/style.css` (R4). |
 | `css/style.css` | Estilos propios: ajustes mínimos (R5), subrayado de los enlaces del pie (CA-A4c), foco visible (CA-A4d) y enlaces de los mensajes (CA-A4e). |
-| `config/optional/block.block.d11assd_theme_*.yml` | Bloques del tema en las regiones de Bootstrap5, copiados de los de Bootstrap5, con etiqueta en español y `langcode: es` (CA-A6). Se crean solos al instalar el tema (R7). |
+| `config/optional/block.block.d11asdd_theme_*.yml` | Bloques del tema en las regiones de Bootstrap5, copiados de los de Bootstrap5, con etiqueta en español y `langcode: es` (CA-A6). Se crean solos al instalar el tema (R7). |
 | `logo.svg`, `screenshot.png` | Identidad propia (R8). |
-| `config/install/d11assd_theme.settings.yml` | Ajustes de Bootstrap5 del tema hijo con los valores de R10. |
-| `config/schema/d11assd_theme.schema.yml` | Esquema `d11assd_theme.settings` de tipo `theme_settings` con las nueve claves `b5_*` y las tres `subtheme_*` (R10). |
+| `config/install/d11asdd_theme.settings.yml` | Ajustes de Bootstrap5 del tema hijo con los valores de R10. |
+| `config/schema/d11asdd_theme.schema.yml` | Esquema `d11asdd_theme.settings` de tipo `theme_settings` con las nueve claves `b5_*` y las tres `subtheme_*` (R10). |
 | `tests/src/Unit/ThemeFilesTest.php` | CA9, CA9b. |
 | `tests/src/Unit/ThemeCssTest.php` | CA-A4d, CA-A4e (reglas de `css/style.css`). |
 | `tests/src/Kernel/ThemeTest.php` | CA1, CA2, CA3, CA11, CA14, CA7d. |
@@ -395,14 +395,14 @@ Archivos en `web/themes/custom/d11assd_theme/`:
 | `tests/src/Functional/FrontendTest.php` | CA4, CA5a, CA12, CA13, CA15, CA7a, CA7b, CA8, CA-A1, CA-A1b, CA-A1c, CA-A1d, CA-A2. |
 | `tests/src/Functional/ThemeSettingsFormTest.php` | CA7e. |
 
-Y en la raíz del proyecto: `config/sync/d11assd_theme.settings.yml` (R9, R10).
+Y en la raíz del proyecto: `config/sync/d11asdd_theme.settings.yml` (R9, R10).
 
 v1.2 (propuesta, se concreta tras aprobar):
 
 | Archivo | Para qué |
 |---------|----------|
-| `d11assd_theme.libraries.yml` | Nueva librería `navbar` con `js/navbar.js` (CA23). |
-| `d11assd_theme.info.yml` | Añade `d11assd_theme/navbar` a `libraries`. |
+| `d11asdd_theme.libraries.yml` | Nueva librería `navbar` con `js/navbar.js` (CA23). |
+| `d11asdd_theme.info.yml` | Añade `d11asdd_theme/navbar` a `libraries`. |
 | `js/navbar.js` | Cierre con Esc y retorno del foco (R13). |
 | `css/style.css` | Solo si la medición de CA20 falla: tamaño mínimo de los objetivos. |
 | `tests/src/Kernel/ThemeTest.php` | CA23. |
@@ -410,7 +410,7 @@ v1.2 (propuesta, se concreta tras aprobar):
 | `scripts/a11y/axe-check.mjs` | Opción `--menu`: CA17–CA22 y axe con el menú abierto (CA-A7). |
 | `scripts/check.sh` | Añade `--menu` a las pasadas de 320 y 1280 px. |
 
-Activación: `drush theme:install d11assd_theme`, se define como tema por
+Activación: `drush theme:install d11asdd_theme`, se define como tema por
 defecto en `system.theme` y después `drush cex`. Para R10 en este sitio: crear
 la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 
@@ -429,7 +429,7 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 - [x] Ampliar tests de criterios ya implementados (CA1, CA5b, CA9–CA15, CA-A1–CA-A2)
 - [x] Tests para CA7a–CA7e y CA8 (en rojo)
 - [x] Subrayado de enlaces del pie en `css/style.css` (CA-A4c)
-- [x] Esquema y ajustes `d11assd_theme.settings` en `config/install` y `config/sync` (R10)
+- [x] Esquema y ajustes `d11asdd_theme.settings` en `config/install` y `config/sync` (R10)
 - [x] Correcciones en el tema hasta que pasen todos los tests
 - [x] Correcciones de la puerta de accesibilidad (A11Y-001 a A11Y-007): tests en rojo y después CSS y etiquetas
 - [x] QA (`asdd-qa`) superado
@@ -492,7 +492,7 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 - v1.1: la plantilla `status-messages.html.twig` de Bootstrap5 pinta cada
   mensaje como `div role="alert"` sin `data-drupal-messages`; el bloque de
   mensajes se identifica por `data-drupal-messages-fallback` (CA13).
-- v1.1: en el sitio, `d11assd_theme.settings` se creó con
+- v1.1: en el sitio, `d11asdd_theme.settings` se creó con
   `drush config:import --partial --source=<ruta absoluta>/config/install` y
   `drush cex` (la ruta relativa falla porque Drush se ejecuta desde `web/`).
 - v1.1: Bootstrap5 tiene más textos en inglés sin `|t` en plantillas

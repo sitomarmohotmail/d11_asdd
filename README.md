@@ -1,4 +1,4 @@
-# d11assd
+# d11asdd
 
 Drupal 11 (perfil estándar) desarrollado con **ASDD** (Agentic Spec-Driven Development).
 
@@ -17,9 +17,9 @@ vendor/bin/drush site:install --existing-config -y
 
 ## Plugin para VSCode
 
-El repositorio incluye un plugin de Claude Code en `.claude/skills/asdd-pipeline/` que muestra un panel lateral con el estado del pipeline ASSD (specs por estado, diagrama de flujo y acceso rápido al dashboard web).
+El repositorio incluye un plugin de Claude Code en `.claude/skills/asdd-pipeline/` que muestra un panel lateral con el estado del pipeline ASDD (specs por estado, diagrama de flujo y acceso rápido al dashboard web).
 
-Se carga automáticamente al abrir el proyecto con Claude Code. Para abrirlo manualmente escribe `/assd_dashboard` en el chat.
+Se carga automáticamente al abrir el proyecto con Claude Code. Para abrirlo manualmente escribe `/asdd_dashboard` en el chat.
 
 ### Configuración (solo la primera vez)
 
@@ -31,16 +31,16 @@ claude plugin configure asdd-pipeline
 
 | Campo | Descripción | Ejemplo |
 |---|---|---|
-| `specsDir` | Ruta absoluta al directorio `specs/` del proyecto | `/home/usuario/d11assd/specs` |
-| `panelUrl` | URL del panel web ASSD. Si se deja vacío, el enlace no aparece. | `https://d11assd.local/asdd_tools/index.html` |
+| `specsDir` | Ruta absoluta al directorio `specs/` del proyecto | `/home/usuario/d11asdd/specs` |
+| `panelUrl` | URL del panel web ASDD. Si se deja vacío, el enlace no aparece. | `https://d11asdd.local/asdd_tools/index.html` |
 
 Los valores quedan guardados por usuario y no hay que repetirlos. Si `specsDir` no se configura, el plugin lo indicará en el propio panel.
 
-## ASSD Dashboard (`asdd_tools/`)
+## ASDD Dashboard (`asdd_tools/`)
 
 Dashboard web con pipeline visual, editor de specs y chat integrado con Claude.
 
-Acceso local: `http://d11assd.local/asdd_tools/`
+Acceso local: `http://d11asdd.local/asdd_tools/`
 
 
 ## Tests

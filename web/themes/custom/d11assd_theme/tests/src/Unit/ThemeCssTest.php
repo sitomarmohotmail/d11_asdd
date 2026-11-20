@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\d11assd_theme\Unit;
+namespace Drupal\Tests\d11asdd_theme\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\Group;
  * The contrast of each rule is measured in specs/001-accesibilidad.md; these
  * tests guard against the rules being removed.
  */
-#[Group('d11assd_theme')]
+#[Group('d11asdd_theme')]
 class ThemeCssTest extends UnitTestCase {
 
   /**

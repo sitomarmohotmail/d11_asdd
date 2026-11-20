@@ -3,11 +3,11 @@ langcode: es
 status: true
 dependencies:
   theme:
-    - d11assd_theme
+    - d11asdd_theme
 _core:
   default_config_hash: h29d1qwg3Fd-yU08CDMaWQXWCCxZSCJTHc2xzpCHPO0
-id: d11assd_theme_local_tasks
-theme: d11assd_theme
+id: d11asdd_theme_local_tasks
+theme: d11asdd_theme
 region: content
 weight: -4
 provider: null

@@ -11,22 +11,22 @@ sin commit, y se revisan como trabajo en curso. Cuando se hizo esta revisión
 todavía no existía el informe de QA (`specs/001-qa.md`).
 
 ## Superficie revisada
-Tema `web/themes/custom/d11assd_theme`:
-- `d11assd_theme.info.yml` y `d11assd_theme.libraries.yml`: una sola librería
+Tema `web/themes/custom/d11asdd_theme`:
+- `d11asdd_theme.info.yml` y `d11asdd_theme.libraries.yml`: una sola librería
   local (`css/style.css`), sin JavaScript y sin recursos externos ni CDN.
 - `css/style.css`: solo reglas de estilo. No tiene `url()`, `@import` ni
   recursos remotos.
 - `logo.svg`: un `rect` y un `text` estáticos. No tiene `<script>`, atributos
   `on*`, `href`/`xlink:href` ni `foreignObject`. `screenshot.png` es binario y
   no se sirve con datos del usuario.
-- `config/install/d11assd_theme.settings.yml` y
-  `config/schema/d11assd_theme.schema.yml` (R10).
-- `config/optional/block.block.d11assd_theme_*.yml`: los 13 bloques.
+- `config/install/d11asdd_theme.settings.yml` y
+  `config/schema/d11asdd_theme.schema.yml` (R10).
+- `config/optional/block.block.d11asdd_theme_*.yml`: los 13 bloques.
 - Tests `tests/src/{Unit,Kernel,Functional,Traits}`.
 
 Configuración exportada en `config/sync`: `system.theme.yml`,
-`system.theme.global.yml`, `d11assd_theme.settings.yml` y los 12
-`block.block.d11assd_theme_*.yml`. Para el contexto también se miró
+`system.theme.global.yml`, `d11asdd_theme.settings.yml` y los 12
+`block.block.d11asdd_theme_*.yml`. Para el contexto también se miró
 `core.extension.yml`, `user.settings.yml`, `system.logging.yml` y
 `user.role.anonymous.yml`.
 
@@ -38,7 +38,7 @@ plantilla Twig ni JavaScript propios. La superficie se reduce a:
 - una hoja CSS y un SVG estáticos;
 - la colocación de bloques de core;
 - la configuración del tema, que se edita desde el formulario heredado de
-  Bootstrap5 (`/admin/appearance/settings/d11assd_theme`).
+  Bootstrap5 (`/admin/appearance/settings/d11asdd_theme`).
 
 ## Hallazgos
 
@@ -84,7 +84,7 @@ plantilla Twig ni JavaScript propios. La superficie se reduce a:
   URL externa o comprometida, un exploit del navegador correría con los
   permisos del usuario de desarrollo. El comentario del script limita su uso
   al sitio local, pero el código no lo impone.
-- **Corrección propuesta:** rechazar las URLs cuyo host no sea `d11assd.local`
+- **Corrección propuesta:** rechazar las URLs cuyo host no sea `d11asdd.local`
   ni `localhost`, o habilitar el sandbox con un perfil AppArmor para Chrome
   (por ejemplo, `kernel.apparmor_restrict_unprivileged_userns`) y quitar
   `--no-sandbox`.
@@ -117,7 +117,7 @@ plantilla Twig ni JavaScript propios. La superficie se reduce a:
   `drupalCreateUser()` y contraseña aleatoria. `settings.php` lee
   `hash_salt` y la contraseña de la base de datos de variables de entorno, y
   `phpunit.xml` y `settings.local.php` están en `.gitignore`.
-- **CFG:** `d11assd_theme.settings` solo contiene clases de presentación.
+- **CFG:** `d11asdd_theme.settings` solo contiene clases de presentación.
   Las claves `subtheme_*` del esquema no traen valores en `config/install` ni
   en `config/sync`. El generador de subtemas de Bootstrap5, que escribe
   archivos en el servidor, es contrib y solo lo puede usar quien tiene

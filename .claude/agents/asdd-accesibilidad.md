@@ -1,6 +1,6 @@
 ---
 name: asdd-accesibilidad
-description: Puerta de accesibilidad WCAG 2.2 AA de una spec que añade o cambia HTML, Twig, CSS o JS en este proyecto Drupal 11 (tema d11assd_theme, módulos, componentes SDC). Hace revisión estática del código, ejecuta axe-core contra http://d11assd.local y genera una lista de comprobación manual para la persona. Escribe specs/NNN-accesibilidad.md y nunca modifica código ni la spec. Úsalo pasándole la ruta de la spec.
+description: Puerta de accesibilidad WCAG 2.2 AA de una spec que añade o cambia HTML, Twig, CSS o JS en este proyecto Drupal 11 (tema d11asdd_theme, módulos, componentes SDC). Hace revisión estática del código, ejecuta axe-core contra http://d11asdd.local y genera una lista de comprobación manual para la persona. Escribe specs/NNN-accesibilidad.md y nunca modifica código ni la spec. Úsalo pasándole la ruta de la spec.
 tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 ---

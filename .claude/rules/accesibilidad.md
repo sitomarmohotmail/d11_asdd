@@ -1,7 +1,7 @@
 # Accesibilidad: WCAG 2.2 nivel AA
 
 Se aplica a **toda spec que añada o cambie HTML, Twig, CSS o JS**: el tema
-`d11assd_theme`, módulos, componentes SDC, bloques, formularios y
+`d11asdd_theme`, módulos, componentes SDC, bloques, formularios y
 configuración que altere la salida (menús, bloques, formatos de texto).
 
 El objetivo es cumplir **WCAG 2.2 AA** (incluye 2.1 AA, la que exige
@@ -48,7 +48,7 @@ lo marca como ALTA.
 
 ### Contenido no textual
 - Imágenes informativas con `alt` descriptivo; decorativas con `alt=""` (1.1.1).
-- El logo enlazado tiene un nombre accesible (p. ej. "Inicio – D11assd").
+- El logo enlazado tiene un nombre accesible (p. ej. "Inicio – D11asdd").
 - Iconos solo visuales con `aria-hidden="true"`; botones de solo icono con
   texto en `visually-hidden` o `aria-label`.
 

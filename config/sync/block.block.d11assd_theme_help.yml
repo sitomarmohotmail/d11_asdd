@@ -5,11 +5,11 @@ dependencies:
   module:
     - help
   theme:
-    - d11assd_theme
+    - d11asdd_theme
 _core:
   default_config_hash: Jut9wZN42bo9F1R5pZbaZb3tpAs5jNkAuOW1Ft3_Ij8
-id: d11assd_theme_help
-theme: d11assd_theme
+id: d11asdd_theme_help
+theme: d11asdd_theme
 region: content
 weight: -3
 provider: null
