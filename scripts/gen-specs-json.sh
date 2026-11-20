@@ -37,6 +37,19 @@ for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
 
   [ -z "$id" ] && continue
 
+  # Detectar puertas de calidad superadas (existen informes NNN-*.md)
+  num="${name%%[^0-9]*}"   # primeros 3 dígitos
+  gates_arr=()
+  [ -f "$SPECS_DIR/${num}-validacion.md" ]    && gates_arr+=("val")
+  [ -f "$SPECS_DIR/${num}-qa.md" ]            && gates_arr+=("qa")
+  [ -f "$SPECS_DIR/${num}-seguridad.md" ]     && gates_arr+=("seg")
+  [ -f "$SPECS_DIR/${num}-accesibilidad.md" ] && gates_arr+=("a11y")
+  if [ ${#gates_arr[@]} -gt 0 ]; then
+    gates_json=$(printf '%s\n' "${gates_arr[@]}" | jq -R . | jq -s .)
+  else
+    gates_json='[]'
+  fi
+
   item=$(jq -n \
     --arg id      "$id"      \
     --arg titulo  "$titulo"  \
@@ -45,7 +58,8 @@ for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
     --arg estado  "$estado"  \
     --arg version "$version" \
     --arg file    "$name"    \
-    '{id:$id,titulo:$titulo,nivel:$nivel,tipo:$tipo,estado:$estado,version:$version,file:$file}')
+    --argjson gates "$gates_json" \
+    '{id:$id,titulo:$titulo,nivel:$nivel,tipo:$tipo,estado:$estado,version:$version,file:$file,gates:$gates}')
 
   items+=("$item")
 done

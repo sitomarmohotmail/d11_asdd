@@ -1,0 +1,349 @@
+import { atom, read, update } from 'claude-code'
+import type { Register } from 'claude-code'
+import type { Spec } from '../types'
+
+const PANE = 'asdd-pipeline'
+const DEFAULT_SPECS_DIR = '/var/www/d11assd/specs'
+
+const specsAtom = atom({ plugin: 'asdd-pipeline', key: 'specs' } as const, [] as Spec[], {
+  shape: 'specs-2',
+})
+const filterAtom = atom({ plugin: 'asdd-pipeline', key: 'filter' } as const, null as string | null, {
+  shape: 'filter-2',
+})
+
+// ── SVG pipeline diagram ──────────────────────────────────────────────────────
+
+function node(
+  x: number, y: number, w: number, h: number,
+  label: string, count: number,
+  stroke: string, fill: string, textColor: string,
+  active: boolean,
+): string {
+  const sw = active ? '2.5' : '1.5'
+  return `
+  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10"
+    fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+  <text x="${x + w / 2}" y="${y + 20}" text-anchor="middle"
+    font-family="system-ui,sans-serif" font-size="9" font-weight="700"
+    fill="${textColor}" letter-spacing="0.07em">${label}</text>
+  <text x="${x + w / 2}" y="${y + h - 10}" text-anchor="middle"
+    font-family="monospace,system-ui" font-size="20" font-weight="700"
+    fill="${active ? textColor : stroke}">${count}</text>`
+}
+
+function gate(x: number, y: number, w: number, h: number, lines: string[]): string {
+  const mid = x + w / 2
+  const lineH = 11
+  const startY = y + (h - lines.length * lineH) / 2 + lineH - 2
+  const textEls = lines
+    .map((l, i) => `<text x="${mid}" y="${startY + i * lineH}" text-anchor="middle"
+      font-family="system-ui,sans-serif" font-size="8.5" fill="#4d5a7a">${l}</text>`)
+    .join('\n')
+  return `
+  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.round(h / 2)}"
+    fill="none" stroke="#262f47" stroke-width="1" stroke-dasharray="4,3"/>
+  ${textEls}`
+}
+
+function arrow(x1: number, x2: number, y: number): string {
+  return `<line x1="${x1}" y1="${y}" x2="${x2 - 1}" y2="${y}"
+    stroke="#2a3448" stroke-width="1.5" marker-end="url(#arr)"/>`
+}
+
+function makePipelineSvg(
+  counts: { borrador: number; aprobada: number; implementada: number },
+  filter: string | null,
+): string {
+  // Layout constants
+  const W = 700, H = 92
+  const ny = 16, nh = 60       // node y, height
+  const gy = 28, gh = 36       // gate y, height
+  const ay = ny + nh / 2       // arrow y (node center)
+
+  // Node x positions
+  const n1x = 10,  n1w = 118
+  const g1x = 148, g1w = 82
+  const n2x = 250, n2w = 124
+  const g2x = 394, g2w = 94
+  const n3x = 508, n3w = 182
+
+  const aFill  = (s: string) => filter === s ? '0.22' : '0.08'
+  const aSW    = (s: string) => filter === s ? '2.5' : '1.5'
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+      markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10" fill="none" stroke="#2a3448" stroke-width="2"/>
+    </marker>
+  </defs>
+  <rect width="${W}" height="${H}" rx="12" fill="#090d1b"/>
+
+  ${node(n1x, ny, n1w, nh, 'BORRADOR', counts.borrador,
+    '#5a6888', `rgba(90,106,136,${aFill('borrador')})`,
+    filter === 'borrador' ? '#c8d8f8' : '#8898bc', filter === 'borrador')}
+
+  ${arrow(n1x + n1w, g1x, ay)}
+  ${gate(g1x, gy, g1w, gh, ['val · M/L'])}
+  ${arrow(g1x + g1w, n2x, ay)}
+
+  ${node(n2x, ny, n2w, nh, 'APROBADA', counts.aprobada,
+    '#d4910f', `rgba(212,145,15,${aFill('aprobada')})`,
+    filter === 'aprobada' ? '#ffd070' : '#d4910f', filter === 'aprobada')}
+
+  ${arrow(n2x + n2w, g2x, ay)}
+  ${gate(g2x, gy - 6, g2w, gh + 12, ['tests · qa', 'seg · a11y L'])}
+  ${arrow(g2x + g2w, n3x, ay)}
+
+  ${node(n3x, ny, n3w, nh, 'IMPLEMENTADA', counts.implementada,
+    '#0ea567', `rgba(14,163,104,${aFill('implementada')})`,
+    filter === 'implementada' ? '#6eebc4' : '#0ea567', filter === 'implementada')}
+</svg>`
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function parseFm(content: string): Record<string, string> {
+  const m = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+  if (!m) return {}
+  const result: Record<string, string> = {}
+  for (const line of m[1].split('\n')) {
+    const kv = line.match(/^([a-z_]+):\s*"?([^"\n]*)"?\s*$/)
+    if (kv) result[kv[1].trim()] = kv[2].trim()
+  }
+  return result
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
+  // Intentar leer specs.json (ya incluye gates) desde assd_tools/
+  try {
+    const jsonPath = specsDir.replace(/\/specs$/, '/assd_tools/specs.json')
+    const raw = await $.fs.read(jsonPath)
+    const data = JSON.parse(typeof raw === 'string' ? raw : '[]')
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map((s: Spec) => ({ ...s, gates: s.gates || [] }))
+    }
+  } catch { /* fallback a parseo de frontmatter */ }
+
+  // Fallback: parsear frontmatter de cada spec
+  try {
+    const entries: Array<{ name: string; kind: string }> = await $.fs.list(specsDir)
+    const specs: Spec[] = []
+    for (const entry of entries) {
+      const { name } = entry
+      if (entry.kind !== 'file') continue
+      if (!name.match(/^\d{3}-/)) continue
+      if (!name.endsWith('.md')) continue
+      if (name.match(/-(qa|validacion|seguridad|accesibilidad)\.md$/)) continue
+      const raw = await $.fs.read(`${specsDir}/${name}`)
+      const text = typeof raw === 'string' ? raw : ''
+      const fm = parseFm(text)
+      if (!fm.id || !fm.estado) continue
+      specs.push({
+        id: fm.id,
+        titulo: fm.titulo || name.replace(/^\d{3}-/, '').replace(/\.md$/, ''),
+        nivel: (fm.nivel as 'S' | 'M' | 'L') || 'S',
+        tipo: fm.tipo || '',
+        estado: fm.estado as 'borrador' | 'aprobada' | 'implementada',
+        version: fm.version || '1.0',
+        gates: [],
+      })
+    }
+    return specs.sort((a, b) => a.id.localeCompare(b.id))
+  } catch {
+    return []
+  }
+}
+
+// ── Colors ────────────────────────────────────────────────────────────────────
+
+const STATE = {
+  borrador:     { fg: '#8898bc', bg: '#181d2e', bd: '#44475a' },
+  aprobada:     { fg: '#ffb86c', bg: '#1e1a0e', bd: '#7a5428' },
+  implementada: { fg: '#50fa7b', bg: '#0d1f16', bd: '#236638' },
+} as const
+
+const LEVEL = {
+  S: { fg: '#a07aec', bg: '#1a1030', bd: '#3a2558' },
+  M: { fg: '#5a86fa', bg: '#0c1428', bd: '#1a2e50' },
+  L: { fg: '#f05888', bg: '#220d16', bd: '#481428' },
+} as const
+
+// ── Register ──────────────────────────────────────────────────────────────────
+
+export const register: Register = (on, options) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const configuredDir: string = (options?.userConfig as any)?.specsDir || ''
+  const specsDir: string = configuredDir || DEFAULT_SPECS_DIR
+  const isConfigured: boolean = Boolean(configuredDir)
+
+  on('session.start', async ($, e, next) => {
+    await $.command.register({
+      name: 'assd_dashboard',
+      description: 'Abrir el panel visual de specs ASSD',
+    })
+    const specs = await loadSpecs($, specsDir)
+    await update($, specsAtom, () => specs)
+    void $.ui.open({ id: PANE, title: 'ASSD Dashboard' })
+    return next(e)
+  })
+
+  on('command.run', { command: 'assd_dashboard' }, async ($) => {
+    const specs = await loadSpecs($, specsDir)
+    await update($, specsAtom, () => specs)
+    await $.ui.open({ id: PANE, title: 'ASSD Dashboard' })
+    return { text: 'Panel ASSD abierto.' }
+  })
+
+  on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
+    // specsDir captured from closure
+    const { Box, Text, Button, Svg, Link } = $.ui.resolve(e)
+    const specs = await read($, specsAtom)
+    const filter = await read($, filterAtom)
+
+    const counts = {
+      borrador:     specs.filter(s => s.estado === 'borrador').length,
+      aprobada:     specs.filter(s => s.estado === 'aprobada').length,
+      implementada: specs.filter(s => s.estado === 'implementada').length,
+    }
+    const filtered = filter ? specs.filter(s => s.estado === filter) : specs
+    const setFilter = (s: string) => update($, filterAtom, f => (f === s ? null : s))
+
+    type Estado = keyof typeof STATE
+    type Nivel  = keyof typeof LEVEL
+
+    const sc = (s: string) => STATE[s as Estado] ?? STATE.borrador
+    const lc = (n: string) => LEVEL[n as Nivel]  ?? LEVEL.S
+
+    return (
+      <Box flexDirection="column" gap={2} paddingX={1} paddingY={1}>
+
+        {/* ── Header ── */}
+        <Box flexDirection="row" gap={2} alignItems="center">
+          <Text bold color="#dce3f4">ASSD Dashboard</Text>
+          <Text dimColor>d11assd · {specs.length} specs</Text>
+          {filter && <Text color="#d4910f">· {filter}</Text>}
+        </Box>
+
+        {/* ── Aviso de configuración pendiente (solo si no cargó specs) ── */}
+        {!isConfigured && specs.length === 0 && (
+          <Box flexDirection="column" gap={1} borderStyle="round" borderColor="#d4910f" paddingX={2} paddingY={1}>
+            <Text color="#d4910f" bold>⚠ Plugin sin configurar</Text>
+            <Text color="#8898bc">Ejecuta en la terminal:</Text>
+            <Text color="#f8f8f2">  claude plugin configure asdd-pipeline</Text>
+            <Text color="#8898bc">e introduce la ruta a tu directorio specs/.</Text>
+          </Box>
+        )}
+
+        {/* ── SVG pipeline diagram ── */}
+        <Svg
+          source={makePipelineSvg(counts, filter)}
+          alt="Pipeline ASDD: Borrador → Aprobada → Implementada"
+        />
+
+        {/* ── Filter chips ── */}
+        <Box flexDirection="row" gap={1} flexWrap="wrap">
+          {(['borrador', 'aprobada', 'implementada'] as Estado[]).map(s => (
+            <Button
+              key={`f-${s}`}
+              label={`${s} ${counts[s]}`}
+              variant={filter === s ? 'primary' : 'secondary'}
+              onPress={() => setFilter(s)}
+            />
+          ))}
+          {filter && (
+            <Button
+              key="f-clear"
+              label="Ver todas"
+              onPress={() => update($, filterAtom, () => null)}
+            />
+          )}
+        </Box>
+
+        {/* ── Spec cards ── */}
+        {filtered.length === 0 && (
+          <Text dimColor>  (sin specs en este estado)</Text>
+        )}
+        {filtered.map(spec => {
+          const s = sc(spec.estado)
+          const l = lc(spec.nivel)
+
+          // Puertas de calidad que aplican a esta spec
+          const allGates: Array<{ key: string; label: string }> = []
+          if (spec.nivel !== 'S') allGates.push({ key: 'val',  label: 'val' })
+          allGates.push({ key: 'qa', label: 'qa' })
+          if (spec.nivel === 'L') allGates.push({ key: 'seg',  label: 'seg' })
+          if (spec.nivel === 'L') allGates.push({ key: 'a11y', label: 'a11y' })
+          const doneGates = new Set(spec.gates || [])
+
+          // Track steps: borrador=1, aprobada=2, implementada=3
+          const step = spec.estado === 'implementada' ? 3 : spec.estado === 'aprobada' ? 2 : 1
+          const stepChar = (n: number) => n <= step ? '█' : '░'
+          const stepColor = (n: number) => n <= step ? '#0ea567' : '#2a3448'
+
+          return (
+            <Box
+              key={spec.id}
+              flexDirection="column"
+              gap={1}
+              borderStyle="round"
+              borderColor={s.bd}
+              backgroundColor={s.bg}
+              paddingX={2}
+              paddingY={1}
+            >
+              {/* ── card-top: id — version  tipo  |  gates  nivel ── */}
+              <Box flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
+                <Text color="#4d5a7a">{spec.id} — v{spec.version}</Text>
+                {spec.tipo ? <Text color="#44475a">{spec.tipo}</Text> : null}
+                <Box flexGrow={1} />
+                {/* Puertas de calidad */}
+                {allGates.map(g => (
+                  <Text key={g.key} color={doneGates.has(g.key) ? '#50fa7b' : '#44475a'}>
+                    {doneGates.has(g.key) ? '✓' : '○'}{g.label}
+                  </Text>
+                ))}
+                {/* Nivel badge */}
+                <Box borderStyle="single" borderColor={l.bd} backgroundColor={l.bg} paddingX={1}>
+                  <Text bold color={l.fg}>{spec.nivel}</Text>
+                </Box>
+              </Box>
+
+              {/* ── card-title ── */}
+              <Text color="#dce3f4">{spec.titulo}</Text>
+
+              {/* ── card-track: pipeline progress bar ── */}
+              <Box flexDirection="row" alignItems="center" gap={0}>
+                <Text color={stepColor(1)}>{stepChar(1)}</Text>
+                <Text color="#2a3448">─</Text>
+                <Text color={stepColor(2)}>{stepChar(2)}</Text>
+                <Text color="#2a3448">─</Text>
+                <Text color={stepColor(3)}>{stepChar(3)}</Text>
+                <Text color="#2a3448">   </Text>
+                <Text color={s.fg}>● {spec.estado}</Text>
+              </Box>
+            </Box>
+          )
+        })}
+
+        {/* ── Acciones ── */}
+        <Box flexDirection="row" gap={2} alignItems="center" marginTop={1}>
+          <Button
+            key="refresh"
+            label="↺ Actualizar specs"
+            onPress={async () => {
+              const fresh = await loadSpecs($, specsDir)
+              await update($, specsAtom, () => fresh)
+            }}
+          />
+          <Link href="https://d11assd.local/assd_tools/index.html">
+            <Text color="#5a86fa">⬡ Panel completo</Text>
+          </Link>
+        </Box>
+
+      </Box>
+    )
+  })
+}

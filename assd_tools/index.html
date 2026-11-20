@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>ASDD Pipeline</title>
+<title>ASSD Dashboard</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
@@ -403,6 +403,10 @@ main {
   transition: box-shadow .15s, transform .15s;
 }
 
+.card[data-estado="borrador"]     { background: linear-gradient(160deg, var(--surface) 30%, rgba(98,114,164,.18) 100%); border-color: var(--borrador-bd); }
+.card[data-estado="aprobada"]     { background: linear-gradient(160deg, var(--surface) 30%, rgba(255,184,108,.14) 100%); border-color: var(--aprobada-bd); }
+.card[data-estado="implementada"] { background: linear-gradient(160deg, var(--surface) 30%, rgba(80,250,123,.12) 100%); border-color: var(--implementada-bd); }
+
 .card:hover { box-shadow: var(--sh-up); transform: translateY(-2px); }
 .card[hidden] { display: none; }
 
@@ -470,8 +474,13 @@ main {
 /* Estado contraído */
 .card.collapsed { gap: 4px; }
 .card.collapsed .card-meta,
-.card.collapsed .agent-icons,
-.card.collapsed .card-track { display: none; }
+.card.collapsed .agent-icons { display: none; }
+
+.card-gates {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
 
 .card-id-ver {
   font-family: 'JetBrains Mono', monospace;
@@ -499,6 +508,18 @@ main {
 .badge.m { color:var(--l-m-fg); background:var(--l-m-bg); border-color:var(--l-m-bd); }
 .badge.l { color:var(--l-l-fg); background:var(--l-l-bg); border-color:var(--l-l-bd); }
 
+.gate-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 20px;
+  border: 1px solid;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.gate-chip.done    { color: var(--implementada-fg); background: var(--implementada-bg); border-color: var(--implementada-bd); }
+.gate-chip.pending { color: var(--muted);           background: var(--surface2);        border-color: var(--border); }
+
 .card-title {
   font-size: 15px;
   font-weight: 500;
@@ -522,56 +543,6 @@ main {
   border: 1px solid var(--border);
 }
 
-/* Pipeline position mini-track */
-.card-track {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-
-.track-steps {
-  display: flex;
-  gap: 3px;
-  flex: 1;
-}
-
-.step {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-}
-
-.step.done     { background:var(--implementada-bg); border-color:var(--implementada-bd); }
-.step.current  { background:var(--aprobada-bg);    border-color:var(--aprobada-bd); }
-.step.cur-bor  { background:var(--borrador-bg);    border-color:var(--borrador-bd); }
-
-.track-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: 10px;
-}
-
-.state-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.state-dot.borrador     { background: var(--borrador-fg); }
-.state-dot.aprobada     { background: var(--aprobada-fg); }
-.state-dot.implementada { background: var(--implementada-fg); }
-
-.state-name {
-  font-size: 13px;
-  font-weight: 500;
-}
-.state-name.borrador     { color: var(--borrador-fg); }
-.state-name.aprobada     { color: var(--aprobada-fg); }
-.state-name.implementada { color: var(--implementada-fg); }
 
 
 /* ── Responsive ───────────────────────────────────────── */
@@ -809,13 +780,155 @@ main {
 }
 .agent-legend .agent-icon { font-size: 13px; padding: 5px 12px; }
 .agent-legend .agent-icon .ai { font-size: 17px; }
+
+/* ── Chat panel ───────────────────────────────────────── */
+.chat-section {
+  border-top: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  max-height: 60vh;
+}
+.chat-bar {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 10px;
+}
+.chat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg2);
+  letter-spacing: .05em;
+}
+.chat-toggle-btn {
+  margin-left: auto;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 14px; padding: 2px 6px;
+  border-radius: 4px; transition: color .12s, background .12s;
+}
+.chat-toggle-btn:hover { color: var(--fg); background: var(--surface2); }
+.chat-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.chat-body.collapsed { display: none; }
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-color: var(--border) transparent;
+}
+.chat-welcome {
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+.chat-welcome strong { color: var(--fg2); }
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 85%;
+}
+.chat-msg.user { align-self: flex-end; align-items: flex-end; }
+.chat-msg.assistant { align-self: flex-start; align-items: flex-start; }
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.chat-msg.user .chat-bubble {
+  background: var(--l-m-bg);
+  border: 1px solid var(--l-m-bd);
+  color: var(--fg);
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.assistant .chat-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble p { margin: 0 0 8px; }
+.chat-bubble p:last-child { margin-bottom: 0; }
+.chat-bubble pre {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 12px; overflow-x: auto;
+  font-size: 12.5px; margin: 8px 0;
+}
+.chat-bubble code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+.chat-bubble :not(pre) > code {
+  background: var(--surface2); padding: 1px 5px; border-radius: 4px;
+}
+.chat-label {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 4px;
+}
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  max-height: 120px;
+  outline: none;
+  transition: border-color .15s;
+  line-height: 1.5;
+}
+.chat-input:focus { border-color: var(--l-m-bd); }
+.chat-send {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  background: var(--l-m-bg);
+  border: 1px solid var(--l-m-bd);
+  border-radius: 10px;
+  color: var(--l-m-fg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s;
+}
+.chat-send:hover { background: var(--l-m-bd); }
+.chat-send:disabled { opacity: .4; cursor: default; }
+.chat-key-warn {
+  padding: 8px 16px;
+  background: var(--aprobada-bg);
+  border-top: 1px solid var(--aprobada-bd);
+  color: var(--aprobada-fg);
+  font-size: 13px;
+}
+.chat-key-warn code { font-family: 'JetBrains Mono', monospace; }
 </style>
 
 <header class="hd">
   <div class="hd-inner">
     <div class="brand">
       <code class="proj-tag">d11assd</code>
-      <h1>ASDD Pipeline</h1>
+      <h1>ASSD Dashboard</h1>
     </div>
     <div class="stat-row" id="stat-row"></div>
   </div>
@@ -851,6 +964,33 @@ main {
   </section>
 </main>
 
+<!-- ── Chat panel ─────────────────────────────────────────── -->
+<section class="chat-section" id="chat-section">
+  <div class="chat-bar">
+    <span class="chat-title">Claude</span>
+    <button class="chat-toggle-btn" id="chat-toggle" aria-label="Colapsar chat">▼</button>
+  </div>
+  <div class="chat-body" id="chat-body">
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-welcome">
+        <p>Hola. Soy Claude con contexto del proyecto <strong>d11assd</strong>. ¿En qué te ayudo?</p>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" rows="1"
+        placeholder="Escribe un mensaje… (Enter envía, Shift+Enter nueva línea)"></textarea>
+      <button class="chat-send" id="chat-send" aria-label="Enviar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M14 8L2 2l2.5 6L2 14l12-6z" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+    <div class="chat-key-warn" id="chat-key-warn" hidden>
+      API key no configurada. Crea el fichero <code>assd_tools/.api-key</code> con tu clave de Anthropic.
+    </div>
+  </div>
+</section>
+
 <div class="dp-overlay" id="dp-overlay"></div>
 <div class="dp-panel" id="dp-panel"></div>
 
@@ -871,6 +1011,7 @@ main {
   <div class="ed-status" id="ed-status" hidden></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
 
@@ -929,7 +1070,7 @@ function updateAgentIcons(data) {
       if (!iconsEl) {
         iconsEl = document.createElement('div');
         iconsEl.className = 'agent-icons';
-        card.querySelector('.card-track').before(iconsEl);
+        card.querySelector('.card-title').after(iconsEl);
       }
       iconsEl.innerHTML = agents.map(agentIconHTML).join('');
     }
@@ -1026,22 +1167,26 @@ function renderPipeline() {
   );
 }
 
-function stepClass(pos, specPos) {
-  if (pos < specPos) return 'step done';
-  if (pos === specPos && specPos === 1) return 'step cur-bor';
-  if (pos === specPos) return 'step current';
-  return 'step';
+function gatesFor(spec) {
+  const done = new Set(spec.gates || []);
+  const chips = [];
+  if (spec.nivel !== 'S') chips.push({ key: 'val',  label: 'val' });
+  chips.push({ key: 'qa', label: 'qa' });
+  if (spec.nivel === 'L') chips.push({ key: 'seg',  label: 'seg' });
+  if (spec.nivel === 'L') chips.push({ key: 'a11y', label: 'a11y' });
+  return chips.map(c =>
+    `<span class="gate-chip ${done.has(c.key) ? 'done' : 'pending'}">${c.label}</span>`
+  ).join('');
 }
 
 function cardHTML(spec) {
-  const sp = STEP_POS[spec.estado];
-  const steps = [1,2,3].map(p => `<div class="${stepClass(p, sp)}"></div>`).join('');
   const agents = runningAgents[spec.id] || [];
   const agentsHTML = agents.length
     ? `<div class="agent-icons">${agents.map(agentIconHTML).join('')}</div>` : '';
   return `<article class="card collapsed" data-estado="${spec.estado}" data-spec-id="${spec.id}">
     <div class="card-top">
       <span class="card-id-ver">${spec.id} — v${spec.version}</span>
+      ${spec.tipo ? `<span class="meta-chip">${spec.tipo}</span>` : ''}
       <div class="card-badges">
         <span class="badge ${spec.nivel.toLowerCase()}">${spec.nivel}</span>
       </div>
@@ -1055,13 +1200,8 @@ function cardHTML(spec) {
       </div>
     </div>
     <div class="card-title">${spec.titulo}</div>
-    <div class="card-meta">
-      <span class="meta-chip">${spec.tipo}</span>
-    </div>
+    <div class="card-gates">${gatesFor(spec)}</div>
     ${agentsHTML}
-    <div class="card-track">
-      <div class="track-steps">${steps}</div>
-    </div>
   </article>`;
 }
 
@@ -1415,6 +1555,114 @@ document.addEventListener('keydown', e => {
   renderSpecs();
   pollRunning();
   setTimeout(pollSpecs, 5000);
+})();
+
+// ── Chat panel ────────────────────────────────────────────
+(function () {
+  const messagesEl = document.getElementById('chat-messages');
+  const inputEl    = document.getElementById('chat-input');
+  const sendBtn    = document.getElementById('chat-send');
+  const toggleBtn  = document.getElementById('chat-toggle');
+  const bodyEl     = document.getElementById('chat-body');
+  const keyWarnEl  = document.getElementById('chat-key-warn');
+  let history = [];
+  let streaming = false;
+
+  marked.setOptions({ breaks: true });
+
+  function addMsg(role, text) {
+    const wrap = document.createElement('div');
+    wrap.className = `chat-msg ${role}`;
+    const label = document.createElement('span');
+    label.className = 'chat-label';
+    label.textContent = role === 'user' ? 'Tú' : 'Claude';
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    if (role === 'assistant') {
+      bubble.innerHTML = marked.parse(text);
+    } else {
+      bubble.textContent = text;
+    }
+    wrap.append(label, bubble);
+    messagesEl.appendChild(wrap);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return bubble;
+  }
+
+  async function send() {
+    const text = inputEl.value.trim();
+    if (!text || streaming) return;
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+
+    history.push({ role: 'user', content: text });
+    addMsg('user', text);
+
+    streaming = true;
+    sendBtn.disabled = true;
+    const bubble = addMsg('assistant', '');
+    let full = '';
+
+    try {
+      const res = await fetch('/assd_tools/chat.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+
+      const reader = res.body.getReader();
+      const dec    = new TextDecoder();
+      let buf = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        // SSE blocks separados por \n\n
+        const blocks = buf.split('\n\n');
+        buf = blocks.pop(); // último bloque puede estar incompleto
+        for (const block of blocks) {
+          const lines   = block.split('\n');
+          const evLine  = lines.find(l => l.startsWith('event: '));
+          const dataLine = lines.find(l => l.startsWith('data: '));
+          if (!dataLine) continue;
+          const ev      = evLine ? evLine.slice(7).trim() : 'delta';
+          const payload = JSON.parse(dataLine.slice(6));
+          if (ev === 'error') {
+            bubble.innerHTML = `<em style="color:var(--aprobada-fg)">${payload}</em>`;
+            if (String(payload).includes('.api-key')) keyWarnEl.hidden = false;
+            break;
+          }
+          if (ev === 'delta') {
+            full += payload;
+            bubble.innerHTML = marked.parse(full);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          }
+        }
+      }
+      if (full) history.push({ role: 'assistant', content: full });
+
+    } catch (err) {
+      bubble.innerHTML = `<em style="color:var(--aprobada-fg)">Error: ${err.message}</em>`;
+    } finally {
+      streaming = false;
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', send);
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  inputEl.addEventListener('input', () => {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  });
+  toggleBtn.addEventListener('click', () => {
+    const col = bodyEl.classList.toggle('collapsed');
+    toggleBtn.textContent = col ? '▲' : '▼';
+  });
 })();
 </script>
 

@@ -6,7 +6,13 @@
     "tipo": "tema",
     "estado": "implementada",
     "version": "1.2",
-    "file": "001-tema-hijo.md"
+    "file": "001-tema-hijo.md",
+    "gates": [
+      "val",
+      "qa",
+      "seg",
+      "a11y"
+    ]
   },
   {
     "id": "002",
@@ -15,7 +21,8 @@
     "tipo": "modulo",
     "estado": "implementada",
     "version": "1.0",
-    "file": "002-linters-front.md"
+    "file": "002-linters-front.md",
+    "gates": []
   },
   {
     "id": "003",
@@ -24,7 +31,8 @@
     "tipo": "tema",
     "estado": "implementada",
     "version": "1.0",
-    "file": "003-tema-admin-gin.md"
+    "file": "003-tema-admin-gin.md",
+    "gates": []
   },
   {
     "id": "004",
@@ -33,7 +41,8 @@
     "tipo": "modulo",
     "estado": "aprobada",
     "version": "1.0",
-    "file": "004-devel.md"
+    "file": "004-devel.md",
+    "gates": []
   },
   {
     "id": "005",
@@ -42,7 +51,8 @@
     "tipo": "modulo",
     "estado": "implementada",
     "version": "1.0",
-    "file": "005-admin-toolbar.md"
+    "file": "005-admin-toolbar.md",
+    "gates": []
   },
   {
     "id": "006",
@@ -51,7 +61,8 @@
     "tipo": "contrib",
     "estado": "borrador",
     "version": "1.0",
-    "file": "006-navigation-extra-tools.md"
+    "file": "006-navigation-extra-tools.md",
+    "gates": []
   },
   {
     "id": "007",
@@ -60,6 +71,7 @@
     "tipo": "modulo",
     "estado": "aprobada",
     "version": "1.5",
-    "file": "007-sdc-cartoteca.md"
+    "file": "007-sdc-cartoteca.md",
+    "gates": []
   }
 ]

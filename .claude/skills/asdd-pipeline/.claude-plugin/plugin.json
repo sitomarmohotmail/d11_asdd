@@ -1,0 +1,14 @@
+{
+  "name": "asdd-pipeline",
+  "version": "0.2.0",
+  "description": "Panel lateral con el pipeline ASSD y el estado de las specs de d11assd",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "specsDir": {
+      "type": "string",
+      "title": "Directorio specs/",
+      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs)",
+      "default": ""
+    }
+  }
+}
