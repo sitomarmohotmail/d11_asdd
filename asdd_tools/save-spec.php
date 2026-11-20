@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $cfg_file = __DIR__ . '/config.json';
 if (!file_exists($cfg_file)) {
     http_response_code(500);
-    exit(json_encode(['ok' => false, 'error' => 'assd_tools/config.json no encontrado']));
+    exit(json_encode(['ok' => false, 'error' => 'asdd_tools/config.json no encontrado']));
 }
 $cfg      = json_decode(file_get_contents($cfg_file), true);
 $specs_dir = realpath(__DIR__ . '/' . ($cfg['specs_dir'] ?? '../specs'));

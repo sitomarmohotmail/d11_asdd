@@ -1,4 +1,4 @@
-# assd_tools — Dashboard de specs ASDD
+# asdd_tools — Dashboard de specs ASDD
 
 Panel web ligero para visualizar y editar en línea las specs de cualquier
 proyecto que siga el flujo
@@ -9,7 +9,7 @@ proyecto que siga el flujo
 ## Estructura de archivos
 
 ```
-assd_tools/
+asdd_tools/
   config.json        ← configuración del proyecto (editar esto)
   index.html         ← dashboard (no tocar)
   specs.json         ← generado automáticamente por gen-specs-json.sh
@@ -34,24 +34,24 @@ assd_tools/
 | Campo | Descripción | Default |
 |---|---|---|
 | `project_name` | Nombre que muestra el dashboard en la cabecera | — |
-| `specs_dir` | Ruta al directorio de specs, **relativa a `assd_tools/`** | `../specs` |
-| `output_json` | Nombre del JSON generado, dentro de `assd_tools/` | `specs.json` |
+| `specs_dir` | Ruta al directorio de specs, **relativa a `asdd_tools/`** | `../specs` |
+| `output_json` | Nombre del JSON generado, dentro de `asdd_tools/` | `specs.json` |
 
 ---
 
 ## Instalar en un proyecto nuevo
 
-1. **Copia** la carpeta `assd_tools/` a la raíz de tu proyecto.
+1. **Copia** la carpeta `asdd_tools/` a la raíz de tu proyecto.
 
 2. **Copia** `scripts/gen-specs-json.sh` a tu directorio `scripts/`.
 
-3. **Edita** `assd_tools/config.json`:
+3. **Edita** `asdd_tools/config.json`:
    - Cambia `project_name`.
    - Ajusta `specs_dir` si tu directorio de specs no es `../specs`.
 
 4. **Enlaza** (o copia) tus specs para que Apache pueda servirlas:
    ```bash
-   ln -s ../specs assd_tools/specs
+   ln -s ../specs asdd_tools/specs
    ```
    Si usas una copia en lugar de un enlace, recuerda mantenerla sincronizada.
 
@@ -60,19 +60,19 @@ assd_tools/
    bash scripts/gen-specs-json.sh
    ```
 
-6. **Configura Apache** para que `assd_tools/` sea accesible y PHP pueda
+6. **Configura Apache** para que `asdd_tools/` sea accesible y PHP pueda
    escribir (el proceso `www-data` necesita permisos de escritura sobre
-   `specs/` y `assd_tools/specs.json`):
+   `specs/` y `asdd_tools/specs.json`):
    ```apache
-   Alias /assd_tools /ruta/a/tu/proyecto/assd_tools
-   <Directory /ruta/a/tu/proyecto/assd_tools>
+   Alias /asdd_tools /ruta/a/tu/proyecto/asdd_tools
+   <Directory /ruta/a/tu/proyecto/asdd_tools>
        Options -Indexes
        AllowOverride None
        Require all granted
    </Directory>
    ```
 
-7. Abre `http://tu-proyecto.local/assd_tools/` en el navegador.
+7. Abre `http://tu-proyecto.local/asdd_tools/` en el navegador.
 
 ---
 
@@ -83,7 +83,7 @@ bash scripts/gen-specs-json.sh
 ```
 
 El script se puede llamar desde cualquier directorio. Lee la configuración de
-`assd_tools/config.json` y vuelca el resultado en `assd_tools/specs.json`.
+`asdd_tools/config.json` y vuelca el resultado en `asdd_tools/specs.json`.
 
 Las rutas se pueden sobreescribir con variables de entorno si necesitas un
 flujo no estándar:

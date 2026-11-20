@@ -13,7 +13,7 @@
     "panelUrl": {
       "type": "string",
       "title": "URL del panel completo",
-      "description": "URL del panel web ASSD (ej: https://d11assd.local/assd_tools/index.html). Si se deja vacío, el enlace no aparece.",
+      "description": "URL del panel web ASSD (ej: https://d11assd.local/asdd_tools/index.html). Si se deja vacío, el enlace no aparece.",
       "default": ""
     }
   }

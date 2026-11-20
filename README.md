@@ -32,22 +32,22 @@ claude plugin configure asdd-pipeline
 | Campo | Descripción | Ejemplo |
 |---|---|---|
 | `specsDir` | Ruta absoluta al directorio `specs/` del proyecto | `/home/usuario/d11assd/specs` |
-| `panelUrl` | URL del panel web ASSD. Si se deja vacío, el enlace no aparece. | `https://d11assd.local/assd_tools/index.html` |
+| `panelUrl` | URL del panel web ASSD. Si se deja vacío, el enlace no aparece. | `https://d11assd.local/asdd_tools/index.html` |
 
 Los valores quedan guardados por usuario y no hay que repetirlos. Si `specsDir` no se configura, el plugin lo indicará en el propio panel.
 
-## ASSD Dashboard (`assd_tools/`)
+## ASSD Dashboard (`asdd_tools/`)
 
 Dashboard web con pipeline visual, editor de specs y chat integrado con Claude.
 
-Acceso local: `http://d11assd.local/assd_tools/`
+Acceso local: `http://d11assd.local/asdd_tools/`
 
 ### Chat con Claude
 
 El dashboard incluye un chat con la API de Anthropic con contexto del proyecto inyectado automáticamente. Requiere una API key:
 
 ```bash
-echo "sk-ant-TUKEY" > assd_tools/.api-key
+echo "sk-ant-TUKEY" > asdd_tools/.api-key
 ```
 
 El fichero `.api-key` está en `.gitignore` — cada desarrollador pone la suya. No hace falta ningún servidor adicional; el chat funciona directamente a través de PHP.

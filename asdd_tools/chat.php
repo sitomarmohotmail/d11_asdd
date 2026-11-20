@@ -1,7 +1,7 @@
 <?php
 // Endpoint SSE para el chat integrado en el dashboard ASSD.
 // Lee la API key de: 1) variable de entorno ANTHROPIC_API_KEY
-//                    2) fichero assd_tools/.api-key (una línea, no versionado)
+//                    2) fichero asdd_tools/.api-key (una línea, no versionado)
 header('Content-Type: text/event-stream; charset=utf-8');
 header('Cache-Control: no-cache');
 header('X-Accel-Buffering: no');
@@ -20,7 +20,7 @@ if (!$api_key) {
 }
 
 if (!$api_key) {
-    sse('error', 'API key no configurada. Crea el fichero assd_tools/.api-key con tu clave de Anthropic.');
+    sse('error', 'API key no configurada. Crea el fichero asdd_tools/.api-key con tu clave de Anthropic.');
     exit;
 }
 

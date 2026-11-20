@@ -123,9 +123,9 @@ function parseFm(content: string): Record<string, string> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
-  // Intentar leer specs.json (ya incluye gates) desde assd_tools/
+  // Intentar leer specs.json (ya incluye gates) desde asdd_tools/
   try {
-    const jsonPath = specsDir.replace(/\/specs$/, '/assd_tools/specs.json')
+    const jsonPath = specsDir.replace(/\/specs$/, '/asdd_tools/specs.json')
     const raw = await $.fs.read(jsonPath)
     const data = JSON.parse(typeof raw === 'string' ? raw : '[]')
     if (Array.isArray(data) && data.length > 0) {

@@ -986,7 +986,7 @@ main {
       </button>
     </div>
     <div class="chat-key-warn" id="chat-key-warn" hidden>
-      API key no configurada. Crea el fichero <code>assd_tools/.api-key</code> con tu clave de Anthropic.
+      API key no configurada. Crea el fichero <code>asdd_tools/.api-key</code> con tu clave de Anthropic.
     </div>
   </div>
 </section>
@@ -1105,7 +1105,7 @@ function updateAgentIcons(data) {
 
 async function pollRunning() {
   try {
-    const r = await fetch('/assd_tools/running.json?t=' + Date.now());
+    const r = await fetch('/asdd_tools/running.json?t=' + Date.now());
     if (r.ok) updateAgentIcons(await r.json());
   } catch {}
   setTimeout(pollRunning, 2000);
@@ -1114,7 +1114,7 @@ async function pollRunning() {
 let _specsEtag = null;
 async function pollSpecs() {
   try {
-    const r = await fetch('/assd_tools/specs.json?t=' + Date.now());
+    const r = await fetch('/asdd_tools/specs.json?t=' + Date.now());
     if (r.ok) {
       const etag = r.headers.get('ETag') || r.headers.get('Last-Modified') || null;
       const data = await r.json();
@@ -1427,7 +1427,7 @@ async function openDp(spec, section = null) {
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   try {
-    const res = await fetch(`/assd_tools/specs/${spec.file}`);
+    const res = await fetch(`/asdd_tools/specs/${spec.file}`);
     const md  = await res.text();
     renderSpecPanel(spec, md);
     if (section) {
@@ -1487,7 +1487,7 @@ async function openEditor(spec) {
   body.innerHTML = '<textarea id="ed-textarea"></textarea>';
 
   try {
-    const r = await fetch(`/assd_tools/specs/${spec.file}?t=` + Date.now());
+    const r = await fetch(`/asdd_tools/specs/${spec.file}?t=` + Date.now());
     const md = await r.text();
     if (edCM) { edCM.toTextArea(); edCM = null; }
     edCM = CodeMirror.fromTextArea(document.getElementById('ed-textarea'), {
@@ -1511,7 +1511,7 @@ async function saveSpec() {
   status.hidden = false;
 
   try {
-    const r = await fetch('/assd_tools/save-spec.php', {
+    const r = await fetch('/asdd_tools/save-spec.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ file: edSpec.file, content: edCM.getValue() }),
@@ -1547,7 +1547,7 @@ document.addEventListener('keydown', e => {
 // Init
 (async () => {
   try {
-    const r = await fetch('/assd_tools/specs.json?t=' + Date.now());
+    const r = await fetch('/asdd_tools/specs.json?t=' + Date.now());
     if (r.ok) { SPECS = await r.json(); _specsEtag = JSON.stringify(SPECS); }
   } catch {}
   renderStats();
@@ -1604,7 +1604,7 @@ document.addEventListener('keydown', e => {
     let full = '';
 
     try {
-      const res = await fetch('/assd_tools/chat.php', {
+      const res = await fetch('/asdd_tools/chat.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history }),
