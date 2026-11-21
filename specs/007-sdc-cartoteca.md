@@ -371,5 +371,5 @@ formulario no lo usaba) y su cobertura se traslada a los tests JS-unit.
   la v1.5 quedan resueltos. El MEDIO A11Y-001 (los tests JS no asertaban el
   `role="region"`/`tabindex` de la tabla ni el `role="group"` de las diapositivas)
   se corrige en **v1.7**: asserts añadidos en `mapa-info.test.mjs` y
-  `image-slider.test.mjs`. 4 BAJOS → `pendientes.md`. Falta que la persona
-  confirme la lista manual del informe.
+  `image-slider.test.mjs`. 4 BAJOS → `pendientes.md`. Lista manual **confirmada
+  por la persona** (2026-11-21).

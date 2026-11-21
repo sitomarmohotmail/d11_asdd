@@ -164,7 +164,7 @@
       "accesibilidad": {
         "fecha": "2026-11-21",
         "version": "1.6 (estado `implementada`; revisión retrospectiva, sustituye al informe de la v1.5)",
-        "resultado": "SUPERADA CON AVISOS (a falta de confirmar la lista manual por la persona)",
+        "resultado": "SUPERADA CON AVISOS (lista manual confirmada por la persona, 2026-11-21)",
         "hallazgos": "0 ALTOS · 1 MEDIO · 4 BAJOS · 0 OBS"
       }
     }
