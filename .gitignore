@@ -39,5 +39,6 @@
 /node_modules/
 /specs/*-axe.json
 
-# Pila transitoria del dashboard asdd_tools
+# Estado efímero del dashboard asdd_tools (procesos en ejecución)
 asdd_tools/.running.stack
+asdd_tools/running.json
