@@ -45,6 +45,9 @@ test('CA7c / CA-A3 · la tabla usa table-striped, aria-label y th scope="row"', 
   assert.match(html, /<table[^>]*\btable-striped\b/);
   assert.match(html, /<table[^>]*aria-label="Datos del mapa"/);
   assert.match(html, /<th scope="row"[^>]*>Autor<\/th>/);
+  // A11Y-004: la región desplazable es focusable (tabindex=0 + role=region).
+  assert.match(html, /tabindex="0"/);
+  assert.match(html, /role="region"[^>]*aria-label="Datos del mapa"/);
 });
 
 test('CA10a · array vacío → not_found con el mensaje de R8', () => {

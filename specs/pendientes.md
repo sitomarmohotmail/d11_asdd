@@ -19,3 +19,7 @@ Una línea por pendiente: origen · descripción. Se agrupan en specs futuras.
 - 008 v1.1 · CA8/CA-A1 no fijan actor ni la vista/navegador concretos de la verificación manual.
 - 008 v1.1 · "Mejorar el TTL del hook" sin referencia a su línea (`TTL=1800` en `scripts/agent-hook.sh`).
 - 008 v1.3 · CA9/CA11/CA12 son tests de presencia (grep sobre `index.html`) por no haber arnés JS para el dashboard; plantear un arnés `node` mínimo (extraer helpers puros) en spec futura.
+- 007 v1.6 a11y · la tabla repite `aria-label "Datos del mapa"` con el `h2` y la región; mejor `aria-labelledby`.
+- 007 v1.6 a11y · el cambio de diapositiva (flechas/miniaturas) no se anuncia con `Drupal.announce`/`aria-live`.
+- 007 v1.6 a11y · la miniatura activa y la que tiene el foco comparten estilo; distinguirlas.
+- 007 v1.6 a11y · "Descargar" sin contexto (añadir el nombre o `aria-label`); flechas con `opacity:.85` y ejemplo repetido en etiqueta+placeholder (heredado de v1.5).

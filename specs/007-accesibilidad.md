@@ -1,57 +1,48 @@
 # Accesibilidad · spec 007 — Módulo sdc_cartoteca
 
 - Fecha: 2026-11-21
-- Versión de la spec: 1.5 (estado `aprobada`)
+- Versión de la spec: 1.6 (estado `implementada`; revisión retrospectiva, sustituye al informe de la v1.5)
 - Norma: WCAG 2.2 AA
-- Resultado: BLOQUEADA
-- Hallazgos: 2 ALTOS · 4 MEDIOS · 4 BAJOS · 1 OBS
+- Resultado: SUPERADA CON AVISOS (a falta de confirmar la lista manual por la persona)
+- Hallazgos: 0 ALTOS · 1 MEDIO · 4 BAJOS · 0 OBS
 
 ## Alcance
-Revisión estática de `components/*/*.{twig,css,js}`, `js/cartoteca-search-form.js`, `css/`, `src/Form/CartotecaSearchForm.php` y tests Functional. Axe sobre `https://d11asdd.local/node/1` (1280 px): 0 violaciones, pero **sin el bloque** (no se renderiza), así que no vale como evidencia.
+`http://d11asdd.local/node/1` (bloque colocado) y los archivos `components/*/*.{twig,css,js,logic.js}` del módulo. El HTML dinámico (tras fetch) se ha revisado de forma estática en `*.logic.js`, porque no hay WebDriver.
+
+## Revisión automática (axe-core)
+| URL | Violaciones | Criterios WCAG |
+|---|---|---|
+| /node/1 a 1280 px | 0 (27 reglas superadas); sin scroll horizontal; foco: 9 elementos, 0 insuficientes | — |
+| /node/1 a 320 px | 0 (26 reglas superadas); sin scroll horizontal; foco: 8 elementos, 0 insuficientes | — |
+
+## Estado de los hallazgos de la v1.5
+- A11Y-001 (revisión automática no ejecutada): **resuelto**. El bloque se renderiza y axe se ejecuta con acceptInsecureCerts.
+- A11Y-002 (4.1.3): **resuelto**. `Drupal.announce()` en ambos loaders para cargando, cargado, vacío y error. El slider ahora también anuncia el error.
+- A11Y-003 (carrusel): **resuelto en lo esencial**. Con más de una imagen, `buildLoadedHTML` añade `role="group" aria-roledescription="Carrusel" aria-label="Imágenes del mapa"`. Cada diapositiva lleva `role="group" aria-roledescription="Diapositiva" aria-label="N de M"`. Las diapositivas ocultas llevan `aria-hidden`. Ver A11Y-B2.
+- A11Y-004 (2.1.1): **resuelto**. `buildFieldsHTML` envuelve la tabla en `div tabindex="0" role="region" aria-label="Datos del mapa"`. El CSS da `overflow-y:auto` a ese contenedor y le pone `:focus-visible` con un contorno de 3 px.
+- A11Y-005 (1.4.3): **resuelto**. `th` usa `var(--bs-secondary-color,#495057)`, que supera 7:1 sobre blanco. El fallback es #495057; en el tema real `--bs-secondary-color` es rgba(33,37,41,.75), que compuesto sobre blanco da ≈ 6,3:1 y sobre la fila rayada ≈ 5,7:1. Cumple 4,5:1.
+- A11Y-006 (tests): **parcial**. Hay tests Kernel de los `<h2>` y tests `node --test` de `aria-roledescription`, `aria-label` de la tabla, `aria-pressed` y `alt`. Ver A11Y-001.
 
 ## Hallazgos
-### A11Y-001 · ALTA · CA-A1 / revisión automática no ejecutada
-- **Evidencia:** `drush config:get block.block.d11asdd_theme_cartotecaieca` → "does not exist" (existe en `config/sync`, no importado). En `/node/1` no hay clases `sdc-cartoteca`. Además `npm run a11y` sobre `http://d11asdd.local` falla con `ERR_CERT_AUTHORITY_INVALID` (redirige a https, el script no ignora el certificado).
-- **Corrección:** `drush cim`, y ejecutar `check.sh` con la URL https (o añadir `ignoreHTTPSErrors`/`--ignore-certificate-errors` en `scripts/a11y/axe-check.mjs`). Axe debe repasar también los estados tras búsqueda, error y vacío.
+### A11Y-001 · MEDIA · 4.1.2 / 2.1.1 · Estados dinámicos sin verificación en navegador
+- **Evidencia:** axe solo cubre la carga inicial (imagen por defecto y "Esperando selección"). Los estados tras buscar (carrusel, tabla, mensajes de error o vacío) solo se han revisado leyendo el código. `tests/js/*.mjs` no comprueba `role="region"` ni `tabindex="0"` de la tabla, ni `role="group"` de las diapositivas.
+- **Problema:** una regresión en el HTML generado por JS pasaría la puerta sin que nadie la detecte.
+- **Corrección propuesta:** añadir a `mapa-info.test.mjs` un `assert.match(html, /tabindex="0"[^>]*role="region"/)` y a `image-slider.test.mjs` uno para `role="group"` en las diapositivas. La persona hace la lista manual con una búsqueda real.
+- **Resuelto (v1.7):** asserts añadidos — `mapa-info.test.mjs` comprueba `tabindex="0"` y `role="region"` de la tabla; `image-slider.test.mjs` comprueba `role="group" aria-roledescription="Diapositiva"` en las diapositivas. 19 tests `node --test` en verde.
 
-### A11Y-002 · ALTA · 4.1.3 Mensajes de estado · `cartoteca-*.js`
-- **Evidencia:** `buildLoadingHTML`, `buildMessageHTML` y `buildInitialHTML` hacen `body.innerHTML = …` sin `Drupal.announce()` ni `aria-live` persistente. El `role="status"` del spinner se inserta junto con su contenido (los lectores suelen no anunciarlo). Resultados, "No se han encontrado datos…", "servicio no disponible" y el regreso silencioso a la imagen por defecto en error (slider) no se anuncian.
-- **Corrección:** `Drupal.announce(...)` ("Cargando…", "Datos del mapa cargados: N imágenes", mensajes de error/vacío) en ambos loaders, o `aria-live="polite"` en un contenedor que exista en el Twig. Mostrar también el error en el slider (hoy solo lo muestra info).
-
-### A11Y-003 · MEDIA · 4.1.2 Nombre, función, valor · `cartoteca-image-slider.twig`, `.js`
-- **Evidencia:** ni el Twig ni `buildLoadedHTML` incluyen `aria-roledescription="carousel"` (requisito RA de la spec), ni `role="group"`/`aria-label` en el contenedor, ni `aria-roledescription="slide"` en las diapositivas. El cambio de diapositiva (flechas/miniaturas) no se anuncia (el `alt` "Vista N del mapa" no indica posición "N de M").
-- **Corrección:** `role="region"` + `aria-roledescription="carousel"` + `aria-label` en el wrapper; `role="group" aria-roledescription="slide" aria-label="N de M"` en cada slide; `aria-live="polite"` en el escenario o `Drupal.announce` al cambiar.
-
-### A11Y-004 · MEDIA · 2.1.1 Teclado · `cartoteca-mapa-info.css:3-5`
-- **Evidencia:** `.sdc-cartoteca__info {overflow-y:auto; max-height:70vh}` y la tabla en `div.overflow-auto`, sin `tabindex="0"`: una región desplazable sin foco no se puede recorrer con teclado en navegadores que no la hacen enfocable (axe `scrollable-region-focusable`).
-- **Corrección:** quitar el `max-height`/overflow del card o dar al contenedor `tabindex="0" role="region" aria-label="Datos del mapa"`.
-
-### A11Y-005 · MEDIA · 1.4.3 Contraste · `cartoteca-mapa-info.css:19`
-- **Evidencia:** `th.sdc-cartoteca__field-label` usa `var(--bs-secondary,#6c757d)` a 0,8 rem sobre `table-striped`. #6c757d sobre blanco = 4,69:1, sobre fila rayada (~#f2f2f2) ≈ 4,2:1 (<4,5). Confirmar con valores reales del tema.
-- **Corrección:** usar `var(--bs-body-color)` o `#495057` (≈7:1).
-
-### A11Y-006 · MEDIA · Tests permanentes
-- `tests/src/Functional/CartotecaFunctionalTest.php` no comprueba CA-A2 (`<h2>`), ni CA-A3 (`aria-label` + `th scope="row"` generados por JS: requiere test JS/WebDriver o mover la tabla a Twig), ni `aria-roledescription`, ni label del campo. Solo cubre `aria-invalid` del campo.
-
-## Cumple (revisado)
-Títulos `<h2>` en ambos Twig; label asociado vía Form API; error inline con `role="alert"`, `aria-invalid`, `aria-describedby` y foco al campo; flechas con `aria-label` y glifo `aria-hidden`; miniaturas `<button type=button>` con `aria-pressed` y `alt`; `<select>` con `aria-label`; `prefers-reduced-motion`; foco con outline 3 px primario en flechas; `th scope="row"` y `aria-label` en tabla (en JS).
-
-## Observaciones
-- OBS: el formulario no funciona sin JS (`novalidate` + `preventDefault`); aceptable, sin acción.
-
-## BAJAS (a `specs/pendientes.md`)
-- Miniatura activa y miniatura con foco usan el mismo outline (`.sdc-cartoteca__thumb--active` / `:focus-visible`); añadir borde/relleno distinto para el estado activo.
-- Flechas con `opacity:.85` sobre imagen: comprobar contraste del glifo ≥ 3:1 (1.4.11).
-- Enlace "Descargar" sin contexto; `Descargar imagen (<resolución>)`. El atributo `download` se ignora en cross-origin.
-- Etiqueta del campo incluye el ejemplo "IECA1988118769" y además hay placeholder repetido; `aria-describedby` del JS sobrescribe descripciones previas.
+## BAJOS (a `specs/pendientes.md`)
+- A11Y-B1: la tabla repite `aria-label="Datos del mapa"` dentro de la región con el mismo nombre y bajo un `<h2>` idéntico. Es redundante: el lector lo dice tres veces. Usar `aria-labelledby` al h2 y quitar el `aria-label` de la tabla.
+- A11Y-B2: el cambio de diapositiva con flechas o miniaturas no se anuncia (no hay `aria-live` ni `Drupal.announce` en `goToSlide`). Con la posición "N de M" en la diapositiva visible queda cubierto de forma aceptable, pero el anuncio es mejor práctica (WCAG 4.1.3 en sentido amplio).
+- A11Y-B3: la miniatura activa y la miniatura con foco comparten el mismo estilo de contorno; distinguir el estado activo con borde o relleno (1.4.11).
+- A11Y-B4: el enlace "Descargar" no tiene contexto (usar "Descargar imagen (resolución)"); en cross-origin `download` se ignora. Heredados de la v1.5: contraste del glifo de las flechas con `opacity:.85` (1.4.11) y el ejemplo repetido en la etiqueta y el placeholder del campo.
 
 ## Comprobación manual (para la persona)
-- [x] Teclado en el bloque: Tab recorre campo → Buscar → Limpiar → flechas → miniaturas → selector → Descargar; Intro/Espacio activan; sin trampas; Mayús+Tab inverso.
-- [x] Enviar vacío: el foco vuelve al campo y Orca lee "Este campo es obligatorio".
-- [x] Buscar `IECA1988118769`: Orca anuncia "Cargando" y el resultado; probar un número inexistente y con red cortada.
-- [x] Cambiar de imagen con flechas/miniaturas: Orca anuncia la posición; el foco no se pierde.
-- [x] Orca: tabla "Datos del mapa" lee cabecera de fila + valor; orden de lectura h2 → contenido.
-- [x] Foco visible en todos los controles (≥ 3:1) y sin quedar tapado.
-- [x] Zoom 200 % y 400 % / ancho 320 px: componentes apilados, sin scroll horizontal ni recortes; se puede desplazar la tabla con teclado.
-- [x] `prefers-reduced-motion: reduce` activado: sin transiciones.
-- [x] Enlace de salto al contenido sigue funcionando con el bloque en la página.
+- [ ] Teclado en /node/1: Tab recorre campo → Buscar → Limpiar → flechas → miniaturas → selector → Descargar; Intro y Espacio activan; Mayús+Tab inverso; sin trampas.
+- [ ] Enviar el formulario vacío: el foco vuelve al campo y Orca lee el error.
+- [ ] Buscar `IECA1988118769`, un número inexistente y con la red cortada: Orca anuncia "Cargando…", después el resultado, "No se han encontrado…" o el error.
+- [ ] Con varias imágenes: Orca lee "Carrusel", y en cada diapositiva "Diapositiva, N de M". Cambiar con flechas y miniaturas: el foco no se pierde y las diapositivas ocultas no se leen.
+- [ ] Tabla: Tab llega a la región "Datos del mapa", con foco visible. Se desplaza con las flechas. Orca lee cabecera de fila y valor.
+- [ ] Foco visible (≥ 3:1) en todos los controles y sin quedar tapado.
+- [ ] Zoom al 200 % y 400 % y ancho 320 px (con resultados cargados): sin scroll horizontal ni recortes.
+- [ ] `prefers-reduced-motion: reduce`: sin transiciones.
+- [ ] El enlace de salto al contenido sigue funcionando con el bloque en la página.

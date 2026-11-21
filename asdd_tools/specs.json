@@ -130,16 +130,17 @@
     "nivel": "L",
     "tipo": "modulo",
     "estado": "implementada",
-    "version": "1.6",
+    "version": "1.7",
     "file": "007-sdc-cartoteca.md",
     "gates": [
       "val",
       "qa",
-      "seg"
+      "seg",
+      "a11y"
     ],
     "reports": {
       "spec": {
-        "version": "1.6",
+        "version": "1.7",
         "estado": "implementada"
       },
       "validacion": {
@@ -162,9 +163,9 @@
       },
       "accesibilidad": {
         "fecha": "2026-11-21",
-        "version": "1.5 (estado `aprobada`)",
-        "resultado": "BLOQUEADA",
-        "hallazgos": "2 ALTOS · 4 MEDIOS · 4 BAJOS · 1 OBS"
+        "version": "1.6 (estado `implementada`; revisión retrospectiva, sustituye al informe de la v1.5)",
+        "resultado": "SUPERADA CON AVISOS (a falta de confirmar la lista manual por la persona)",
+        "hallazgos": "0 ALTOS · 1 MEDIO · 4 BAJOS · 0 OBS"
       }
     }
   },

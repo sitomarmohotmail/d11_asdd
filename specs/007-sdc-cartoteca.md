@@ -1,7 +1,7 @@
 ---
 id: 007
 titulo: Módulo sdc_cartoteca — bloque buscador de mapas con componentes SDC
-version: 1.6
+version: 1.7
 estado: implementada
 nivel: L
 tipo: modulo
@@ -366,6 +366,10 @@ formulario no lo usaba) y su cobertura se traslada a los tests JS-unit.
   (incluido `js-unit` y axe a 1280/320 px) + 19 tests `node --test`.
 - Seguridad: `007-seguridad.md`. La remediación reduce superficie (se elimina el
   servicio) y no añade rutas ni permisos; sin cambios que reabran la puerta.
-- Accesibilidad: `007-accesibilidad.md`. La salida HTML no cambia; axe sigue en 0.
-  Lista manual (CA5m, CA6m, CA9, CA12m, CA-A5) **confirmada por la persona**
-  (2026-11-21).
+- Accesibilidad: `007-accesibilidad.md` **re-pasado sobre v1.6** (2026-11-21):
+  **SUPERADA CON AVISOS** — axe 0 violaciones a 1280 y 320 px; los 5 hallazgos de
+  la v1.5 quedan resueltos. El MEDIO A11Y-001 (los tests JS no asertaban el
+  `role="region"`/`tabindex` de la tabla ni el `role="group"` de las diapositivas)
+  se corrige en **v1.7**: asserts añadidos en `mapa-info.test.mjs` y
+  `image-slider.test.mjs`. 4 BAJOS → `pendientes.md`. Falta que la persona
+  confirme la lista manual del informe.

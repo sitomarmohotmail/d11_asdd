@@ -71,6 +71,8 @@ test('CA5 · con varias imágenes hay flechas y miniaturas como <button>', () =>
   assert.match(html, /sdc-cartoteca__btn-next[^>]*aria-label=/);
   assert.match(html, /<button[^>]*sdc-cartoteca__thumb/);
   assert.match(html, /aria-roledescription="Carrusel"/);
+  // A11Y-003: cada diapositiva es un grupo con rol de diapositiva.
+  assert.match(html, /role="group" aria-roledescription="Diapositiva"/);
 });
 
 test('CA6 · el selector de resolución lista las claves disponibles', () => {
