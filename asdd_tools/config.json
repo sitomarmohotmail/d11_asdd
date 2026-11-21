@@ -1,5 +1,6 @@
 {
   "project_name": "d11asdd",
   "specs_dir": "../specs",
-  "output_json": "specs.json"
+  "output_json": "specs.json",
+  "stack": "drupal"
 }

@@ -215,6 +215,238 @@ grep -qF 'En curso' "$INDEX" && grep -qF 'en curso' "$INDEX" \
   && ok "CA-A2 etiquetas de texto «En curso»/«en curso»" \
   || ko "CA-A2 etiqueta" "faltan los textos del estado"
 
+# ===========================================================================
+# spec-009 · QA agnóstica de tecnología (perfiles de stack)
+# ===========================================================================
+INIT=scripts/asdd/init.sh
+DRUPAL_STACK=asdd_tools/stacks/drupal.json
+NODE_STACK=asdd_tools/stacks/node.json
+
+# Sonda de capacidad: el runner genérico (R2) existe cuando check.sh lee
+# ASDD_STACKS_DIR. Mientras no exista, no invocamos el check.sh real (sería
+# lento y recursivo); cada caso de runner se marca en rojo.
+RUNNER_READY=0; grep -q 'ASDD_STACKS_DIR' "$CHECK" && RUNNER_READY=1
+
+# -- fixtures de perfiles y stubs ------------------------------------------
+STKDIR="$TMP/stacks"; mkdir -p "$STKDIR"
+CFG="$TMP/config009.json"
+MARK="$TMP/mark"; TRACEDIR="$TMP/trace"; mkdir -p "$TRACEDIR"
+STUB="$TMP/stub"; mkdir -p "$STUB"
+HOMEDIR="$TMP/home"; mkdir -p "$HOMEDIR/.nvm"
+# npm y herramientas node como no-ops para el paso a11y / node.json.
+for b in npm npx node vitest eslint tsc; do
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$STUB/$b"; chmod +x "$STUB/$b"
+done
+printf 'nvm(){ :; }\n' > "$HOMEDIR/.nvm/nvm.sh"
+
+set_stack() { # id
+  jq -n --arg s "$1" \
+    '{project_name:"fix",specs_dir:"../specs",output_json:"specs.json",stack:$s}' > "$CFG"
+}
+run_check() { # args… -> OUT, RC  (nunca toca los ficheros reales)
+  OUT="$(ASDD_IN_TEST=1 ASDD_CONFIG="$CFG" ASDD_STACKS_DIR="$STKDIR" \
+         HOME="$HOMEDIR" PATH="$STUB:$PATH" bash "$CHECK" "$@" 2>&1)"; RC=$?
+}
+
+jq -n '{label:"Pass",a11y:false,gates:[{id:"g1",label:"g1",cmd:["true"]},{id:"g2",label:"g2",cmd:["true"]}]}' > "$STKDIR/pass.json"
+jq -n '{label:"Fail",a11y:false,gates:[{id:"g1",label:"g1",cmd:["true"]},{id:"g2",label:"g2",cmd:["false"]}]}' > "$STKDIR/fail.json"
+jq -n --arg m "$MARK" '{label:"Group",a11y:false,gates:[{id:"t",label:"t",cmd:["bash","-c",("printf plain > "+$m)],cmd_group:["bash","-c",("printf group-{group} > "+$m)]}]}' > "$STKDIR/grp.json"
+jq -n '{label:"A11y",a11y:true,gates:[{id:"g1",label:"g1",cmd:["true"]}]}' > "$STKDIR/a11yon.json"
+jq -n --arg d "$TRACEDIR" '{label:"Trace",a11y:false,gates:[{id:"g1",label:"g1",cmd:["true"]}],trace:{pattern:"([A-Za-z0-9_]+)::([A-Za-z0-9_]+)",locate:("grep -q {2} "+$d+"/{1}.txt")}}' > "$STKDIR/trace.json"
+jq -n --arg d "$TRACEDIR" '{label:"Trace2",a11y:false,gates:[{id:"g1",label:"g1",cmd:["true"]}],trace:{pattern:"([A-Za-z0-9_]+)::([A-Za-z0-9_.-]+)",locate:("grep -q {2} "+$d+"/{1}.txt")}}' > "$STKDIR/trace2.json"
+jq -n '{label:"Guard",a11y:false,gates:[{id:"tool",label:"TOOLGATE",cmd:["scripts/asdd/test.sh"]},{id:"ok",label:"OKGATE",cmd:["true"]}]}' > "$STKDIR/guard.json"
+echo bar   > "$TRACEDIR/Foo.txt"      # para Foo::bar (existe) y Foo::ba-r (sanear)
+printf 'ref Foo::bar\n'  > "$TMP/spec-ok.md"
+printf 'ref Baz::qux\n'  > "$TMP/spec-bad.md"
+printf 'ref Foo::ba-r\n' > "$TMP/spec-inj.md"
+
+rc_test() { # etiqueta  stack  esperado(0|ne)  [args…]
+  local label="$1" stack="$2" exp="$3"; shift 3
+  if [ "$RUNNER_READY" != 1 ]; then ko "$label" "runner no implementado (ASDD_STACKS_DIR)"; return; fi
+  set_stack "$stack"; run_check "$@"
+  if [ "$exp" = "0" ]; then
+    [ "$RC" -eq 0 ] && ok "$label" || ko "$label" "RC=$RC; OUT=$OUT"
+  else
+    [ "$RC" -ne 0 ] && ok "$label" || ko "$label" "RC=0 (esperaba ≠0); OUT=$OUT"
+  fi
+}
+
+# -- R1 · perfil drupal.json (CA1, CA2, CA2b) ------------------------------
+if [ -f "$DRUPAL_STACK" ] && jq -e . "$DRUPAL_STACK" >/dev/null 2>&1; then
+  keys="$(jq -r 'has("label") and has("a11y") and (.gates|type=="array" and length>0) and (.trace|has("pattern") and has("locate"))' "$DRUPAL_STACK")"
+  [ "$keys" = "true" ] && ok "009-CA1 drupal.json válido con claves" || ko "009-CA1 drupal.json" "faltan claves"
+else
+  ko "009-CA1 drupal.json" "no existe o JSON inválido"
+fi
+
+if [ -f "$DRUPAL_STACK" ]; then
+  ids="$(jq -r '[.gates[].id] | join(",")' "$DRUPAL_STACK" 2>/dev/null)"
+  need=1
+  for g in unit kernel functional phpcs phpstan stylelint eslint twig js-unit drush; do
+    echo "$ids" | grep -q "$g" || need=0
+  done
+  a11y="$(jq -r '.a11y' "$DRUPAL_STACK" 2>/dev/null)"
+  cg="$(jq -r '[.gates[]|select(.id=="functional")|has("cmd_group")]|any' "$DRUPAL_STACK" 2>/dev/null)"
+  [ "$need" = 1 ] && [ "$a11y" = "true" ] && [ "$cg" = "true" ] \
+    && ok "009-CA2 drupal.json: ids de gates + a11y + cmd_group" \
+    || ko "009-CA2 drupal.json" "ids=$ids a11y=$a11y cmd_group=$cg"
+else
+  ko "009-CA2 drupal.json" "no existe"
+fi
+
+# CA2b · label+cmd literales e invariante vs check.sh:50-65
+EXPECTED_GATES="$(jq -n '[
+  {id:"unit",      label:"phpunit custom-unit",      cmd:["vendor/bin/phpunit","--testsuite","custom-unit"]},
+  {id:"kernel",    label:"phpunit custom-kernel",    cmd:["vendor/bin/phpunit","--testsuite","custom-kernel"]},
+  {id:"functional",label:"phpunit custom-functional",cmd:["vendor/bin/phpunit","--testsuite","custom-functional"],cmd_group:["vendor/bin/phpunit","--testsuite","custom-functional","--group","{group}"]},
+  {id:"phpcs",     label:"phpcs",                    cmd:["vendor/bin/phpcs","-q"]},
+  {id:"phpstan",   label:"phpstan",                  cmd:["vendor/bin/phpstan","analyse","--no-progress"]},
+  {id:"stylelint", label:"stylelint",                cmd:["scripts/lint/lint.sh","css"]},
+  {id:"eslint",    label:"eslint",                   cmd:["scripts/lint/lint.sh","js"]},
+  {id:"twig",      label:"twig",                     cmd:["scripts/lint/lint.sh","twig"]},
+  {id:"linters",   label:"linters (fixtures)",       cmd:["scripts/lint/test.sh"]},
+  {id:"tooling",   label:"tooling (fixtures)",       cmd:["scripts/asdd/test.sh"]},
+  {id:"js-unit",   label:"js-unit (node --test)",    cmd:["bash","-c",". \"$HOME/.nvm/nvm.sh\" >/dev/null 2>&1; nvm use >/dev/null 2>&1; npm run --silent test:js"]},
+  {id:"drush",     label:"drush config:status",      cmd:["bash","-c","vendor/bin/drush config:status 2>&1 | grep -q \"No differences\""]}
+]')"
+if [ -f "$DRUPAL_STACK" ] && \
+   jq --argjson exp "$EXPECTED_GATES" -e '.gates == $exp' "$DRUPAL_STACK" >/dev/null 2>&1; then
+  ok "009-CA2b drupal.json: gates literales e invariante"
+else
+  ko "009-CA2b drupal.json" "los gates no coinciden literalmente con check.sh:50-65"
+fi
+
+# -- R2 · runner (CA3, CA3b, CA4, CA4b, CA5, CA5b, CA6, CA6b, CA-R7) --------
+rc_test "009-CA3 runner: un gate falla → ≠0"     fail 1  --no-a11y
+rc_test "009-CA3b runner: todos pasan → 0"       pass 0  --no-a11y
+
+if [ "$RUNNER_READY" = 1 ]; then
+  set_stack grp; : > "$MARK"; run_check --group MIGRUPO --no-a11y
+  [ "$(cat "$MARK" 2>/dev/null)" = "group-MIGRUPO" ] \
+    && ok "009-CA4 --group usa cmd_group con {group}" || ko "009-CA4" "MARK=$(cat "$MARK" 2>/dev/null)"
+  set_stack grp; : > "$MARK"; run_check --no-a11y
+  [ "$(cat "$MARK" 2>/dev/null)" = "plain" ] \
+    && ok "009-CA4b sin --group usa cmd" || ko "009-CA4b" "MARK=$(cat "$MARK" 2>/dev/null)"
+else
+  ko "009-CA4 --group"  "runner no implementado"
+  ko "009-CA4b sin group" "runner no implementado"
+fi
+
+if [ "$RUNNER_READY" = 1 ]; then
+  set_stack a11yon; run_check
+  echo "$OUT" | grep -q 'axe' && ok "009-CA5b a11y:true ejecuta axe" || ko "009-CA5b a11y on" "sin paso axe"
+  set_stack a11yon; run_check --no-a11y
+  echo "$OUT" | grep -q 'axe' && ko "009-CA5 --no-a11y omite axe" "corrió axe" || ok "009-CA5 --no-a11y omite axe"
+else
+  ko "009-CA5 a11y off"  "runner no implementado"
+  ko "009-CA5b a11y on"  "runner no implementado"
+fi
+
+rc_test "009-CA6 trazabilidad: test existe → 0"  trace  0  --spec "$TMP/spec-ok.md"  --no-a11y
+rc_test "009-CA6 trazabilidad: test falta → ≠0"  trace  1  --spec "$TMP/spec-bad.md" --no-a11y
+rc_test "009-CA6b saneo: valor con guion → ≠0"   trace2 1  --spec "$TMP/spec-inj.md" --no-a11y
+
+if [ "$RUNNER_READY" = 1 ]; then
+  set_stack guard; run_check --no-a11y
+  echo "$OUT" | grep -q 'OKGATE' && ! echo "$OUT" | grep -q 'TOOLGATE' \
+    && ok "009-CA-R7 guardia ASDD_IN_TEST omite gate de tooling" \
+    || ko "009-CA-R7 guardia" "OUT=$OUT"
+else
+  ko "009-CA-R7 guardia" "runner no implementado"
+fi
+
+# -- R3 · validación del id de stack (CA7, CA7b) ---------------------------
+for bad in "a/b" "../x" "ghost"; do
+  rc_test "009-CA7 stack inválido ($bad) → ≠0" "$bad" 1 --no-a11y
+done
+if [ "$RUNNER_READY" = 1 ]; then
+  jq -n '{project_name:"fix",specs_dir:"../specs",output_json:"specs.json"}' > "$CFG"  # sin stack
+  run_check --no-a11y
+  [ "$RC" -ne 0 ] && ok "009-CA7b sin stack → ≠0" || ko "009-CA7b sin stack" "RC=0"
+else
+  ko "009-CA7b sin stack" "runner no implementado"
+fi
+# init.sh también valida el id
+if [ -x "$INIT" ]; then
+  set_stack drupal
+  if ASDD_CONFIG="$CFG" ASDD_STACKS_DIR="$STKDIR" bash "$INIT" --stack "../x" >/dev/null 2>&1; then
+    ko "009-CA7 init.sh id inválido" "no abortó"
+  else
+    [ "$(jq -r '.stack' "$CFG")" = "drupal" ] && ok "009-CA7 init.sh rechaza id inválido sin tocar config" \
+      || ko "009-CA7 init.sh" "modificó config.json"
+  fi
+else
+  ko "009-CA7 init.sh id inválido" "scripts/asdd/init.sh no existe"
+fi
+
+# -- R4 · asistente init.sh (CA8, CA8b, CA8c) ------------------------------
+if [ -x "$INIT" ]; then
+  set_stack node
+  ASDD_CONFIG="$CFG" ASDD_STACKS_DIR="$STKDIR" bash "$INIT" --stack pass >/dev/null 2>&1
+  [ "$(jq -r '.stack' "$CFG")" = "pass" ] && [ "$(jq -r '.project_name' "$CFG")" = "fix" ] \
+    && ok "009-CA8 init.sh fija .stack conservando campos" || ko "009-CA8 init.sh" "config=$(cat "$CFG")"
+  out="$(ASDD_CONFIG="$CFG" ASDD_STACKS_DIR="$STKDIR" bash "$INIT" 2>&1)"
+  echo "$out" | grep -q 'pass' && echo "$out" | grep -q 'Pass' \
+    && ok "009-CA8b init.sh lista id + label" || ko "009-CA8b init.sh listar" "$out"
+else
+  ko "009-CA8 init.sh fija stack" "scripts/asdd/init.sh no existe"
+  ko "009-CA8b init.sh lista"      "scripts/asdd/init.sh no existe"
+fi
+# CA8c: init.sh regenera stack.json con active actualizado
+if [ -x "$INIT" ] && grep -q 'STACK_OUT' "$GEN"; then
+  set_stack pass; SOUT="$TMP/stack.json"
+  ASDD_CONFIG="$CFG" ASDD_STACKS_DIR="$STKDIR" STACKS_DIR="$STKDIR" STACK_OUT="$SOUT" \
+    bash "$INIT" --stack fail >/dev/null 2>&1
+  [ "$(jq -r '.active' "$SOUT" 2>/dev/null)" = "fail" ] \
+    && ok "009-CA8c init.sh regenera stack.json (active)" || ko "009-CA8c init.sh stack.json" "active=$(jq -r '.active' "$SOUT" 2>/dev/null)"
+else
+  ko "009-CA8c init.sh regenera stack.json" "init.sh o STACK_OUT no implementados"
+fi
+
+# -- R5 · perfil node.json (CA9, CA9b) -------------------------------------
+if [ -f "$NODE_STACK" ] && jq -e '.gates|type=="array" and length>0' "$NODE_STACK" >/dev/null 2>&1; then
+  ok "009-CA9 node.json válido con gates"
+else
+  ko "009-CA9 node.json" "no existe o sin gates"
+fi
+if [ "$RUNNER_READY" = 1 ] && [ -f "$NODE_STACK" ]; then
+  cp "$NODE_STACK" "$STKDIR/node.json"; set_stack node; run_check --no-a11y
+  [ "$RC" -eq 0 ] && ok "009-CA9b runner ejecuta node.json con stubs" || ko "009-CA9b node.json" "RC=$RC OUT=$OUT"
+else
+  ko "009-CA9b runner ejecuta node.json" "runner o node.json no implementados"
+fi
+
+# -- R6 · stack.json y panel (CA10, CA11) ----------------------------------
+set_stack pass; SOUT="$TMP/stack.json"; rm -f "$SOUT"
+SPECS_DIR="$SPECS_FIX" OUTPUT="$TMP/specs2.json" STACKS_DIR="$STKDIR" STACK_OUT="$SOUT" \
+  ASDD_CONFIG="$CFG" bash "$GEN" >/dev/null 2>&1
+if [ -f "$SOUT" ] && [ "$(jq -r '.active' "$SOUT" 2>/dev/null)" = "pass" ] \
+   && [ "$(jq -r '[.available[]|select(.id=="pass")]|length' "$SOUT" 2>/dev/null)" = "1" ] \
+   && [ "$(jq -r '.available[0]|has("id") and has("label") and has("a11y")' "$SOUT" 2>/dev/null)" = "true" ]; then
+  ok "009-CA10 gen genera stack.json {active, available[{id,label,a11y}]}"
+else
+  ko "009-CA10 stack.json" "no generado o incompleto"
+fi
+have 'stack\.json' && have 'init\.sh --stack' \
+  && ok "009-CA11 index.html lee stack.json y muestra el comando init.sh --stack" \
+  || ko "009-CA11 panel" "index.html no referencia stack.json / init.sh --stack"
+
+# -- RA · accesibilidad de la UI nueva (CA-A1, CA-A2, CA-A3) ----------------
+sfg="$(grep -oE '\-\-stack-fg:[[:space:]]*#[0-9a-fA-F]{3,6}' "$INDEX" | grep -oE '#[0-9a-fA-F]{3,6}' | head -1)"
+sbg="$(grep -oE '\-\-stack-bg:[[:space:]]*#[0-9a-fA-F]{3,6}' "$INDEX" | grep -oE '#[0-9a-fA-F]{3,6}' | head -1)"
+if [ -n "$sfg" ] && [ -n "$sbg" ]; then
+  cr="$(contrast "$sfg" "$sbg")"
+  ge "$cr" 4.5 && ok "009-CA-A1 contraste distintivo $cr:1 ≥ 4,5" || ko "009-CA-A1 contraste" "$cr:1 < 4,5"
+else
+  ko "009-CA-A1 contraste" "faltan tokens --stack-fg/--stack-bg"
+fi
+have 'aria-current' && grep -qE '<(button|a)[^>]*stack' "$INDEX" \
+  && ok "009-CA-A2 opciones como button/a + aria-current" \
+  || ko "009-CA-A2 botones" "faltan button/a de stack o aria-current"
+have 'aria-live' && grep -qiE 'clipboard|execCommand' "$INDEX" \
+  && ok "009-CA-A3 aria-live + fallback de copia" \
+  || ko "009-CA-A3 anuncio copia" "falta aria-live o fallback de clipboard"
+
 # ---------------------------------------------------------------------------
 [ "$fallos" -eq 0 ] && { echo "— tooling OK —"; exit 0; }
 echo "$fallos caso(s) fallidos"; exit 1

@@ -43,6 +43,10 @@
   --radius-lg: 14px;
   --sh:    0 2px 8px rgba(0,0,0,.45);
   --sh-up: 0 6px 20px rgba(0,0,0,.60);
+
+  /* Selector de stack (spec-009): contraste fg/bg ≥ 4,5:1 */
+  --stack-fg: #f8f8f2;
+  --stack-bg: #44475a;
   color-scheme: dark;
 }
 
@@ -848,6 +852,39 @@ main {
   text-decoration: none;
 }
 .site-footer a:hover { text-decoration: underline; }
+
+/* ── Selector de stack (spec-009) ─────────────────────── */
+.stack-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--stack-fg); background: var(--stack-bg);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 5px 12px; font: 500 13px 'Inter', sans-serif; cursor: pointer;
+  min-height: 24px;
+}
+.stack-badge:hover { border-color: var(--fg2); }
+.stack-badge:focus-visible { outline: 2px solid #8be9fd; outline-offset: 2px; }
+.stack-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #50fa7b; }
+.stk-list { display: flex; flex-direction: column; gap: 8px; padding: 4px; }
+.stk-item {
+  display: flex; flex-direction: column; gap: 2px; width: 100%;
+  text-align: left; background: var(--surface2); color: var(--fg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; cursor: pointer; font: 500 14px 'Inter', sans-serif;
+  min-height: 24px;
+}
+.stk-item:hover { border-color: var(--fg2); }
+.stk-item:focus-visible { outline: 2px solid #8be9fd; outline-offset: 2px; }
+.stk-item[aria-current="true"] { border-color: #50fa7b; }
+.stk-item .stk-id { font: 500 12px 'JetBrains Mono', monospace; color: var(--fg2); }
+.stk-item .stk-active { color: #50fa7b; font-size: 12px; }
+.stk-cmd {
+  margin-top: 10px; padding: 10px 12px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font: 500 13px 'JetBrains Mono', monospace; color: var(--fg);
+  word-break: break-all;
+}
+.stk-cmd code { user-select: all; }
+.stk-note { margin-top: 6px; font-size: 12px; color: var(--fg2); min-height: 18px; }
 </style>
 
 <header class="hd">
@@ -855,6 +892,10 @@ main {
     <div class="brand">
       <code class="proj-tag">d11asdd</code>
       <h1>ASDD Dashboard</h1>
+      <button class="stack-badge" id="stack-badge" type="button" hidden
+              aria-haspopup="dialog" aria-label="Stack activo; abrir selector de tecnología">
+        <span class="dot" aria-hidden="true"></span><span id="stack-badge-label">—</span>
+      </button>
     </div>
     <div class="stat-row" id="stat-row"></div>
   </div>
@@ -911,6 +952,22 @@ main {
   </div>
   <div class="ed-body" id="ed-body">
     <textarea id="ed-textarea"></textarea>
+  </div>
+</div>
+
+<!-- Selector de stack (spec-009) -->
+<div class="ed-overlay" id="stk-overlay"></div>
+<div class="ed-modal" id="stk-modal" role="dialog" aria-modal="true" aria-labelledby="stk-title" inert>
+  <div class="ed-head">
+    <span class="ed-title" id="stk-title">Tecnología (stack) de la QA</span>
+    <div class="ed-btns">
+      <button class="ed-btn ed-cancel" id="stk-cancel">Cerrar</button>
+    </div>
+  </div>
+  <div class="ed-body">
+    <div class="stk-list" id="stk-list"></div>
+    <div class="stk-cmd" id="stk-cmd" hidden></div>
+    <p class="stk-note" id="stk-note" aria-live="polite"></p>
   </div>
 </div>
 
@@ -1497,6 +1554,120 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeEditor();
 });
 
+// ── Selector de stack (spec-009) ─────────────────────────
+let STACK = { active: '', available: [] };
+let _stkOpener = null;
+
+async function pollStack() {
+  try {
+    const r = await fetch('/asdd_tools/stack.json?t=' + Date.now());
+    if (r.ok) { STACK = await r.json(); renderStackBadge(); }
+  } catch {}
+}
+
+function renderStackBadge() {
+  const badge = document.getElementById('stack-badge');
+  const act = (STACK.available || []).find(s => s.id === STACK.active);
+  const name = act ? act.label : (STACK.active || 'stack');
+  document.getElementById('stack-badge-label').textContent = name;
+  // 2.5.3 Etiqueta en el nombre: el nombre accesible contiene el texto visible.
+  badge.setAttribute('aria-label', name + ' · abrir selector de tecnología (stack)');
+  badge.hidden = false;
+}
+
+// Fondo inerte mientras el modal está abierto: saca el resto del orden de foco
+// y de la accesibilidad (confina el foco sin trampa manual). 2.4.3/2.4.7.
+function stkBackground() {
+  return [...document.body.children].filter(
+    el => el.id !== 'stk-overlay' && el.id !== 'stk-modal');
+}
+
+function renderStackList() {
+  const list = document.getElementById('stk-list');
+  list.innerHTML = (STACK.available || []).map(s => {
+    const active = s.id === STACK.active;
+    return `<button type="button" class="stk-item" data-id="${esc(s.id)}"`
+      + (active ? ' aria-current="true"' : '') + `>`
+      + `<span>${esc(s.label || s.id)}`
+      + (active ? ' <span class="stk-active">· activo</span>' : '') + `</span>`
+      + `<span class="stk-id">${esc(s.id)}</span></button>`;
+  }).join('');
+  list.querySelectorAll('.stk-item').forEach(b =>
+    b.addEventListener('click', () => chooseStack(b.dataset.id)));
+}
+
+function chooseStack(id) {
+  const cmdEl = document.getElementById('stk-cmd');
+  const note  = document.getElementById('stk-note');
+  if (id === STACK.active) {
+    cmdEl.hidden = true;
+    note.textContent = `«${id}» ya es el stack activo.`;
+    return;
+  }
+  const cmd = `scripts/asdd/init.sh --stack ${id}`;
+  cmdEl.hidden = false;
+  cmdEl.innerHTML = `<code>${esc(cmd)}</code>`;
+  copyCmd(cmd, note);
+}
+
+function copyCmd(text, note) {
+  const done = () => { note.textContent =
+    'Comando copiado. Ejecútalo en la terminal para cambiar de stack.'; };
+  const fail = () => { note.textContent =
+    'No se pudo copiar: selecciona y copia el comando manualmente.'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done, fail));
+  } else {
+    fallbackCopy(text, done, fail);
+  }
+}
+
+function fallbackCopy(text, done, fail) {
+  const prev = document.activeElement;
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    const okc = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (prev && prev.focus) prev.focus();   // no perder el foco al quitar el textarea
+    okc ? done() : fail();
+  } catch { if (prev && prev.focus) prev.focus(); fail(); }
+}
+
+function openStacks() {
+  _stkOpener = document.activeElement;
+  renderStackList();
+  document.getElementById('stk-cmd').hidden = true;
+  document.getElementById('stk-note').textContent = '';
+  document.getElementById('stk-overlay').classList.add('open');
+  const modal = document.getElementById('stk-modal');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  stkBackground().forEach(el => el.inert = true);
+  modal.inert = false;
+  const first = document.querySelector('#stk-list .stk-item');
+  if (first) first.focus();
+}
+
+function closeStacks() {
+  document.getElementById('stk-overlay').classList.remove('open');
+  const modal = document.getElementById('stk-modal');
+  modal.classList.remove('open');
+  modal.inert = true;
+  stkBackground().forEach(el => el.inert = false);
+  document.body.style.overflow = '';
+  if (_stkOpener && _stkOpener.focus) _stkOpener.focus();
+}
+
+document.getElementById('stack-badge').addEventListener('click', openStacks);
+document.getElementById('stk-cancel').addEventListener('click', closeStacks);
+document.getElementById('stk-overlay').addEventListener('click', closeStacks);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('stk-modal').classList.contains('open'))
+    closeStacks();
+});
+
 // Init
 (async () => {
   try {
@@ -1507,6 +1678,7 @@ document.addEventListener('keydown', e => {
   renderPipeline();
   renderSpecs();
   applyFilter();
+  pollStack();
   pollRunning();
   setTimeout(pollSpecs, 5000);
 })();

@@ -1,0 +1,22 @@
+{
+  "label": "Drupal 11 / PHP",
+  "a11y": true,
+  "gates": [
+    { "id": "unit",       "label": "phpunit custom-unit",       "cmd": ["vendor/bin/phpunit", "--testsuite", "custom-unit"] },
+    { "id": "kernel",     "label": "phpunit custom-kernel",     "cmd": ["vendor/bin/phpunit", "--testsuite", "custom-kernel"] },
+    { "id": "functional", "label": "phpunit custom-functional", "cmd": ["vendor/bin/phpunit", "--testsuite", "custom-functional"], "cmd_group": ["vendor/bin/phpunit", "--testsuite", "custom-functional", "--group", "{group}"] },
+    { "id": "phpcs",      "label": "phpcs",                     "cmd": ["vendor/bin/phpcs", "-q"] },
+    { "id": "phpstan",    "label": "phpstan",                   "cmd": ["vendor/bin/phpstan", "analyse", "--no-progress"] },
+    { "id": "stylelint",  "label": "stylelint",                 "cmd": ["scripts/lint/lint.sh", "css"] },
+    { "id": "eslint",     "label": "eslint",                    "cmd": ["scripts/lint/lint.sh", "js"] },
+    { "id": "twig",       "label": "twig",                      "cmd": ["scripts/lint/lint.sh", "twig"] },
+    { "id": "linters",    "label": "linters (fixtures)",        "cmd": ["scripts/lint/test.sh"] },
+    { "id": "tooling",    "label": "tooling (fixtures)",        "cmd": ["scripts/asdd/test.sh"] },
+    { "id": "js-unit",    "label": "js-unit (node --test)",     "cmd": ["bash", "-c", ". \"$HOME/.nvm/nvm.sh\" >/dev/null 2>&1; nvm use >/dev/null 2>&1; npm run --silent test:js"] },
+    { "id": "drush",      "label": "drush config:status",       "cmd": ["bash", "-c", "vendor/bin/drush config:status 2>&1 | grep -q \"No differences\""] }
+  ],
+  "trace": {
+    "pattern": "(FunctionalJavascript|Unit|Kernel|Functional)\\\\([A-Za-z0-9_]+)::(test[A-Za-z0-9_]+)",
+    "locate": "grep -l 'function {3}(' web/modules/custom/*/tests/src/{1}/{2}.php web/themes/custom/*/tests/src/{1}/{2}.php 2>/dev/null | grep -q ."
+  }
+}

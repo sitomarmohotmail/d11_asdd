@@ -6,7 +6,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TOOLS_DIR="$SCRIPT_DIR/../asdd_tools"
-CONFIG="$TOOLS_DIR/config.json"
+CONFIG="${ASDD_CONFIG:-$TOOLS_DIR/config.json}"
 
 if [ -f "$CONFIG" ] && command -v jq &>/dev/null; then
   SPECS_REL=$(jq -r '.specs_dir  // "../specs"'   "$CONFIG")
@@ -108,3 +108,23 @@ done
 
 printf '%s\n' "${items[@]}" | jq -s 'sort_by(.id)' > "$OUTPUT"
 echo "Generado $OUTPUT — $(jq length "$OUTPUT") specs"
+
+# --- stack.json: stack activo y disponibles, para el selector del panel -----
+STACKS_DIR="${STACKS_DIR:-$TOOLS_DIR/stacks}"
+STACK_OUT="${STACK_OUT:-$TOOLS_DIR/stack.json}"
+if command -v jq &>/dev/null; then
+  active="$(jq -r '.stack // ""' "$CONFIG" 2>/dev/null)"
+  avail=()
+  for sf in "$STACKS_DIR"/*.json; do
+    [ -e "$sf" ] || continue
+    sid="$(basename "$sf" .json)"
+    avail+=("$(jq -c --arg id "$sid" '{id:$id, label:(.label // ""), a11y:(.a11y // false)}' "$sf")")
+  done
+  if [ ${#avail[@]} -gt 0 ]; then
+    avail_json=$(printf '%s\n' "${avail[@]}" | jq -s .)
+  else
+    avail_json='[]'
+  fi
+  jq -n --arg a "$active" --argjson av "$avail_json" '{active:$a, available:$av}' > "$STACK_OUT"
+  echo "Generado $STACK_OUT — stack activo: ${active:-(sin definir)}"
+fi

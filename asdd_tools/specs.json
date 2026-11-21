@@ -199,5 +199,43 @@
         "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 0 BAJOS nuevos"
       }
     }
+  },
+  {
+    "id": "009",
+    "titulo": "QA agnóstica de tecnología (perfiles de stack) y selector en el panel",
+    "nivel": "L",
+    "tipo": "modulo",
+    "estado": "implementada",
+    "version": "1.3",
+    "file": "009-qa-agnostica-stack.md",
+    "gates": [
+      "val",
+      "qa",
+      "a11y"
+    ],
+    "reports": {
+      "spec": {
+        "version": "1.3",
+        "estado": "implementada"
+      },
+      "validacion": {
+        "fecha": "2026-11-21",
+        "version": "1.3 (2ª pasada; la 1ª, sobre v1.0, salió BLOQUEADA)",
+        "resultado": "SUPERADA",
+        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 2 BAJOS"
+      },
+      "qa": {
+        "fecha": "2026-11-21",
+        "version": "1.3",
+        "resultado": "SUPERADA",
+        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 0 BAJOS nuevos"
+      },
+      "accesibilidad": {
+        "fecha": "2026-11-21",
+        "version": "implementada (revisión retrospectiva)",
+        "resultado": "SUPERADA CON AVISOS (pendiente de lista manual de la persona)",
+        "hallazgos": "0 ALTOS · 3 MEDIOS · 2 BAJOS · 0 OBS"
+      }
+    }
   }
 ]
