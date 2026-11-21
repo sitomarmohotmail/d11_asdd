@@ -335,12 +335,27 @@ main {
 
 /* ── Kanban board ─────────────────────────────────────── */
 .kanban {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2px;
+}
+
+/* Cada fila (cabeceras y cada spec) mantiene las 4 columnas alineadas. */
+.kol-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: 10px;
-  row-gap: 2px;
   align-items: start;
 }
+
+.kol-headrow {
+  position: sticky;
+  top: 56px;
+  z-index: 1;
+}
+
+/* Fila de spec oculta por el filtro de estado. */
+.kol-row[hidden] { display: none; }
 
 .kol-cell {
   min-height: 6px;
@@ -353,8 +368,6 @@ main {
 .kol-cell[data-col="implementada"] { background: linear-gradient(to bottom, rgba(80,250,123,.14), var(--implementada-bg)); }
 .kol-cell[data-col="en-curso"]     { background: linear-gradient(to bottom, rgba(139,233,253,.14), var(--en-curso-bg)); }
 
-.kol-cell.dimmed, .kol-hd.dimmed { opacity: .22; pointer-events: none; }
-
 .kol-hd {
   font-size: 13px;
   font-weight: 700;
@@ -366,9 +379,6 @@ main {
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid;
-  position: sticky;
-  top: 56px;
-  z-index: 1;
   transition: opacity .2s;
 }
 
@@ -584,7 +594,7 @@ main {
 
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 800px) {
-  .kanban { column-gap: 8px; }
+  .kol-row { column-gap: 8px; }
 }
 
 @media (max-width: 600px) {
@@ -1051,6 +1061,7 @@ async function pollSpecs() {
         renderStats();
         renderPipeline();
         renderSpecs();
+        applyFilter();
       }
     }
   } catch {}
@@ -1186,14 +1197,14 @@ function renderSpecs() {
 
   const el = document.getElementById('kanban');
 
-  const headers = cols.map(state =>
+  const headers = `<div class="kol-row kol-headrow">` + cols.map(state =>
     `<div class="kol-hd ${state}" data-col="${state}">${labels[state]}<span class="kol-count">${counts[state]}</span></div>`
-  ).join('');
+  ).join('') + `</div>`;
 
   const rows = sorted.map(spec =>
-    cols.map(col =>
+    `<div class="kol-row" data-estado="${spec.estado}">` + cols.map(col =>
       `<div class="kol-cell" data-col="${col}">${col === spec.estado ? cardHTML(spec) : ''}</div>`
-    ).join('')
+    ).join('') + `</div>`
   ).join('');
 
   el.innerHTML = headers + rows;
@@ -1242,8 +1253,10 @@ function renderSpecs() {
 }
 
 function applyFilter() {
-  document.querySelectorAll('.kol-hd[data-col], .kol-cell[data-col]').forEach(el => {
-    el.classList.toggle('dimmed', !!(activeFilter && el.dataset.col !== activeFilter));
+  // Se mantienen siempre las 4 columnas y sus cabeceras; al filtrar solo se
+  // ocultan del todo las filas de specs cuyo estado no coincide.
+  document.querySelectorAll('.kol-row[data-estado]').forEach(row => {
+    row.hidden = !!activeFilter && row.dataset.estado !== activeFilter;
   });
   const fi = document.getElementById('filter-info');
   const cb = document.getElementById('clear-btn');
@@ -1493,6 +1506,7 @@ document.addEventListener('keydown', e => {
   renderStats();
   renderPipeline();
   renderSpecs();
+  applyFilter();
   pollRunning();
   setTimeout(pollSpecs, 5000);
 })();
