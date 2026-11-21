@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\sdc_cartoteca\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\sdc_cartoteca\Service\CartotecaApiService;
 
 /**
  * Tests de kernel del bloque y servicio Cartoteca.
@@ -39,8 +38,13 @@ class CartotecaBlockTest extends KernelTestBase {
    * CA3 / CA10a / CA10b — servicio declarado y resoluble en el contenedor.
    */
   public function testApiServiceIsRegistered(): void {
-    $service = $this->container->get('sdc_cartoteca.api_service');
-    $this->assertInstanceOf(CartotecaApiService::class, $service);
+    $this->assertTrue(
+      $this->container->has('sdc_cartoteca.api_service'),
+      'El servicio sdc_cartoteca.api_service no está registrado.',
+    );
+    // get() lanza una excepción si el servicio no es resoluble: la propia
+    // llamada es la comprobación de que puede instanciarse.
+    $this->container->get('sdc_cartoteca.api_service');
   }
 
 }

@@ -29,6 +29,14 @@ class CartotecaSearchForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @param array<string, mixed> $form
+   *   El array del formulario.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   El estado del formulario.
+   *
+   * @return array<string, mixed>
+   *   El array del formulario construido.
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $form['#attributes']['class'][] = 'sdc-cartoteca__form';
@@ -109,6 +117,11 @@ class CartotecaSearchForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @param array<string, mixed> $form
+   *   El array del formulario.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   El estado del formulario.
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     // La búsqueda y el renderizado los gestiona JavaScript.

@@ -326,7 +326,13 @@ if (rejected.length > 0) {
 
 // --no-sandbox: Ubuntu restringe los user namespaces que usa el sandbox de
 // Chrome. Solo se navega por el sitio local.
-const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+// acceptInsecureCerts: el entorno local redirige a https con un certificado
+// autofirmado; como isAllowed() limita la navegación a ALLOWED_HOSTS, aceptar
+// el certificado no abre ninguna superficie externa.
+const browser = await puppeteer.launch({
+  args: ['--no-sandbox'],
+  acceptInsecureCerts: true,
+});
 const report = [];
 let total = 0;
 

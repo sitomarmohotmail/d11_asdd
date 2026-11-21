@@ -20,19 +20,40 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   admin_label: new TranslatableMarkup('Cartoteca IECA'),
   category: new TranslatableMarkup('Custom'),
 )]
-class CartotecaBlock extends BlockBase implements ContainerFactoryPluginInterface {
+final class CartotecaBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
+  /**
+   * Construye el bloque buscador de la Cartoteca.
+   *
+   * @param array<string, mixed> $configuration
+   *   La configuración del plugin.
+   * @param string $plugin_id
+   *   El id del plugin.
+   * @param mixed $plugin_definition
+   *   La definición del plugin.
+   * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
+   *   El servicio constructor de formularios.
+   */
   public function __construct(
     array $configuration,
     string $plugin_id,
     mixed $plugin_definition,
-    private FormBuilderInterface $formBuilder,
+    protected FormBuilderInterface $formBuilder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   El contenedor de servicios.
+   * @param array<string, mixed> $configuration
+   *   La configuración del plugin.
+   * @param string $plugin_id
+   *   El id del plugin.
+   * @param mixed $plugin_definition
+   *   La definición del plugin.
    */
   public static function create(
     ContainerInterface $container,
@@ -50,6 +71,9 @@ class CartotecaBlock extends BlockBase implements ContainerFactoryPluginInterfac
 
   /**
    * {@inheritdoc}
+   *
+   * @return array<string, mixed>
+   *   El render array del bloque.
    */
   public function build(): array {
     $build = $this->formBuilder->getForm(CartotecaSearchForm::class);

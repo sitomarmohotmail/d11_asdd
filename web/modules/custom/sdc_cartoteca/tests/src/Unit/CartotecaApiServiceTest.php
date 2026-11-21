@@ -40,6 +40,9 @@ class CartotecaApiServiceTest extends UnitTestCase {
    *
    * Los campos de texto simple se dan como [{value: ...}] para que
    * detectAndExtract los reconozca correctamente.
+   *
+   * @return array<string, mixed>
+   *   Datos simulados de un registro de la API.
    */
   private function validApiData(): array {
     return [
@@ -79,8 +82,9 @@ class CartotecaApiServiceTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::fetchMapa
    * CA3 — valor en minúsculas se envía en mayúsculas a la API; estado 'loaded'.
+   *
+   * @covers ::fetchMapa
    */
   public function testApiCall(): void {
     $client = $this->createMock(ClientInterface::class);
@@ -104,8 +108,9 @@ class CartotecaApiServiceTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::fetchMapa
    * CA10a — array vacío → estado 'not_found' + imagen por defecto.
+   *
+   * @covers ::fetchMapa
    */
   public function testEmptyArrayIsNotFound(): void {
     $client = $this->createMock(ClientInterface::class);
@@ -122,8 +127,9 @@ class CartotecaApiServiceTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::fetchMapa
    * CA10b — excepción HTTP → estado 'error' + imagen por defecto.
+   *
+   * @covers ::fetchMapa
    */
   public function testHttpErrorHandling(): void {
     $client = $this->createMock(ClientInterface::class);
@@ -142,8 +148,9 @@ class CartotecaApiServiceTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::fetchMapa
    * CA4b — sin imágenes en los tres campos → una sola diapositiva por defecto.
+   *
+   * @covers ::fetchMapa
    */
   public function testNoImagesUsesDefault(): void {
     $data = $this->validApiData();
@@ -164,8 +171,9 @@ class CartotecaApiServiceTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::fetchMapa
    * CA7b — campos vacíos ([], '', null) no aparecen en fields.
+   *
+   * @covers ::fetchMapa
    */
   public function testEmptyFieldsAreStripped(): void {
     $data = $this->validApiData();

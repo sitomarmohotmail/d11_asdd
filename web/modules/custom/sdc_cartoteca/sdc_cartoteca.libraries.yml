@@ -17,6 +17,7 @@ cartoteca-image-slider:
       components/cartoteca-image-slider/cartoteca-image-slider.css: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
     - core/once
 
 cartoteca-mapa-info:
@@ -27,4 +28,5 @@ cartoteca-mapa-info:
       components/cartoteca-mapa-info/cartoteca-mapa-info.css: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
     - core/once

@@ -25,6 +25,7 @@
     return String(s ?? '')
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
@@ -147,8 +148,11 @@
           `</tr>`,
       )
       .join('');
+    // La región desplazable es focusable (tabindex=0) con role="region" y
+    // nombre, para poder recorrerla con teclado (WCAG 2.1.1).
     return (
-      `<div class="card-body p-0 overflow-auto">` +
+      `<div class="sdc-cartoteca__fields-scroll card-body p-0" tabindex="0"` +
+      ` role="region" aria-label="${Drupal.t('Datos del mapa')}">` +
       `<table class="sdc-cartoteca__fields table table-sm table-striped mb-0"` +
       ` aria-label="${Drupal.t('Datos del mapa')}">` +
       `<tbody>${rows}</tbody></table>` +
@@ -181,6 +185,7 @@
           }
 
           body.innerHTML = buildLoadingHTML();
+          Drupal.announce(Drupal.t('Cargando datos del mapa…'));
 
           try {
             const response = await fetch(url);
@@ -190,30 +195,33 @@
             if (reqId !== currentRequest) return;
 
             if (!Array.isArray(data) || !data.length) {
-              body.innerHTML = buildMessageHTML(
-                Drupal.t(
-                  'No se han encontrado datos para ese número de control.',
-                ),
+              const msg = Drupal.t(
+                'No se han encontrado datos para ese número de control.',
               );
+              body.innerHTML = buildMessageHTML(msg);
+              Drupal.announce(msg);
               return;
             }
 
             const fields = normalizeFields(data[0]);
             if (!fields.length) {
-              body.innerHTML = buildMessageHTML(
-                Drupal.t('No hay información disponible para este mapa.'),
+              const msg = Drupal.t(
+                'No hay información disponible para este mapa.',
               );
+              body.innerHTML = buildMessageHTML(msg);
+              Drupal.announce(msg);
               return;
             }
 
             body.innerHTML = buildFieldsHTML(fields);
+            Drupal.announce(Drupal.t('Datos del mapa cargados.'));
           } catch (_err) {
             if (reqId !== currentRequest) return;
-            body.innerHTML = buildMessageHTML(
-              Drupal.t(
-                'El servicio de la Cartoteca no está disponible en este momento.',
-              ),
+            const msg = Drupal.t(
+              'El servicio de la Cartoteca no está disponible en este momento.',
             );
+            body.innerHTML = buildMessageHTML(msg);
+            Drupal.announce(msg);
           }
         });
       });

@@ -1,1 +1,16 @@
-{}
+{
+  "__global__": [
+    {
+      "agent": "tests",
+      "mode": "foreground",
+      "started": 1795266299
+    }
+  ],
+  "007": [
+    {
+      "agent": "tests",
+      "mode": "foreground",
+      "started": 1795266652
+    }
+  ]
+}

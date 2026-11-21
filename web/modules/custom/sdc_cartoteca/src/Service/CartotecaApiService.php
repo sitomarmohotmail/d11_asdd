@@ -25,7 +25,7 @@ class CartotecaApiService {
   /**
    * Busca un mapa por número de control y devuelve los datos normalizados.
    *
-   * @return array
+   * @return array<string, mixed>
    *   Array con claves status, slides, fields y message.
    */
   public function fetchMapa(string $numeroControl): array {
@@ -61,6 +61,12 @@ class CartotecaApiService {
 
   /**
    * Construye la lista de diapositivas a partir de los tres campos de imagen.
+   *
+   * @param array<string, mixed> $raw
+   *   Registro del mapa decodificado del JSON.
+   *
+   * @return array<int, array<string, string>>
+   *   Lista de diapositivas; cada una es un mapa de tamaño a URL.
    */
   private function normalizeImages(array $raw): array {
     $slides = [];
@@ -87,6 +93,9 @@ class CartotecaApiService {
 
   /**
    * Comprueba si la imagen tiene al menos una variante de tamaño.
+   *
+   * @param array<string, mixed> $img
+   *   Datos de una imagen del JSON.
    */
   private function hasSizes(array $img): bool {
     foreach (self::IMAGE_SIZES as $size) {
@@ -99,6 +108,12 @@ class CartotecaApiService {
 
   /**
    * Extrae las variantes de tamaño disponibles de una imagen.
+   *
+   * @param array<string, mixed> $img
+   *   Datos de una imagen del JSON.
+   *
+   * @return array<string, string>
+   *   Mapa de tamaño a URL; al menos la imagen por defecto.
    */
   private function extractSizes(array $img): array {
     $sizes = [];
@@ -112,6 +127,12 @@ class CartotecaApiService {
 
   /**
    * Mapea los campos field_* del JSON a pares etiqueta-valor normalizados.
+   *
+   * @param array<string, mixed> $raw
+   *   Registro del mapa decodificado del JSON.
+   *
+   * @return array<int, array{label: string, value: string}>
+   *   Lista de pares etiqueta-valor con los campos no vacíos.
    */
   private function normalizeFields(array $raw): array {
     static $skip = [
@@ -189,7 +210,7 @@ class CartotecaApiService {
    * valor está en [0]['value']. Las claves _indicador_1 e _indicador_2
    * se omiten siempre.
    *
-   * @param array $records
+   * @param array<int, mixed> $records
    *   Array de registros del campo.
    * @param string $prefix
    *   Prefijo del campo (p.ej. 'field_245')
@@ -235,6 +256,9 @@ class CartotecaApiService {
    *
    * Estructura: $raw['field_*'] = [{'label': '...', ...}, ...]
    *
+   * @param array<int, mixed> $records
+   *   Array de registros del campo.
+   *
    * @return string[]
    *   Un string por elemento; vacíos omitidos.
    */
@@ -254,6 +278,9 @@ class CartotecaApiService {
 
   /**
    * Resultado cuando la API devuelve un array vacío (mapa no encontrado).
+   *
+   * @return array<string, mixed>
+   *   Array con claves status, slides, fields y message.
    */
   private function notFoundResult(): array {
     return [
@@ -266,6 +293,9 @@ class CartotecaApiService {
 
   /**
    * Resultado de error HTTP (servicio no disponible).
+   *
+   * @return array<string, mixed>
+   *   Array con claves status, slides, fields y message.
    */
   private function errorResult(): array {
     return [
@@ -278,6 +308,9 @@ class CartotecaApiService {
 
   /**
    * Devuelve la diapositiva con la imagen por defecto.
+   *
+   * @return array<string, string>
+   *   Mapa con la clave 'default' y la ruta de la imagen por defecto.
    */
   private function defaultSlide(): array {
     return ['default' => self::DEFAULT_IMAGE];

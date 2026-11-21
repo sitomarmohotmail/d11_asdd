@@ -1,8 +1,15 @@
 /* Panel de información del mapa de la Cartoteca IECA */
 
-.sdc-cartoteca__info {
+/* La región desplazable es la tabla de campos, no la tarjeta entera, para que
+   sea focusable con teclado (ver .sdc-cartoteca__fields-scroll). */
+.sdc-cartoteca__fields-scroll {
   overflow-y: auto;
   max-height: 70vh;
+}
+
+.sdc-cartoteca__fields-scroll:focus-visible {
+  outline: 3px solid var(--bs-primary, #0d6efd);
+  outline-offset: -3px;
 }
 
 .sdc-cartoteca__info-title {
@@ -19,7 +26,8 @@
   vertical-align: middle;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--bs-secondary, #6c757d);
+  /* gray-700: ≥ 7:1 sobre blanco y filas rayadas (1.4.3); #6c757d quedaba ~4,2:1. */
+  color: var(--bs-secondary-color, #495057);
   font-size: 0.8rem;
   font-weight: 600;
 }
