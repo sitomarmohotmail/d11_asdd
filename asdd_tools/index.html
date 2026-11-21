@@ -781,7 +781,6 @@ main {
   transition: opacity .12s;
 }
 .ed-btn:hover { opacity: .8; }
-.ed-save   { background: var(--implementada-bg); color: var(--implementada-fg); border-color: var(--implementada-bd); }
 .ed-cancel { background: var(--surface2); color: var(--muted); border-color: var(--border); }
 
 .ed-body { flex: 1; overflow: hidden; display: flex; }
@@ -790,13 +789,6 @@ main {
   font-family: 'JetBrains Mono', monospace !important;
   font-size: 14px !important; line-height: 1.6 !important;
 }
-
-.ed-status {
-  padding: 8px 18px; font-size: 12px; font-weight: 600;
-  border-top: 1px solid var(--border); flex-shrink: 0;
-}
-.ed-status.ok  { color: var(--implementada-fg); }
-.ed-status.err { color: #ff5555; }
 
 /* ── Leyenda de agentes ───────────────────────────────── */
 .agent-legend-label {
@@ -881,14 +873,12 @@ main {
     <span class="ed-id" id="ed-id"></span>
     <span class="ed-title" id="ed-title"></span>
     <div class="ed-btns">
-      <button class="ed-btn ed-save" id="ed-save">Guardar</button>
-      <button class="ed-btn ed-cancel" id="ed-cancel">Cancelar</button>
+      <button class="ed-btn ed-cancel" id="ed-cancel">Cerrar</button>
     </div>
   </div>
   <div class="ed-body" id="ed-body">
     <textarea id="ed-textarea"></textarea>
   </div>
-  <div class="ed-status" id="ed-status" hidden></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -1124,7 +1114,7 @@ function cardHTML(spec) {
         <button class="card-menu-btn" aria-label="Acciones" title="Acciones">☰</button>
         <div class="card-menu" role="menu">
           <button class="card-menu-item" data-action="reqs"><span class="mi">📋</span>Revisar requisitos</button>
-          <button class="card-menu-item" data-action="edit"><span class="mi">✏️</span>Modificar especificación</button>
+          <button class="card-menu-item" data-action="view"><span class="mi">👁️</span>Ver especificación</button>
         </div>
       </div>
     </div>
@@ -1182,7 +1172,7 @@ function renderSpecs() {
       document.querySelectorAll('.card-menu.open').forEach(m => m.classList.remove('open'));
       if (!spec) return;
       if (action === 'reqs') openDp(spec, 'reqs');
-      if (action === 'edit') openEditor(spec);
+      if (action === 'view') openEditor(spec);
     });
   });
 
@@ -1397,14 +1387,12 @@ document.addEventListener('click', () => {
 
 // ── Editor inline ────────────────────────────────────────
 let edCM = null;
-let edSpec = null;
 
+// Visor de solo lectura de la spec (raw markdown). El guardado desde el panel
+// se retiró; las specs se editan desde el IDE.
 async function openEditor(spec) {
-  edSpec = spec;
   document.getElementById('ed-id').textContent    = spec.id;
   document.getElementById('ed-title').textContent = spec.titulo;
-  const status = document.getElementById('ed-status');
-  status.hidden = true;
 
   const overlay = document.getElementById('ed-overlay');
   const modal   = document.getElementById('ed-modal');
@@ -1423,41 +1411,12 @@ async function openEditor(spec) {
     edCM = CodeMirror.fromTextArea(document.getElementById('ed-textarea'), {
       mode: 'markdown', theme: 'dracula',
       lineNumbers: true, lineWrapping: true,
-      autofocus: true, indentWithTabs: false,
-      extraKeys: { 'Ctrl-S': saveSpec, 'Cmd-S': saveSpec },
+      readOnly: true, cursorBlinkRate: -1,
     });
     edCM.setValue(md);
     edCM.refresh();
   } catch {
     body.innerHTML = '<p style="padding:24px;color:#ff5555">Error al cargar la spec.</p>';
-  }
-}
-
-async function saveSpec() {
-  if (!edSpec || !edCM) return;
-  const status = document.getElementById('ed-status');
-  status.className = 'ed-status';
-  status.textContent = 'Guardando…';
-  status.hidden = false;
-
-  try {
-    const r = await fetch('/asdd_tools/save-spec.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file: edSpec.file, content: edCM.getValue() }),
-    });
-    const data = await r.json();
-    if (data.ok) {
-      status.className = 'ed-status ok';
-      status.textContent = '✓ Guardado';
-      setTimeout(() => { status.hidden = true; }, 2000);
-    } else {
-      status.className = 'ed-status err';
-      status.textContent = '✗ ' + (data.error || 'Error desconocido');
-    }
-  } catch {
-    status.className = 'ed-status err';
-    status.textContent = '✗ Error de red';
   }
 }
 
@@ -1467,7 +1426,6 @@ function closeEditor() {
   document.body.style.overflow = '';
 }
 
-document.getElementById('ed-save').addEventListener('click',   saveSpec);
 document.getElementById('ed-cancel').addEventListener('click', closeEditor);
 document.getElementById('ed-overlay').addEventListener('click', closeEditor);
 document.addEventListener('keydown', e => {
