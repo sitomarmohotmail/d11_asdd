@@ -4,7 +4,7 @@ titulo: QA agnóstica de tecnología (perfiles de stack) y selector en el panel
 version: 1.3
 estado: implementada
 nivel: L
-tipo: modulo
+tipo: panel
 proyecto: asdd_tools
 ---
 
