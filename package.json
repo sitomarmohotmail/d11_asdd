@@ -8,6 +8,7 @@
   },
   "scripts": {
     "a11y": "node scripts/a11y/axe-check.mjs",
+    "test:js": "node --test web/modules/custom/*/tests/js/*.test.mjs",
     "lint": "scripts/lint/lint.sh all",
     "lint:css": "scripts/lint/lint.sh css",
     "lint:js": "scripts/lint/lint.sh js",

@@ -1,9 +1,12 @@
 /**
  * @file
- * Slider de imágenes de la Cartoteca IECA.
+ * Comportamiento del slider de imágenes de la Cartoteca IECA.
  *
- * sdcCartotecaSlider  — navegación (flechas, miniaturas, selector de tamaño).
- * sdcCartotecaSliderLoader — escucha cartoteca:load, hace fetch y renderiza.
+ * sdcCartotecaSlider        — navegación (flechas, miniaturas, selector).
+ * sdcCartotecaSliderLoader  — escucha cartoteca:load, hace fetch y renderiza.
+ *
+ * La lógica pura y los constructores de HTML viven en
+ * cartoteca-image-slider.logic.js (Drupal.sdcCartoteca.slider).
  *
  * @param {Drupal} Drupal
  *   Drupal global object.
@@ -11,209 +14,21 @@
  *   Drupal once utility.
  */
 (function sdcCartotecaSliderInit(Drupal, once) {
-  const SIZE_LABELS = {
-    'original-view': Drupal.t('Vista original'),
-    big: Drupal.t('Grande'),
-    medium: Drupal.t('Mediana'),
-    small: Drupal.t('Pequeña'),
-  };
-  const IMAGE_SIZES = ['original-view', 'big', 'medium', 'small'];
+  const S = Drupal.sdcCartoteca.slider;
+  const { IMAGE_SIZES, SIZE_LABELS, safeUrl } = S;
 
   // ---------------------------------------------------------------------------
-  // Utilidades
+  // Helpers de navegación (manipulan el DOM; interacción viva → verif. manual)
   // ---------------------------------------------------------------------------
-
-  function esc(s) {
-    return String(s ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-  }
 
   /**
-   * Devuelve la URL solo si usa un esquema seguro (http, https o relativa).
+   * Actualiza el selector de resolución y el enlace de descarga.
    *
-   * Evita que un dato hostil de la API inyecte `javascript:`, `data:` o
-   * `vbscript:` en atributos src/href (defensa en profundidad).
-   *
-   * @param {*} u
-   *   Valor de URL procedente del JSON de la API.
-   *
-   * @return {string}
-   *   La URL saneada, o cadena vacía si el esquema no es seguro.
+   * @param {HTMLElement} controls
+   *   Contenedor del pie de controles.
+   * @param {object} sizes
+   *   Mapa de tamaños de la imagen activa.
    */
-  function safeUrl(u) {
-    const s = String(u ?? '').trim();
-    if (/^(?:javascript|data|vbscript):/i.test(s)) return '';
-    return s;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Parseo de imágenes (portado de CartotecaApiService.php)
-  // ---------------------------------------------------------------------------
-
-  function hasSizes(img) {
-    return IMAGE_SIZES.some((s) => img[s]);
-  }
-
-  function extractSizes(img) {
-    const sizes = {};
-    IMAGE_SIZES.forEach((s) => {
-      if (img[s]) sizes[s] = img[s];
-    });
-    return Object.keys(sizes).length ? sizes : null;
-  }
-
-  function normalizeImages(raw, defaultImage) {
-    const slides = [];
-    const destacada = raw?.field_imagen_destacada_media?.[0];
-    if (destacada && hasSizes(destacada)) {
-      slides.push(extractSizes(destacada));
-    }
-    (raw?.field_imagenes_media ?? []).forEach((img) => {
-      if (img && hasSizes(img)) slides.push(extractSizes(img));
-    });
-    (raw?.field_imagenes_b_n ?? []).forEach((img) => {
-      if (img && hasSizes(img)) slides.push(extractSizes(img));
-    });
-    return slides.length ? slides : [{ default: defaultImage }];
-  }
-
-  // ---------------------------------------------------------------------------
-  // Constructores de HTML
-  // ---------------------------------------------------------------------------
-
-  function buildSlide(sizes, index, total) {
-    const src = safeUrl(
-      sizes['original-view'] ||
-        sizes.big ||
-        sizes.medium ||
-        sizes.small ||
-        sizes.default ||
-        '',
-    );
-    const hidden = index > 0 ? ' d-none' : '';
-    const ariaAttr = index > 0 ? ' aria-hidden="true"' : '';
-    // Atributos de carrusel solo cuando hay varias diapositivas (4.1.2).
-    const slideAria =
-      total > 1
-        ? ` role="group" aria-roledescription="${Drupal.t('Diapositiva')}"` +
-          ` aria-label="${Drupal.t('@n de @t', { '@n': index + 1, '@t': total })}"`
-        : '';
-    // data-sizes en atributo con comillas dobles y escapado HTML completo:
-    // JSON.stringify no escapa comillas, así que un dato hostil de la API no
-    // puede romper el atributo (XSS).
-    const sizesJson = esc(JSON.stringify(sizes));
-    return (
-      `<div class="sdc-cartoteca__slide${hidden}" data-slide-index="${index}"` +
-      ` data-sizes="${sizesJson}"${slideAria}${ariaAttr}>` +
-      `<img src="${esc(src)}"` +
-      ` alt="${Drupal.t('Vista @n del mapa', { '@n': index + 1 })}"` +
-      ` class="sdc-cartoteca__image card-img-top img-fluid" loading="lazy" />` +
-      `</div>`
-    );
-  }
-
-  function buildControls(firstSizes) {
-    const options = IMAGE_SIZES.filter((s) => firstSizes[s])
-      .map(
-        (s) =>
-          `<option value="${esc(safeUrl(firstSizes[s]))}">${SIZE_LABELS[s]}</option>`,
-      )
-      .join('');
-    const firstKey = IMAGE_SIZES.find((s) => firstSizes[s]);
-    const href = firstKey ? esc(safeUrl(firstSizes[firstKey])) : '#';
-    return (
-      `<div class="sdc-cartoteca__controls card-footer d-flex align-items-center gap-2" data-active-slide="0">` +
-      `<select class="sdc-cartoteca__resolution form-select form-select-sm"` +
-      ` aria-label="${Drupal.t('Resolución de imagen')}">${options}</select>` +
-      `<a class="sdc-cartoteca__download btn btn-sm btn-outline-primary" href="${href}" download>` +
-      `${Drupal.t('Descargar')}</a></div>`
-    );
-  }
-
-  function buildThumbnails(slides) {
-    if (slides.length <= 1) return '';
-    const thumbs = slides
-      .map((sizes, i) => {
-        const src = safeUrl(
-          sizes['original-view'] ||
-            sizes.big ||
-            sizes.medium ||
-            sizes.small ||
-            sizes.default ||
-            '',
-        );
-        const active = i === 0 ? ' sdc-cartoteca__thumb--active' : '';
-        const pressed = i === 0 ? 'true' : 'false';
-        return (
-          `<button class="sdc-cartoteca__thumb${active} btn btn-link p-1"` +
-          ` data-slide-index="${i}" aria-pressed="${pressed}" type="button">` +
-          `<img src="${esc(src)}"` +
-          ` alt="${Drupal.t('Miniatura @n', { '@n': i + 1 })}"` +
-          ` class="sdc-cartoteca__thumb-img" loading="lazy" /></button>`
-        );
-      })
-      .join('');
-    return (
-      `<div class="sdc-cartoteca__thumbnails d-flex flex-wrap gap-1 p-2 border-top overflow-auto">` +
-      `${thumbs}</div>`
-    );
-  }
-
-  function buildArrows(total) {
-    if (total <= 1) return '';
-    return (
-      `<button class="sdc-cartoteca__btn-prev btn btn-light position-absolute top-50 start-0 translate-middle-y"` +
-      ` data-direction="prev" type="button" aria-label="${Drupal.t('Imagen anterior')}">` +
-      `<span aria-hidden="true">‹</span></button>` +
-      `<button class="sdc-cartoteca__btn-next btn btn-light position-absolute top-50 end-0 translate-middle-y"` +
-      ` data-direction="next" type="button" aria-label="${Drupal.t('Imagen siguiente')}">` +
-      `<span aria-hidden="true">›</span></button>`
-    );
-  }
-
-  function buildLoadedHTML(slides) {
-    const total = slides.length;
-    const slidesHTML = slides.map((s, i) => buildSlide(s, i, total)).join('');
-    const arrows = buildArrows(total);
-    const thumbs = buildThumbnails(slides);
-    const controls = slides[0].default ? '' : buildControls(slides[0]);
-    // Con varias diapositivas el escenario es un carrusel (WCAG 4.1.2).
-    const stageAria =
-      total > 1
-        ? ` role="group" aria-roledescription="${Drupal.t('Carrusel')}"` +
-          ` aria-label="${Drupal.t('Imágenes del mapa')}"`
-        : '';
-    return (
-      `<div class="sdc-cartoteca__stage position-relative"${stageAria}>${slidesHTML}${arrows}</div>` +
-      `${thumbs}${controls}`
-    );
-  }
-
-  function buildInitialHTML(defaultImage) {
-    return (
-      `<div class="sdc-cartoteca__stage">` +
-      `<div class="sdc-cartoteca__slide" data-slide-index="0" data-sizes="{}">` +
-      `<img src="${esc(safeUrl(defaultImage))}" alt="${Drupal.t('Imagen no disponible')}"` +
-      ` class="sdc-cartoteca__image card-img-top img-fluid" loading="lazy" /></div></div>`
-    );
-  }
-
-  function buildLoadingHTML() {
-    return (
-      `<div class="sdc-cartoteca__stage">` +
-      `<div class="spinner-border text-secondary" role="status">` +
-      `<span class="visually-hidden">${Drupal.t('Cargando…')}</span></div></div>`
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Helpers de navegación
-  // ---------------------------------------------------------------------------
-
   function updateControls(controls, sizes) {
     const select = controls.querySelector('.sdc-cartoteca__resolution');
     const link = controls.querySelector('.sdc-cartoteca__download');
@@ -229,6 +44,14 @@
     if (link && select.value) link.href = select.value;
   }
 
+  /**
+   * Muestra la diapositiva indicada y sincroniza miniaturas y controles.
+   *
+   * @param {HTMLElement} wrapper
+   *   Contenedor del slider.
+   * @param {number} targetIndex
+   *   Índice de la diapositiva destino.
+   */
   function goToSlide(wrapper, targetIndex) {
     const slides = wrapper.querySelectorAll('.sdc-cartoteca__slide');
     const thumbs = wrapper.querySelectorAll('.sdc-cartoteca__thumb');
@@ -256,7 +79,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Behavior: navegación (todo event delegation — funciona con HTML dinámico)
+  // Behavior: navegación (event delegation — funciona con HTML dinámico)
   // ---------------------------------------------------------------------------
 
   Drupal.behaviors.sdcCartotecaSlider = {
@@ -316,43 +139,41 @@
           const url = e.detail?.url ?? '';
 
           if (!url) {
-            body.innerHTML = buildInitialHTML(defaultImage);
+            body.innerHTML = S.buildInitialHTML(defaultImage);
             return;
           }
 
-          body.innerHTML = buildLoadingHTML();
+          body.innerHTML = S.buildLoadingHTML();
           Drupal.announce(Drupal.t('Cargando imágenes del mapa…'));
 
+          let ok = false;
+          let data = null;
           try {
             const response = await fetch(url);
-            if (reqId !== currentRequest) return;
-            if (!response.ok) throw new Error(response.status);
-            const data = await response.json();
-            if (reqId !== currentRequest) return;
-
-            if (!Array.isArray(data) || !data.length) {
-              body.innerHTML = buildInitialHTML(defaultImage);
-              Drupal.announce(Drupal.t('No se han encontrado imágenes.'));
-              return;
-            }
-
-            const slides = normalizeImages(data[0], defaultImage);
-            body.innerHTML = buildLoadedHTML(slides);
-            Drupal.announce(
-              slides[0].default
-                ? Drupal.t('No se han encontrado imágenes.')
-                : Drupal.formatPlural(
-                    slides.length,
-                    '1 imagen cargada.',
-                    '@count imágenes cargadas.',
-                  ),
-            );
+            ok = response.ok;
+            if (ok) data = await response.json();
           } catch (_err) {
-            if (reqId !== currentRequest) return;
-            body.innerHTML = buildInitialHTML(defaultImage);
+            ok = false;
+          }
+          if (reqId !== currentRequest) return;
+
+          const { status, slides } = S.classifyResponse(ok, data, defaultImage);
+          body.innerHTML = S.buildLoadedHTML(slides);
+
+          if (status === 'loaded' && !slides[0].default) {
+            Drupal.announce(
+              Drupal.formatPlural(
+                slides.length,
+                '1 imagen cargada.',
+                '@count imágenes cargadas.',
+              ),
+            );
+          } else if (status === 'error') {
             Drupal.announce(
               Drupal.t('No se han podido cargar las imágenes del mapa.'),
             );
+          } else {
+            Drupal.announce(Drupal.t('No se han encontrado imágenes.'));
           }
         });
       });

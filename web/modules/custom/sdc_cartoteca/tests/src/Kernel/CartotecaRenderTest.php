@@ -29,6 +29,7 @@ class CartotecaRenderTest extends ComponentKernelTestBase {
     'system',
     'user',
     'serialization',
+    'inline_form_errors',
     'sdc_cartoteca',
   ];
 

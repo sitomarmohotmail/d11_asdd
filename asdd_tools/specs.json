@@ -69,10 +69,12 @@
     "titulo": "Módulo sdc_cartoteca — bloque buscador de mapas con componentes SDC",
     "nivel": "L",
     "tipo": "modulo",
-    "estado": "aprobada",
-    "version": "1.5",
+    "estado": "implementada",
+    "version": "1.6",
     "file": "007-sdc-cartoteca.md",
     "gates": [
+      "val",
+      "qa",
       "seg",
       "a11y"
     ]

@@ -24,6 +24,7 @@ class CartotecaFormTest extends KernelTestBase {
    */
   protected static $modules = [
     'sdc_cartoteca',
+    'inline_form_errors',
     'system',
     'user',
   ];
@@ -72,7 +73,10 @@ class CartotecaFormTest extends KernelTestBase {
   }
 
   /**
-   * CA2b — enviar el formulario con el campo vacío produce error de #required.
+   * CA2b (servidor) — enviar el formulario vacío produce error de #required.
+   *
+   * El render inline del error lo cubre Functional\CartotecaFormErrorTest; aquí
+   * se comprueba que la validación de servidor fija el error del campo.
    */
   public function testRequiredValidationError(): void {
     $form_state = new FormState();
@@ -82,6 +86,18 @@ class CartotecaFormTest extends KernelTestBase {
       ->submitForm(CartotecaSearchForm::class, $form_state);
 
     $this->assertArrayHasKey('numero_control', $form_state->getErrors());
+  }
+
+  /**
+   * CA11b — cada componente se envuelve en una columna Bootstrap del tema.
+   */
+  public function testResultsUseBootstrapColumns(): void {
+    $form = $this->buildCartotecaForm();
+
+    $images = $form['results']['images_wrapper']['#attributes']['class'] ?? [];
+    $info = $form['results']['info_wrapper']['#attributes']['class'] ?? [];
+    $this->assertContains('col-md-6', $images);
+    $this->assertContains('col-md-6', $info);
   }
 
 }

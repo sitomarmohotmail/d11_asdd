@@ -1,9 +1,12 @@
 /**
  * @file
- * Formulario de búsqueda de la Cartoteca IECA.
+ * Comportamiento del formulario de búsqueda de la Cartoteca IECA.
  *
- * Valida el campo inline, construye la URL y despacha el evento
- * cartoteca:load en cada componente del formulario.
+ * Mejora progresiva: con valor, intercepta el envío (sin recarga) y despacha
+ * cartoteca:load en cada componente; con el campo vacío, deja que el formulario
+ * se envíe para que la validación de servidor (inline_form_errors) muestre el
+ * error inline. La construcción de la URL vive en cartoteca-search-form.logic.js
+ * (Drupal.sdcCartoteca.form).
  *
  * @param {Drupal} Drupal
  *   Drupal global object.
@@ -13,6 +16,8 @@
  *   Drupal settings object.
  */
 (function sdcCartotecaSearchFormInit(Drupal, once, drupalSettings) {
+  const F = Drupal.sdcCartoteca.form;
+
   Drupal.behaviors.cartotecaSearchForm = {
     attach(context) {
       once(
@@ -22,77 +27,38 @@
       ).forEach((form) => {
         const input = form.querySelector('.sdc-cartoteca__input');
         const limpiarBtn = form.querySelector('[data-cartoteca-limpiar]');
-        const errorId = `${form.id || 'cartoteca'}-input-error`;
 
-        // --- Gestión de error inline ---
-
-        function showError(msg) {
-          let errorEl = form.querySelector(`#${CSS.escape(errorId)}`);
-          if (!errorEl) {
-            errorEl = document.createElement('div');
-            errorEl.id = errorId;
-            errorEl.className =
-              'sdc-cartoteca__field-error text-danger small mt-1';
-            errorEl.setAttribute('role', 'alert');
-            input.after(errorEl);
-          }
-          errorEl.textContent = msg;
-          input.setAttribute('aria-invalid', 'true');
-          input.setAttribute('aria-describedby', errorId);
-        }
-
-        function clearError() {
-          const errorEl = form.querySelector(`#${CSS.escape(errorId)}`);
-          if (errorEl) errorEl.remove();
-          input.removeAttribute('aria-invalid');
-          input.removeAttribute('aria-describedby');
-        }
-
-        // --- Despacho del evento a los componentes ---
-
+        /**
+         * Despacha cartoteca:load en los componentes del formulario.
+         *
+         * @param {string} url
+         *   URL de la API, o '' para restaurar el estado inicial.
+         */
         function dispatch(url) {
-          form.querySelectorAll('.sdc-cartoteca__slider').forEach((el) =>
-            el.dispatchEvent(
-              new CustomEvent('cartoteca:load', {
-                bubbles: false,
-                detail: { url },
-              }),
-            ),
-          );
-          form.querySelectorAll('.sdc-cartoteca__info').forEach((el) =>
-            el.dispatchEvent(
-              new CustomEvent('cartoteca:load', {
-                bubbles: false,
-                detail: { url },
-              }),
-            ),
-          );
+          form
+            .querySelectorAll('.sdc-cartoteca__slider, .sdc-cartoteca__info')
+            .forEach((el) =>
+              el.dispatchEvent(
+                new CustomEvent('cartoteca:load', {
+                  bubbles: false,
+                  detail: { url },
+                }),
+              ),
+            );
         }
-
-        // --- Submit: validar y lanzar ---
 
         form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          clearError();
-
           const val = (input?.value ?? '').trim();
-          if (!val) {
-            showError(Drupal.t('Este campo es obligatorio.'));
-            input?.focus();
-            return;
-          }
-
+          // Campo vacío: no interceptamos; valida el servidor (IFE).
+          if (!val) return;
+          e.preventDefault();
           const base = drupalSettings?.sdc_cartoteca?.apiBase ?? '';
-          const url = `${base}&numero_de_control=${encodeURIComponent(val.toUpperCase())}`;
-          dispatch(url);
+          dispatch(F.buildApiUrl(base, val));
         });
-
-        // --- Limpiar ---
 
         if (limpiarBtn) {
           limpiarBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            clearError();
             if (input) input.value = '';
             dispatch('');
           });

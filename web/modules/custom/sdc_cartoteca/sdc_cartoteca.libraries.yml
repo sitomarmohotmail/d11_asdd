@@ -1,5 +1,6 @@
 cartoteca-search-form:
   js:
+    js/cartoteca-search-form.logic.js: {}
     js/cartoteca-search-form.js: {}
   css:
     component:
@@ -11,6 +12,7 @@ cartoteca-search-form:
 
 cartoteca-image-slider:
   js:
+    components/cartoteca-image-slider/cartoteca-image-slider.logic.js: {}
     components/cartoteca-image-slider/cartoteca-image-slider.js: {}
   css:
     component:
@@ -22,6 +24,7 @@ cartoteca-image-slider:
 
 cartoteca-mapa-info:
   js:
+    components/cartoteca-mapa-info/cartoteca-mapa-info.logic.js: {}
     components/cartoteca-mapa-info/cartoteca-mapa-info.js: {}
   css:
     component:

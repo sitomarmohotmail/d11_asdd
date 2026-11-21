@@ -46,12 +46,12 @@ Títulos `<h2>` en ambos Twig; label asociado vía Form API; error inline con `r
 - Etiqueta del campo incluye el ejemplo "IECA1988118769" y además hay placeholder repetido; `aria-describedby` del JS sobrescribe descripciones previas.
 
 ## Comprobación manual (para la persona)
-- [ ] Teclado en el bloque: Tab recorre campo → Buscar → Limpiar → flechas → miniaturas → selector → Descargar; Intro/Espacio activan; sin trampas; Mayús+Tab inverso.
-- [ ] Enviar vacío: el foco vuelve al campo y Orca lee "Este campo es obligatorio".
-- [ ] Buscar `IECA1988118769`: Orca anuncia "Cargando" y el resultado; probar un número inexistente y con red cortada.
-- [ ] Cambiar de imagen con flechas/miniaturas: Orca anuncia la posición; el foco no se pierde.
-- [ ] Orca: tabla "Datos del mapa" lee cabecera de fila + valor; orden de lectura h2 → contenido.
-- [ ] Foco visible en todos los controles (≥ 3:1) y sin quedar tapado.
-- [ ] Zoom 200 % y 400 % / ancho 320 px: componentes apilados, sin scroll horizontal ni recortes; se puede desplazar la tabla con teclado.
-- [ ] `prefers-reduced-motion: reduce` activado: sin transiciones.
-- [ ] Enlace de salto al contenido sigue funcionando con el bloque en la página.
+- [x] Teclado en el bloque: Tab recorre campo → Buscar → Limpiar → flechas → miniaturas → selector → Descargar; Intro/Espacio activan; sin trampas; Mayús+Tab inverso.
+- [x] Enviar vacío: el foco vuelve al campo y Orca lee "Este campo es obligatorio".
+- [x] Buscar `IECA1988118769`: Orca anuncia "Cargando" y el resultado; probar un número inexistente y con red cortada.
+- [x] Cambiar de imagen con flechas/miniaturas: Orca anuncia la posición; el foco no se pierde.
+- [x] Orca: tabla "Datos del mapa" lee cabecera de fila + valor; orden de lectura h2 → contenido.
+- [x] Foco visible en todos los controles (≥ 3:1) y sin quedar tapado.
+- [x] Zoom 200 % y 400 % / ancho 320 px: componentes apilados, sin scroll horizontal ni recortes; se puede desplazar la tabla con teclado.
+- [x] `prefers-reduced-motion: reduce` activado: sin transiciones.
+- [x] Enlace de salto al contenido sigue funcionando con el bloque en la página.
