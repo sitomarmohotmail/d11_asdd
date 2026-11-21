@@ -1,7 +1,7 @@
 ---
 id: 001
 titulo: Tema hijo de Bootstrap5
-version: 1.2
+version: 1.3
 estado: implementada
 nivel: L
 tipo: tema
@@ -498,3 +498,13 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 - v1.1: Bootstrap5 tiene más textos en inglés sin `|t` en plantillas
   heredadas: `aria-label="Toggle navigation"` (barra) y `aria-label="Close"`
   (mensajes). Candidatos a OBS según RA.
+- v1.3: corregida la errata del **nombre máquina del tema**: el directorio y
+  los ficheros estaban como `d11assd_theme` (doble «s») mientras que todo el
+  contenido (config, `system.theme`, `core.extension`, namespaces de tests,
+  specs) ya usaba `d11asdd_theme` (doble «d»). Esta divergencia dejaba
+  `config:status` permanentemente sucio (activo `d11assd_theme` ≠ sync
+  `d11asdd_theme`). Se renombraron directorio y ficheros a `d11asdd_theme` y se
+  reconcilió el sitio con `drush cim` (bloques migrados como *rename*,
+  conservando su colocación). No cambia el nombre de la BD local (`d11assd`),
+  que es un recurso del sistema. Tras la corrección `config:status` queda en 0
+  diferencias.
