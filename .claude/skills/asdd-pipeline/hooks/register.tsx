@@ -1,9 +1,19 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
-import type { Spec } from '../types'
+import type { Spec, SpecReport } from '../types'
 
 const PANE = 'asdd-pipeline'
 const DEFAULT_SPECS_DIR = '/var/www/d11asdd/specs'
+
+// Resumen por documento de la spec (igual que el panel web: mismo orden y campos).
+const DOC_LABELS: Record<string, string> = {
+  spec: 'spec', validacion: 'validación', qa: 'qa', seguridad: 'seguridad', accesibilidad: 'accesibilidad',
+}
+const DOC_ORDER = ['spec', 'validacion', 'qa', 'seguridad', 'accesibilidad'] as const
+const FIELD_LABELS: Record<string, string> = {
+  fecha: 'Fecha', version: 'Versión de la spec', resultado: 'Resultado', hallazgos: 'Hallazgos',
+}
+const FIELD_ORDER = ['fecha', 'version', 'resultado', 'hallazgos'] as const
 
 const specsAtom = atom({ plugin: 'asdd-pipeline', key: 'specs' } as const, [] as Spec[], {
   shape: 'specs-2',
@@ -253,6 +263,7 @@ export const register: Register = (on, options) => {
     const filtered = specs
       .filter(s => !filter      || s.estado === filter)
       .filter(s => !levelFilter || s.nivel  === levelFilter)
+      .sort((a: Spec, b: Spec) => b.id.localeCompare(a.id)) // id descendente: la más reciente primero
     const setFilter      = (s: string) => update($, filterAtom,      f => (f === s ? null : s))
     const setLevelFilter = (n: string) => update($, levelFilterAtom, f => (f === n ? null : n))
 
@@ -410,6 +421,32 @@ export const register: Register = (on, options) => {
                     <Text color="#c8d0e0">   </Text>
                     <Text color={s.fg}>● {spec.estado}</Text>
                   </Box>
+
+                  {/* ── card-meta: resumen por documento (Fecha · Versión · Resultado · Hallazgos) ── */}
+                  {(() => {
+                    const reports = spec.reports || {}
+                    const docs = DOC_ORDER.filter(k => reports[k])
+                    if (docs.length === 0) return null
+                    return (
+                      <Box flexDirection="column" gap={1} marginTop={1}>
+                        {docs.map(k => {
+                          const r: SpecReport = reports[k]
+                          const fields = FIELD_ORDER.filter(f => r[f])
+                          return (
+                            <Box key={k} flexDirection="column" gap={0}>
+                              <Text bold color="#8fa3c8">{DOC_LABELS[k]}</Text>
+                              {fields.map(f => (
+                                <Box key={f} flexDirection="row" gap={1}>
+                                  <Text dimColor>{FIELD_LABELS[f]}:</Text>
+                                  <Text color="#c8d0e0">{r[f]}</Text>
+                                </Box>
+                              ))}
+                            </Box>
+                          )
+                        })}
+                      </Box>
+                    )
+                  })()}
                 </>
               )}
             </Box>

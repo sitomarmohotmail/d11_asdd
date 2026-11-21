@@ -1,3 +1,11 @@
+export type SpecReport = {
+  fecha?: string
+  version?: string
+  resultado?: string
+  hallazgos?: string
+  estado?: string
+}
+
 export type Spec = {
   id: string
   titulo: string
@@ -6,6 +14,7 @@ export type Spec = {
   estado: 'borrador' | 'aprobada' | 'implementada'
   version: string
   gates: string[]
+  reports?: Record<string, SpecReport>
 }
 
 declare module 'claude-code' {
