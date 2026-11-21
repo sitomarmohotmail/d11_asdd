@@ -189,8 +189,10 @@ web/modules/custom/sdc_cartoteca/
     block--sdc-cartoteca.html.twig
   tests/src/
     Unit/CartotecaApiServiceTest.php
-    Kernel/CartotecaBlockTest.php
-    Functional/CartotecaFunctionalTest.php
+    Kernel/CartotecaBlockTest.php          ← bloque + servicio registrados
+    Kernel/CartotecaFormTest.php           ← estructura + validación del formulario
+    Kernel/CartotecaRenderTest.php         ← render de los componentes SDC
+    FunctionalJavascript/CartotecaJavascriptTest.php ← escenarios con JS (pendientes)
 ```
 
 ### Campos mapeados desde el JSON a `cartoteca-mapa-info`
@@ -262,22 +264,24 @@ existentes pero ya no lo usa el formulario.
 | Requisito | Criterio | Test |
 |-----------|----------|------|
 | R1 | CA1 | `Kernel\CartotecaBlockTest::testBlockExists` |
-| R2 | CA2 | `Functional\CartotecaFunctionalTest::testFormRendered` |
-| R2 | CA2b | `Functional\CartotecaFunctionalTest::testFormRequiredValidation` |
-| R3 | CA3 | `Unit\CartotecaApiServiceTest::testApiCall` / `Kernel\CartotecaBlockTest::testApiParsing` |
-| R3 | CA3b | `Functional\CartotecaFunctionalTest::testApiUrlInDrupalSettings` |
-| R4 | CA4 | `Functional\CartotecaFunctionalTest::testSliderRendered` |
+| R2 | CA2 | `Kernel\CartotecaFormTest::testFieldMaxlengthRequiredAndButton` |
+| R2 | CA2b | `Kernel\CartotecaFormTest::testRequiredValidationError` |
+| R3 | CA3 | `Unit\CartotecaApiServiceTest::testApiCall` |
+| R3 | CA3b | `Kernel\CartotecaFormTest::testApiUrlInDrupalSettings` |
+| R4 | CA4 | `FunctionalJavascript\CartotecaJavascriptTest::testInfoAndSliderAfterSearch` |
 | R4 | CA4b | `Unit\CartotecaApiServiceTest::testNoImagesUsesDefault` |
-| R4 | CA5 | `Functional\CartotecaFunctionalTest::testSliderControls` |
-| R4 | CA6 | `Functional\CartotecaFunctionalTest::testResolutionSelector` |
-| R5 | CA7 | `Functional\CartotecaFunctionalTest::testInfoFields` |
+| R4 | CA5 | `FunctionalJavascript\CartotecaJavascriptTest::testSliderControls` |
+| R4 | CA6 | `FunctionalJavascript\CartotecaJavascriptTest::testResolutionSelector` |
+| R5 | CA7 | `FunctionalJavascript\CartotecaJavascriptTest::testInfoAndSliderAfterSearch` |
 | R5 | CA7b | `Unit\CartotecaApiServiceTest::testEmptyFieldsAreStripped` |
-| R6 | CA8 | `Functional\CartotecaFunctionalTest::testInitialState` |
-| R7 | CA9 | `Functional\CartotecaFunctionalTest::testAjaxUpdate` |
+| R6 | CA8 | `Kernel\CartotecaRenderTest::testSliderInitialState` |
+| R7 | CA9 | `FunctionalJavascript\CartotecaJavascriptTest::testAjaxUpdate` |
 | R8 | CA10a | `Unit\CartotecaApiServiceTest::testEmptyArrayIsNotFound` |
 | R8 | CA10b | `Unit\CartotecaApiServiceTest::testHttpErrorHandling` |
 | R9 | CA11 | `check.sh` (axe 320 px) |
 | RA | CA-A1 | `check.sh` (axe + reflujo + foco) |
+| RA | CA-A2 | `Kernel\CartotecaRenderTest::testInfoInitialState` |
+| RA | CA-A3 | `FunctionalJavascript\CartotecaJavascriptTest::testMetadataTableAccessibility` |
 
 ## Puertas
 

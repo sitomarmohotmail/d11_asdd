@@ -68,10 +68,14 @@ if [ -n "$spec" ]; then
     while read -r ref; do
       local type="${ref%%\\*}" rest="${ref#*\\}"
       local class="${rest%%::*}" method="${rest#*::}"
-      if ! grep -qs "function ${method}(" web/modules/custom/*/tests/src/"$type"/"$class".php web/themes/custom/*/tests/src/"$type"/"$class".php; then
+      # grep -l lista los ficheros con coincidencia; el 2>/dev/null descarta el
+      # error del glob que no expande (p. ej. sin tests en themes). El segundo
+      # grep decide si hubo al menos una coincidencia. Evita depender del código
+      # de salida de grep ante ficheros inexistentes (ugrep devuelve 2).
+      if ! grep -l "function ${method}(" web/modules/custom/*/tests/src/"$type"/"$class".php web/themes/custom/*/tests/src/"$type"/"$class".php 2>/dev/null | grep -q .; then
         echo "No existe: $ref"; missing=1
       fi
-    done < <(grep -oE '(Unit|Kernel|Functional)\\[A-Za-z0-9_]+::test[A-Za-z0-9_]+' "$spec" | sort -u)
+    done < <(grep -oE '(FunctionalJavascript|Unit|Kernel|Functional)\\[A-Za-z0-9_]+::test[A-Za-z0-9_]+' "$spec" | sort -u)
     return $missing
   }
   run "trazabilidad ($spec)" trace
