@@ -173,6 +173,19 @@ async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
   }
 }
 
+// ¿Un texto de hallazgos declara BLOQUEANTES sin resolver?
+// Los hallazgos son texto libre tipo "0 BLOQUEANTES · 2 ALTOS · …".
+function hallazgoBloqueante(h?: string): boolean {
+  const m = String(h || '').match(/(\d+)\s*BLOQUEANTE/i)
+  return Boolean(m && Number(m[1]) > 0)
+}
+
+// ¿Algún documento de la spec tiene hallazgos BLOQUEANTES sin resolver?
+function specBloqueada(spec: Spec): boolean {
+  const reports = spec.reports || {}
+  return Object.keys(reports).some(k => hallazgoBloqueante(reports[k]?.hallazgos))
+}
+
 // ── Colors ────────────────────────────────────────────────────────────────────
 
 const STATE = {
@@ -351,6 +364,7 @@ export const register: Register = (on, options) => {
         {filtered.map(spec => {
           const s = sc(spec.estado)
           const l = lc(spec.nivel)
+          const blocked = specBloqueada(spec)
 
           // Puertas de calidad que aplican a esta spec
           const allGates: Array<{ key: string; label: string }> = []
@@ -373,7 +387,7 @@ export const register: Register = (on, options) => {
               flexDirection="column"
               gap={1}
               borderStyle="round"
-              borderColor={s.bd}
+              borderColor={blocked ? '#ff5555' : s.bd}
               backgroundColor={s.bg}
               paddingX={2}
               paddingY={1}
@@ -381,6 +395,7 @@ export const register: Register = (on, options) => {
               {/* ── card-top: id — version — tipo  |  nivel  toggle ── */}
               <Box flexDirection="column" gap={0}>
                 <Box flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
+                  {blocked && <Text bold color="#ff5555">⛔</Text>}
                   <Text bold color="#dce3f4">{spec.id} — v{spec.version}</Text>
                   {spec.tipo ? <Text bold color="#dce3f4">— {spec.tipo}</Text> : null}
                   <Box flexGrow={1} />
@@ -432,13 +447,18 @@ export const register: Register = (on, options) => {
                         {docs.map(k => {
                           const r: SpecReport = reports[k]
                           const fields = FIELD_ORDER.filter(f => r[f])
+                          const docBlocked = hallazgoBloqueante(r.hallazgos)
                           return (
                             <Box key={k} flexDirection="column" gap={0}>
-                              <Text bold color="#8fa3c8">{DOC_LABELS[k]}</Text>
+                              <Text bold color={docBlocked ? '#ff5555' : '#8fa3c8'}>
+                                {docBlocked ? '⛔ ' : ''}{DOC_LABELS[k]}
+                              </Text>
                               {fields.map(f => (
                                 <Box key={f} flexDirection="row" gap={1}>
                                   <Text dimColor>{FIELD_LABELS[f]}:</Text>
-                                  <Text color="#c8d0e0">{r[f]}</Text>
+                                  <Text color={f === 'hallazgos' && docBlocked ? '#ff5555' : '#c8d0e0'}>
+                                    {r[f]}
+                                  </Text>
                                 </Box>
                               ))}
                             </Box>

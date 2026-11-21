@@ -399,6 +399,7 @@ main {
 
 /* ── Spec card ────────────────────────────────────────── */
 .card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -417,6 +418,28 @@ main {
 
 .card:hover { box-shadow: var(--sh-up); transform: translateY(-2px); }
 .card[hidden] { display: none; }
+
+/* Hallazgos BLOQUEANTES sin resolver: borde e icono rojos en la esquina. */
+.card[data-bloqueante="true"] { border-color: #ff5555; }
+.card-meta-doc.bloqueante .card-meta-doc-t { color: #ff5555; }
+.card-meta-v.bloqueante { color: #ff5555; font-weight: 600; }
+.card-block {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  border-radius: 50%;
+  background: #ff5555;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.4);
+  z-index: 2;
+}
 
 .card-top {
   display: flex;
@@ -1085,15 +1108,38 @@ function gatesFor(spec) {
 const DOC_LABELS = { spec:'spec', validacion:'validación', qa:'qa', seguridad:'seguridad', accesibilidad:'accesibilidad' };
 const FIELD_LABELS = { fecha:'Fecha', version:'Versión de la spec', resultado:'Resultado', hallazgos:'Hallazgos' };
 
+// ¿Un texto de hallazgos declara BLOQUEANTES sin resolver?
+// Los hallazgos son texto libre tipo "0 BLOQUEANTES · 2 ALTOS · …".
+function hallazgoBloqueante(h) {
+  const m = String(h || '').match(/(\d+)\s*BLOQUEANTE/i);
+  return !!(m && Number(m[1]) > 0);
+}
+
+// Documentos (validación/qa/seguridad/accesibilidad/spec) con bloqueantes, por etiqueta.
+function docsBloqueantes(spec) {
+  const reports = spec.reports || {};
+  return Object.keys(DOC_LABELS)
+    .filter(k => reports[k] && hallazgoBloqueante(reports[k].hallazgos))
+    .map(k => DOC_LABELS[k]);
+}
+
+// ¿Algún documento de la spec tiene hallazgos BLOQUEANTES sin resolver?
+function specBloqueada(spec) {
+  return docsBloqueantes(spec).length > 0;
+}
+
 // Resumen de cada documento de la spec para la parte desplegable de la tarjeta.
 function cardMetaHTML(spec) {
   const reports = spec.reports || {};
   const docs = Object.keys(DOC_LABELS).filter(k => reports[k]).map(k => {
     const r = reports[k];
-    const rows = ['fecha', 'version', 'resultado', 'hallazgos'].filter(f => r[f]).map(f =>
-      `<div class="card-meta-row"><span class="card-meta-k">${FIELD_LABELS[f]}</span><span class="card-meta-v">${esc(r[f])}</span></div>`
-    ).join('');
-    return `<div class="card-meta-doc"><div class="card-meta-doc-t">${esc(DOC_LABELS[k])}</div>${rows}</div>`;
+    const docBlocked = hallazgoBloqueante(r.hallazgos);
+    const rows = ['fecha', 'version', 'resultado', 'hallazgos'].filter(f => r[f]).map(f => {
+      const vClass = (f === 'hallazgos' && docBlocked) ? 'card-meta-v bloqueante' : 'card-meta-v';
+      return `<div class="card-meta-row"><span class="card-meta-k">${FIELD_LABELS[f]}</span><span class="${vClass}">${esc(r[f])}</span></div>`;
+    }).join('');
+    const title = `${docBlocked ? '⛔ ' : ''}${esc(DOC_LABELS[k])}`;
+    return `<div class="card-meta-doc${docBlocked ? ' bloqueante' : ''}"><div class="card-meta-doc-t">${title}</div>${rows}</div>`;
   }).join('');
   return docs ? `<div class="card-meta">${docs}</div>` : '';
 }
@@ -1102,7 +1148,13 @@ function cardHTML(spec) {
   const agents = normList(runningAgents[spec.id]);
   const agentsHTML = agents.length
     ? `<div class="agent-icons">${agents.map(agentIconHTML).join('')}</div>` : '';
-  return `<article class="card collapsed" data-estado="${spec.estado}" data-spec-id="${spec.id}">
+  const docsBloq = docsBloqueantes(spec);
+  const blocked = docsBloq.length > 0;
+  const blockLabel = blocked
+    ? `Hallazgos BLOQUEANTES sin resolver en: ${docsBloq.join(', ')}`
+    : '';
+  return `<article class="card collapsed" data-estado="${spec.estado}" data-spec-id="${spec.id}"${blocked ? ' data-bloqueante="true"' : ''}>
+    ${blocked ? `<span class="card-block" role="img" aria-label="${esc(blockLabel)}" title="${esc(blockLabel)}">!</span>` : ''}
     <div class="card-top">
       <span class="card-id-ver">${spec.id} — v${spec.version}</span>
       ${spec.tipo ? `<span class="meta-chip">${spec.tipo}</span>` : ''}
