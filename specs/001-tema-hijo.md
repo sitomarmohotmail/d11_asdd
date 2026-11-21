@@ -1,7 +1,7 @@
 ---
 id: 001
 titulo: Tema hijo de Bootstrap5
-version: 1.3
+version: 1.4
 estado: implementada
 nivel: L
 tipo: tema
@@ -16,6 +16,7 @@ proyecto: d11asdd_theme
 | 1.0 | 2026-11-08 | implementada (`84bb516`) | Versión inicial, criterios en Dado/Cuando/Entonces. |
 | 1.1 | 2026-11-08 | implementada (aprobada por la persona tras validación SUPERADA CON AVISOS en la 3.ª pasada; QA, seguridad y accesibilidad superadas) | Migración a EARS y prioridades. Nuevos R10 (ajustes de Bootstrap5 propios del tema hijo) y RA (WCAG 2.2 AA). Criterios para todos los requisitos. Corregida tras `001-validacion.md` (pasadas 1 y 2: BLOQUEADA). Tras la primera puerta de accesibilidad (BLOQUEADA) se añaden, dentro de RA y con el visto bueno de la persona, CA-A1d, CA-A4d, CA-A4e y CA-A6. |
 | 1.2 | 2026-11-08 | implementada (QA y accesibilidad superados; lista manual CA-A8 confirmada por la persona) | Responsive: menú plegable operable con teclado (R11), objetivos táctiles ≥ 24 × 24 px (R12) y cierre con Esc (R13). Comprobación dinámica con Puppeteer (`--menu` en `axe-check.mjs`), no con Selenium. R5 se reformula para admitir JS propio sin compilar. |
+| 1.4 | 2026-11-21 | implementada (tests verdes, phpcs y trazabilidad OK) | Refactor de tests (sin cambios de comportamiento del tema): las 11 pruebas de portada de `FrontendTest` se consolidan en 4 métodos por afinidad (assets/branding, regiones/bloques, clases Bootstrap, accesibilidad) para compartir la instalación del sitio; la suite funcional del tema pasa de ~15 a 8 instalaciones conservando las 82 aserciones. Trazabilidad actualizada en `001-qa.md` y `001-accesibilidad.md`; corregida la referencia obsoleta `testAdminUsesClaro`→`testAdminUsesGin`. |
 
 ## Contexto
 El sitio usa ahora Olivero como tema público. Queremos un tema propio que
@@ -452,30 +453,30 @@ la configuración (`drush cim` parcial o `drush cset`) y `drush cex`.
 | R1 | CA1 | `Kernel\ThemeTest::testThemeIsDiscovered` |
 | R2 | CA1, CA2 | `Kernel\ThemeTest::testThemeIsDiscovered`, `Kernel\ThemeTest::testInstallRequiresBaseThemeAndHasRegions` |
 | R3 | CA2 | `Kernel\ThemeTest::testInstallRequiresBaseThemeAndHasRegions` |
-| R4 | CA3, CA4 | `Kernel\ThemeTest::testGlobalStylingLibrary`, `Functional\FrontendTest::testFrontPage` |
+| R4 | CA3, CA4 | `Kernel\ThemeTest::testGlobalStylingLibrary`, `Functional\FrontendTest::testFrontPageAssetsAndBranding` |
 | R5 | CA9, CA9b | `Unit\ThemeFilesTest::testNoScssOrNodeFiles`, `Unit\ThemeFilesTest::testGlobalStylingOnlyDeclaresCss` |
-| R6 | CA4, CA5a, CA5b | `Functional\FrontendTest::testFrontPage`, `Functional\FrontendTest::testAdminUsesClaro`, `Kernel\ConfigSyncTest::testExportedThemeConfiguration` |
-| R7 | CA11, CA12, CA13, CA-A6 | `Kernel\ThemeTest::testInstallPlacesBlocks`, `Functional\FrontendTest::testBlocksInRegions`, `Functional\FrontendTest::testMessagesInMain`, `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` |
-| R8 | CA14, CA15, CA-A2 | `Kernel\ThemeTest::testOwnLogoAndScreenshot`, `Functional\FrontendTest::testLogo` |
+| R6 | CA4, CA5a, CA5b | `Functional\FrontendTest::testFrontPageAssetsAndBranding`, `Functional\FrontendTest::testAdminUsesGin`, `Kernel\ConfigSyncTest::testExportedThemeConfiguration` |
+| R7 | CA11, CA12, CA13, CA-A6 | `Kernel\ThemeTest::testInstallPlacesBlocks`, `Functional\FrontendTest::testFrontPageRegionsAndBlocks`, `Functional\FrontendTest::testMessagesInMain`, `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` |
+| R8 | CA14, CA15, CA-A2 | `Kernel\ThemeTest::testOwnLogoAndScreenshot`, `Functional\FrontendTest::testFrontPageAssetsAndBranding` |
 | R9 | CA5b, CA10, CA7c | `Kernel\ConfigSyncTest::testExportedThemeConfiguration`, `Kernel\ConfigSyncTest::testExportedBlocks`, `Kernel\ConfigSyncTest::testThemeSettingsExported` |
-| R10 | CA7a | `Functional\FrontendTest::testDefaultSettingsClasses` |
-| R10 | CA7b | `Functional\FrontendTest::testNoIncompleteClasses` |
+| R10 | CA7a | `Functional\FrontendTest::testFrontPageBootstrapClasses` |
+| R10 | CA7b | `Functional\FrontendTest::testFrontPageBootstrapClasses` |
 | R10 | CA7c | `Kernel\ConfigSyncTest::testThemeSettingsExported` |
 | R10 | CA7d | `Kernel\ThemeTest::testThemeSettingsInstalledWithSchema` |
 | R10 | CA7e | `Functional\ThemeSettingsFormTest::testSaveFormKeepsValidSchema` |
 | R10 | CA8 | `Functional\FrontendTest::testSettingsChangeAppliesToCachedPage` |
-| RA | CA-A1, CA-A1b, CA-A1c, CA-A1d | `Functional\FrontendTest::testHtmlLang`, `Functional\FrontendTest::testSkipLink`, `Functional\FrontendTest::testSingleMain`, `Functional\FrontendTest::testSingleH1` |
-| RA | CA-A2 | `Functional\FrontendTest::testLogo` |
+| RA | CA-A1, CA-A1b, CA-A1c, CA-A1d | `Functional\FrontendTest::testFrontPageAccessibility` |
+| RA | CA-A2 | `Functional\FrontendTest::testFrontPageAssetsAndBranding` |
 | RA | CA-A4d, CA-A4e | `Unit\ThemeCssTest::testFocusIndicators`, `Unit\ThemeCssTest::testAlertLinks`, y medición en `001-accesibilidad.md` |
 | RA | CA-A6 | `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` |
 | RA | CA-A3, CA-A4, CA-A4b, CA-A4c | `npm run a11y` y revisión estática (informe `001-accesibilidad.md`) |
 | RA | CA-A5 | comprobación manual (informe `001-accesibilidad.md`) |
-| R11 | CA16 | `Functional\FrontendTest::testNavbarToggler` |
+| R11 | CA16 | `Functional\FrontendTest::testFrontPageRegionsAndBlocks` |
 | R11 | CA17, CA17b, CA18, CA18b, CA19 | `check.sh` (`axe-check.mjs --menu`) |
 | R12 | CA20 | `check.sh` (`axe-check.mjs --menu`) |
 | R13 | CA21, CA22 | `check.sh` (`axe-check.mjs --menu`) |
 | R13, R5 | CA23 | `Kernel\ThemeTest::testNavbarLibrary` |
-| R13 | CA23b | `Functional\FrontendTest::testNavbarScriptLoaded` |
+| R13 | CA23b | `Functional\FrontendTest::testFrontPageAssetsAndBranding` |
 | RA | CA-A7 | `check.sh` (`axe-check.mjs --menu`) |
 | RA | CA-A8 | comprobación manual |
 | — | CA6 | `vendor/bin/phpcs`, `vendor/bin/phpstan` |

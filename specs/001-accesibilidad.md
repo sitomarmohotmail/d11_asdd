@@ -142,11 +142,11 @@ Esta lista es la verificación de **CA-A5**. Hazla en Firefox o Chrome, sin sesi
 ## Tests permanentes
 | Criterio | Test | Estado |
 |---|---|---|
-| CA-A1 (`lang` igual al idioma por defecto) | `Functional\FrontendTest::testHtmlLang` | Correcto |
-| CA-A1b (enlace de salto como primer enlace, `#main-content` dentro de `<main>`) | `Functional\FrontendTest::testSkipLink` | Correcto |
-| CA-A1c (un único `<main>`) | `Functional\FrontendTest::testSingleMain` | Correcto |
-| CA-A1d (un único `<h1>`) | `Functional\FrontendTest::testSingleH1` | Correcto |
-| CA-A2 (logo en un enlace a la portada con `rel="home"` y `alt` no vacío) | `Functional\FrontendTest::testLogo` | Correcto |
+| CA-A1 (`lang` igual al idioma por defecto) | `Functional\FrontendTest::testFrontPageAccessibility` | Correcto |
+| CA-A1b (enlace de salto como primer enlace, `#main-content` dentro de `<main>`) | `Functional\FrontendTest::testFrontPageAccessibility` | Correcto |
+| CA-A1c (un único `<main>`) | `Functional\FrontendTest::testFrontPageAccessibility` | Correcto |
+| CA-A1d (un único `<h1>`) | `Functional\FrontendTest::testFrontPageAccessibility` | Correcto |
+| CA-A2 (logo en un enlace a la portada con `rel="home"` y `alt` no vacío) | `Functional\FrontendTest::testFrontPageAssetsAndBranding` | Correcto |
 | CA-A6 (bloques con `langcode: es` y etiqueta en español) | `Kernel\ConfigSyncTest::testBlockLabelsInSpanish` | Correcto |
 | CA-A4d (contorno de foco de 2 px y al menos 3:1) | `Unit\ThemeCssTest::testFocusIndicators` y la medición de este informe | **Correcto** (antes incompleto): cubre `.btn-close:focus-visible`, `.form-check-input:focus-visible`, `footer .nav-link:focus-visible` y `color: inherit` en `a.site-logo`. Ejecutado: OK |
 | CA-A4e (enlaces de los mensajes con al menos 4,5:1) | `Unit\ThemeCssTest::testAlertLinks` y la medición de este informe | Correcto |
@@ -222,9 +222,9 @@ Haz esta lista a 320 px (modo responsive de las DevTools o pantalla real), sin s
 ### Tests permanentes (v1.2)
 | Criterio | Test | Estado |
 |---|---|---|
-| CA16 (botón con `aria-expanded` y `aria-controls`) | `Functional\FrontendTest::testNavbarToggler` | Correcto |
+| CA16 (botón con `aria-expanded` y `aria-controls`) | `Functional\FrontendTest::testFrontPageRegionsAndBlocks` | Correcto |
 | CA23 (librería `navbar` con `js/navbar.js` y dependencias) | `Kernel\ThemeTest::testNavbarLibrary` | Correcto |
-| CA23b (`js/navbar.js` cargado en la portada) | `Functional\FrontendTest::testNavbarScriptLoaded` | Correcto |
+| CA23b (`js/navbar.js` cargado en la portada) | `Functional\FrontendTest::testFrontPageAssetsAndBranding` | Correcto |
 | CA17–CA22, CA20, CA-A7 | `check.sh` (`axe-check.mjs --menu`) | Superados (ver tabla) |
 | CA-A8 | Lista manual | Confirmada por la persona (2026-11-08) |
 

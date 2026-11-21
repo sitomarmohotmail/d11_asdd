@@ -13,8 +13,13 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests the theme in the browser.
  *
- * Spec 001: CA4, CA5a, CA12, CA13, CA15, CA7a, CA7b, CA8, CA-A1, CA-A1b,
- * CA-A1c, CA-A1d, CA-A2.
+ * Las comprobaciones de la portada anónima se agrupan por afinidad en cuatro
+ * métodos (assets/branding, regiones/bloques, clases Bootstrap y
+ * accesibilidad) para compartir la instalación del sitio. Los escenarios con
+ * contexto propio (tema de administración, mensajes y caché) van aparte.
+ *
+ * Spec 001: CA4, CA5a, CA7a, CA7b, CA8, CA12, CA13, CA15, CA16, CA23b, CA-A1,
+ * CA-A1b, CA-A1c, CA-A1d, CA-A2.
  */
 #[Group('d11asdd_theme')]
 class FrontendTest extends BrowserTestBase {
@@ -72,63 +77,23 @@ class FrontendTest extends BrowserTestBase {
   }
 
   /**
-   * CA4: the front page uses the theme, its CSS and shows the site name.
+   * CA4, CA23b, CA15, CA-A2: assets del tema y logo enlazado de la portada.
    */
-  public function testFrontPage(): void {
-    $this->drupalGet('<front>');
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->responseContains('themes/contrib/bootstrap5/css/style.css');
-    $this->assertSession()->responseContains('themes/custom/d11asdd_theme/css/style.css');
-    $this->assertSession()->elementTextContains('css', 'body', 'Sitio D11asdd');
-  }
-
-  /**
-   * CA5a: administration pages keep using Gin.
-   */
-  public function testAdminUsesGin(): void {
-    $this->drupalLogin($this->drupalCreateUser([
-      'access content overview',
-      'view the administration theme',
-    ]));
-    $this->drupalGet('/admin/content');
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->responseContains('themes/contrib/gin/');
-    $this->assertSession()->responseNotContains('themes/custom/d11asdd_theme/css/style.css');
-  }
-
-  /**
-   * CA12: branding and main menu in the navbar, content block in main.
-   */
-  public function testBlocksInRegions(): void {
+  public function testFrontPageAssetsAndBranding(): void {
     $this->drupalGet('<front>');
     $assert = $this->assertSession();
-    $assert->elementExists('css', 'nav.navbar #block-d11asdd-theme-branding');
-    $assert->elementExists('css', 'nav.navbar #block-d11asdd-theme-main-navigation');
-    $assert->elementExists('css', 'main #block-d11asdd-theme-content');
-  }
+    $assert->statusCodeEquals(200);
 
-  /**
-   * CA13: status messages are rendered inside main.
-   */
-  public function testMessagesInMain(): void {
-    $this->drupalGet('user/login');
-    $this->submitForm(['name' => 'nadie', 'pass' => 'incorrecta'], 'Log in');
-    $assert = $this->assertSession();
-    // The d11asdd_theme_messages block (system_messages_block) renders its
-    // fallback wrapper; Bootstrap5 renders each message as role="alert".
-    $assert->elementExists('css', 'main [data-drupal-messages-fallback]');
-    // The alert is rendered right after the fallback wrapper, inside the same
-    // messages block (block--system-messages-block.html.twig).
-    $alert = $assert->elementExists('xpath', '//main//div[@data-drupal-messages-fallback]/following-sibling::div[@role="alert"]');
-    $this->assertStringContainsString('Unrecognized username or password', $alert->getText());
-  }
+    // CA4: the front page uses the theme, its CSS and shows the site name.
+    $assert->responseContains('themes/contrib/bootstrap5/css/style.css');
+    $assert->responseContains('themes/custom/d11asdd_theme/css/style.css');
+    $assert->elementTextContains('css', 'body', 'Sitio D11asdd');
 
-  /**
-   * CA15 and CA-A2: the theme logo is linked to the front page with alt text.
-   */
-  public function testLogo(): void {
-    $this->drupalGet('<front>');
-    $link = $this->assertSession()->elementExists('xpath', '//a[@rel="home"][.//img]');
+    // CA23b: the front page loads js/navbar.js.
+    $assert->responseContains('themes/custom/d11asdd_theme/js/navbar.js');
+
+    // CA15 and CA-A2: the theme logo is linked to the front page with alt text.
+    $link = $assert->elementExists('xpath', '//a[@rel="home"][.//img]');
     $this->assertSame(Url::fromRoute('<front>')->toString(), $link->getAttribute('href'), 'The logo links to the front page.');
     $logo = $link->find('css', 'img');
     $this->assertStringContainsString('/themes/custom/d11asdd_theme/logo.svg', (string) $logo->getAttribute('src'));
@@ -136,11 +101,47 @@ class FrontendTest extends BrowserTestBase {
   }
 
   /**
-   * CA7a: default R10 settings generate complete Bootstrap classes.
+   * CA12, CA16: bloques en regiones y ARIA del toggler de la navbar.
    */
-  public function testDefaultSettingsClasses(): void {
+  public function testFrontPageRegionsAndBlocks(): void {
+    $this->drupalGet('<front>');
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+
+    // CA12: branding and main menu in the navbar, content block in main.
+    $assert->elementExists('css', 'nav.navbar #block-d11asdd-theme-branding');
+    $assert->elementExists('css', 'nav.navbar #block-d11asdd-theme-main-navigation');
+    $assert->elementExists('css', 'main #block-d11asdd-theme-content');
+
+    // CA16 (R11, v1.2): the navbar toggler button has the correct ARIA markup.
+    $button = $page->find('css', 'nav.navbar button.navbar-toggler');
+    $this->assertNotNull($button, 'Navbar toggler button exists inside nav.navbar.');
+    $this->assertSame('button', $button->getAttribute('type'));
+    $this->assertSame('false', $button->getAttribute('aria-expanded'));
+
+    $controls_id = $button->getAttribute('aria-controls');
+    $this->assertNotEmpty($controls_id, 'aria-controls is set on the toggler.');
+
+    $controlled = $page->findById($controls_id);
+    $this->assertNotNull($controlled, "Element #$controls_id referenced by aria-controls exists.");
+
+    $this->assertNotNull(
+      $controlled->find('css', '#block-d11asdd-theme-main-navigation'),
+      "#$controls_id contains the main navigation block."
+    );
+    $this->assertNotNull(
+      $controlled->find('css', '#block-d11asdd-theme-account-menu'),
+      "#$controls_id contains the account menu block."
+    );
+  }
+
+  /**
+   * CA7a, CA7b: clases Bootstrap completas y sin tokens incompletos.
+   */
+  public function testFrontPageBootstrapClasses(): void {
     $this->drupalGet('<front>');
 
+    // CA7a: default R10 settings generate complete Bootstrap classes.
     $nav = $this->classTokens('nav.navbar');
     foreach (['navbar-dark', 'text-light', 'bg-dark'] as $class) {
       $this->assertContains($class, $nav, "The navbar has class $class.");
@@ -161,19 +162,68 @@ class FrontendTest extends BrowserTestBase {
     }
 
     $this->assertSame('light', $this->assertSession()->elementExists('css', 'html')->getAttribute('data-bs-theme'));
-  }
 
-  /**
-   * CA7b: no incomplete class tokens in body, navbar and footer.
-   */
-  public function testNoIncompleteClasses(): void {
-    $this->drupalGet('<front>');
+    // CA7b: no incomplete class tokens in body, navbar and footer.
     foreach (['body', 'nav.navbar', 'footer'] as $selector) {
       $tokens = $this->classTokens($selector);
       foreach (['navbar-', 'footer-', 'bg-'] as $incomplete) {
         $this->assertNotContains($incomplete, $tokens, "$selector has no incomplete class $incomplete.");
       }
     }
+  }
+
+  /**
+   * CA-A1, CA-A1b, CA-A1c, CA-A1d: semántica accesible de la portada.
+   */
+  public function testFrontPageAccessibility(): void {
+    $this->drupalGet('<front>');
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+
+    // CA-A1: html lang matches the default site language.
+    $langcode = $this->container->get('language_manager')->getDefaultLanguage()->getId();
+    $this->assertSame($langcode, $assert->elementExists('css', 'html')->getAttribute('lang'));
+
+    // CA-A1d: the page has exactly one h1 element.
+    $this->assertCount(1, $page->findAll('css', 'h1'));
+
+    // CA-A1c: the page has exactly one main element.
+    $this->assertCount(1, $page->findAll('css', 'main'));
+
+    // CA-A1b: the first link of body skips to #main-content, inside main.
+    $first_link = $assert->elementExists('xpath', '(//body//a)[1]');
+    $this->assertSame('#main-content', $first_link->getAttribute('href'));
+    $assert->elementExists('css', 'main #main-content');
+  }
+
+  /**
+   * CA5a: administration pages keep using Gin.
+   */
+  public function testAdminUsesGin(): void {
+    $this->drupalLogin($this->drupalCreateUser([
+      'access content overview',
+      'view the administration theme',
+    ]));
+    $this->drupalGet('/admin/content');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains('themes/contrib/gin/');
+    $this->assertSession()->responseNotContains('themes/custom/d11asdd_theme/css/style.css');
+  }
+
+  /**
+   * CA13: status messages are rendered inside main.
+   */
+  public function testMessagesInMain(): void {
+    $this->drupalGet('user/login');
+    $this->submitForm(['name' => 'nadie', 'pass' => 'incorrecta'], 'Log in');
+    $assert = $this->assertSession();
+    // The d11asdd_theme_messages block (system_messages_block) renders its
+    // fallback wrapper; Bootstrap5 renders each message as role="alert".
+    $assert->elementExists('css', 'main [data-drupal-messages-fallback]');
+    // The alert is rendered right after the fallback wrapper, inside the same
+    // messages block (block--system-messages-block.html.twig).
+    $alert = $assert->elementExists('xpath', '//main//div[@data-drupal-messages-fallback]/following-sibling::div[@role="alert"]');
+    $this->assertStringContainsString('Unrecognized username or password', $alert->getText());
   }
 
   /**
@@ -203,81 +253,6 @@ class FrontendTest extends BrowserTestBase {
       $classes = preg_split('/\s+/', (string) $this->childDiv($xpath)->getAttribute('class'), -1, PREG_SPLIT_NO_EMPTY);
       $this->assertContains('container-fluid', $classes, "$xpath container is fluid.");
     }
-  }
-
-  /**
-   * CA-A1: html lang matches the default site language.
-   */
-  public function testHtmlLang(): void {
-    $this->drupalGet('<front>');
-    $langcode = $this->container->get('language_manager')->getDefaultLanguage()->getId();
-    $html = $this->assertSession()->elementExists('css', 'html');
-    $this->assertSame($langcode, $html->getAttribute('lang'));
-  }
-
-  /**
-   * CA-A1d: the page has exactly one h1 element.
-   */
-  public function testSingleH1(): void {
-    $this->drupalGet('<front>');
-    $this->assertCount(1, $this->getSession()->getPage()->findAll('css', 'h1'));
-  }
-
-  /**
-   * CA-A1b: the first link of body skips to #main-content, inside main.
-   */
-  public function testSkipLink(): void {
-    $this->drupalGet('<front>');
-    $first_link = $this->assertSession()->elementExists('xpath', '(//body//a)[1]');
-    $this->assertSame('#main-content', $first_link->getAttribute('href'));
-    $this->assertSession()->elementExists('css', 'main #main-content');
-  }
-
-  /**
-   * CA-A1c: the page has exactly one main element.
-   */
-  public function testSingleMain(): void {
-    $this->drupalGet('<front>');
-    $this->assertCount(1, $this->getSession()->getPage()->findAll('css', 'main'));
-  }
-
-  /**
-   * CA16 (R11, v1.2): the navbar toggler button has the correct ARIA markup.
-   *
-   * Checks that the button exists with aria-expanded="false" and that
-   * aria-controls points to an existing element containing both nav blocks.
-   */
-  public function testNavbarToggler(): void {
-    $this->drupalGet('<front>');
-    $page = $this->getSession()->getPage();
-
-    $button = $page->find('css', 'nav.navbar button.navbar-toggler');
-    $this->assertNotNull($button, 'Navbar toggler button exists inside nav.navbar.');
-    $this->assertSame('button', $button->getAttribute('type'));
-    $this->assertSame('false', $button->getAttribute('aria-expanded'));
-
-    $controls_id = $button->getAttribute('aria-controls');
-    $this->assertNotEmpty($controls_id, 'aria-controls is set on the toggler.');
-
-    $controlled = $page->findById($controls_id);
-    $this->assertNotNull($controlled, "Element #$controls_id referenced by aria-controls exists.");
-
-    $this->assertNotNull(
-      $controlled->find('css', '#block-d11asdd-theme-main-navigation'),
-      "#$controls_id contains the main navigation block."
-    );
-    $this->assertNotNull(
-      $controlled->find('css', '#block-d11asdd-theme-account-menu'),
-      "#$controls_id contains the account menu block."
-    );
-  }
-
-  /**
-   * CA23b (R13, v1.2): the front page loads js/navbar.js.
-   */
-  public function testNavbarScriptLoaded(): void {
-    $this->drupalGet('<front>');
-    $this->assertSession()->responseContains('themes/custom/d11asdd_theme/js/navbar.js');
   }
 
 }
