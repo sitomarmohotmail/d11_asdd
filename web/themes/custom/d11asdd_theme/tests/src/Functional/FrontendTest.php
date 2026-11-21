@@ -41,8 +41,8 @@ class FrontendTest extends BrowserTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->config('system.site')->set('name', 'Sitio D11asdd')->save();
-    $this->container->get('theme_installer')->install(['claro']);
-    $this->config('system.theme')->set('admin', 'claro')->save();
+    $this->container->get('theme_installer')->install(['gin']);
+    $this->config('system.theme')->set('admin', 'gin')->save();
 
     // The main menu is empty in the testing profile; add a link so that the
     // main navigation block is rendered (CA12).
@@ -83,16 +83,16 @@ class FrontendTest extends BrowserTestBase {
   }
 
   /**
-   * CA5a: administration pages keep using Claro.
+   * CA5a: administration pages keep using Gin.
    */
-  public function testAdminUsesClaro(): void {
+  public function testAdminUsesGin(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'access content overview',
       'view the administration theme',
     ]));
     $this->drupalGet('/admin/content');
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->responseContains('core/themes/claro/');
+    $this->assertSession()->responseContains('themes/contrib/gin/');
     $this->assertSession()->responseNotContains('themes/custom/d11asdd_theme/css/style.css');
   }
 

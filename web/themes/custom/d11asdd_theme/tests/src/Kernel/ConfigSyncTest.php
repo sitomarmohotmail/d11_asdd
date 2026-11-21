@@ -27,7 +27,7 @@ class ConfigSyncTest extends KernelTestBase {
   }
 
   /**
-   * CA5b: config/sync sets d11asdd_theme as default and Claro as admin.
+   * CA5b: config/sync sets d11asdd_theme as default and Gin as admin.
    */
   public function testExportedThemeConfiguration(): void {
     $storage = $this->syncStorage();
