@@ -22,27 +22,18 @@
         ]
       }
     ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/var/www/d11asdd/scripts/agent-hook.sh subagent-stop",
+            "async": true
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
-      {
-        "matcher": "Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/var/www/d11asdd/scripts/agent-hook.sh stop",
-            "async": true
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/var/www/d11asdd/scripts/agent-hook.sh stop",
-            "async": true
-          }
-        ]
-      },
       {
         "matcher": "Write|Edit",
         "hooks": [

@@ -711,6 +711,16 @@ main {
 .agent-icon.accesibilidad .ai { animation: bounceY   1.1s ease-in-out infinite; }
 .agent-icon.tests         .ai { animation: flashPlay 0.8s ease-in-out infinite; }
 
+/* Modo de ejecución: primer plano (borde sólido) vs segundo plano (discontinuo) */
+.agent-icon.mode-fg { border-style: solid; }
+.agent-icon.mode-bg { border-style: dashed; }
+.agent-mode {
+  font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 7px; margin-left: 1px;
+  background: rgba(255,255,255,.14); color: inherit;
+}
+.agent-icon.mode-bg .agent-mode { outline: 1px dashed currentColor; outline-offset: -1px; }
+
 /* Leyenda de agentes */
 .agent-legend {
   display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
@@ -906,9 +916,22 @@ const AGENT_MAP = {
   'tests':              { cls:'tests',         icon:'▶', label:'tests' },
 };
 
-function agentIconHTML(agentType) {
-  const a = AGENT_MAP[agentType] || { cls:'validacion', icon:'↻', label:agentType };
-  return `<span class="agent-icon ${a.cls}" title="${agentType}"><span class="ai" aria-hidden="true">${a.icon}</span>${a.label}</span>`;
+// running.json admite entradas como objeto { agent, mode, started } o, por
+// compatibilidad, como cadena suelta (se asume primer plano).
+function normAgent(e) {
+  if (typeof e === 'string') return { agent: e, mode: 'foreground' };
+  return { agent: e.agent, mode: e.mode === 'background' ? 'background' : 'foreground' };
+}
+function normList(arr) { return (arr || []).map(normAgent); }
+
+function agentIconHTML(entry) {
+  const e = normAgent(entry);
+  const a = AGENT_MAP[e.agent] || { cls:'validacion', icon:'↻', label:e.agent };
+  const bg = e.mode === 'background';
+  const modeTitle = bg ? 'segundo plano' : 'primer plano';
+  return `<span class="agent-icon ${a.cls} ${bg ? 'mode-bg' : 'mode-fg'}" title="${e.agent} · ${modeTitle}">` +
+    `<span class="ai" aria-hidden="true">${a.icon}</span>${a.label}` +
+    `<span class="agent-mode" title="${modeTitle}">${bg ? 'bg' : 'fg'}</span></span>`;
 }
 
 function updateAgentIcons(data) {
@@ -917,7 +940,7 @@ function updateAgentIcons(data) {
   // Actualizar iconos en cada tarjeta
   document.querySelectorAll('.card[data-spec-id]').forEach(card => {
     const id = card.dataset.specId;
-    const agents = runningAgents[id] || [];
+    const agents = normList(runningAgents[id]);
     let iconsEl = card.querySelector('.agent-icons');
     if (agents.length === 0) {
       if (iconsEl) iconsEl.remove();
@@ -932,24 +955,27 @@ function updateAgentIcons(data) {
   });
 
   // Actualizar leyenda global con "agente → spec"
-  const anyActive = Object.values(runningAgents).some(arr => arr.length > 0);
+  const anyActive = Object.values(runningAgents).some(arr => (arr || []).length > 0);
   const legend = document.getElementById('agent-legend');
   legend.hidden = !anyActive;
   if (anyActive) {
     const items = [];
-    Object.entries(runningAgents).forEach(([specId, agents]) => {
+    Object.entries(runningAgents).forEach(([specId, rawAgents]) => {
       const isGlobal = specId === '__global__';
       const spec = isGlobal ? null : SPECS.find(s => s.id === specId);
       const specLabel = isGlobal ? '(global)' : (spec ? `${specId} · ${spec.titulo}` : specId);
-      agents.forEach(agentType => {
-        const a = AGENT_MAP[agentType] || { cls:'validacion', icon:'↻', label:agentType };
+      normList(rawAgents).forEach(e => {
+        const a = AGENT_MAP[e.agent] || { cls:'validacion', icon:'↻', label:e.agent };
+        const bg = e.mode === 'background';
+        const modeTitle = bg ? 'segundo plano' : 'primer plano';
         const suffix = isGlobal
           ? `${a.label} <span style="opacity:.6">${esc(specLabel)}</span>`
           : `${a.label} → <strong>${esc(specLabel)}</strong>`;
         items.push(
-          `<span class="agent-icon ${a.cls}">` +
+          `<span class="agent-icon ${a.cls} ${bg ? 'mode-bg' : 'mode-fg'}" title="${modeTitle}">` +
           `<span class="ai" aria-hidden="true">${a.icon}</span>` +
           suffix +
+          `<span class="agent-mode" title="${modeTitle}">${bg ? 'bg' : 'fg'}</span>` +
           `</span>`
         );
       });
@@ -1035,7 +1061,7 @@ function gatesFor(spec) {
 }
 
 function cardHTML(spec) {
-  const agents = runningAgents[spec.id] || [];
+  const agents = normList(runningAgents[spec.id]);
   const agentsHTML = agents.length
     ? `<div class="agent-icons">${agents.map(agentIconHTML).join('')}</div>` : '';
   return `<article class="card collapsed" data-estado="${spec.estado}" data-spec-id="${spec.id}">

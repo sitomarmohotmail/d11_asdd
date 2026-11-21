@@ -26,6 +26,13 @@ while [ $# -gt 0 ]; do
 done
 [ ${#urls[@]} -eq 0 ] && urls=("http://d11asdd.local/")
 
+# Dashboard asdd_tools: el START lo registra el hook PreToolUse (conoce el modo
+# primer/segundo plano); aquí garantizamos el STOP al terminar de verdad, pase
+# lo que pase, con un trap EXIT. Inmune al timing de PostToolUse en background.
+_hook="$(dirname "$0")/agent-hook.sh"
+_sid="$(printf '%s' "$spec" | grep -oE '[0-9]{3}' | head -1)"; _sid="${_sid:-__global__}"
+[ -x "$_hook" ] && trap '"$_hook" mark-stop "$_sid" tests' EXIT
+
 failed=0
 results=()
 run() {

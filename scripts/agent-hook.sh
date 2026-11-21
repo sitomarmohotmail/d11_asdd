@@ -1,13 +1,85 @@
 #!/bin/bash
-# Actualiza running.json cuando un agente ASDD o un comando de tests empieza o termina.
-# Uso (vía hook de Claude Code): cat hook-input.json | scripts/agent-hook.sh start|stop
+# Mantiene asdd_tools/running.json con los procesos ASDD en curso (agentes y QA)
+# para que el dashboard los muestre en vivo, diferenciando primer/segundo plano.
 #
-# Stdin: JSON de PreToolUse / PostToolUse con tool_name=Agent|Bash
-# Arg 1: "start" (PreToolUse) | "stop" (PostToolUse)
+# El problema que resuelve: PostToolUse dispara cuando la LLAMADA devuelve el
+# control, que para trabajo en background es el instante del lanzamiento, no el
+# final real. Por eso aquí:
+#   - START se captura en PreToolUse (único sitio que conoce run_in_background).
+#   - STOP se captura al terminar de verdad:
+#       · subagentes  -> hook SubagentStop (desapila LIFO).
+#       · check.sh    -> trap EXIT del propio script (acción directa mark-stop).
+#   - TTL como red de seguridad: purga entradas caducadas en cada escritura.
+#
+# Modos de uso:
+#   hook PreToolUse (Agent|Bash):  cat input.json | agent-hook.sh start
+#   hook SubagentStop:             cat input.json | agent-hook.sh subagent-stop
+#   directo (trap de check.sh):    agent-hook.sh mark-stop  <sid> <agente>
+#                                  agent-hook.sh mark-start <sid> <agente> <modo>
+#
+# Estructura de running.json:
+#   { "001": [ { "agent": "tests", "mode": "background", "started": 1764... } ] }
+
+set -u
 
 RUNNING_JSON="/var/www/d11asdd/asdd_tools/running.json"
+STACK="/var/www/d11asdd/asdd_tools/.running.stack"
+TTL=1800  # segundos; entradas más antiguas se consideran colgadas y se purgan.
 
+now=$(date +%s)
+
+ensure_json() {
+  [ -f "$RUNNING_JSON" ] || echo '{}' > "$RUNNING_JSON"
+  jq empty "$RUNNING_JSON" 2>/dev/null || echo '{}' > "$RUNNING_JSON"
+}
+
+# Purga por TTL y elimina specs sin agentes. Recibe/entrega JSON por la tubería jq.
+PRUNE='
+  with_entries(.value |= [ .[]
+    | (if type == "string" then { agent: ., mode: "foreground", started: $now } else . end)
+    | select((.started // 0) > ($now - $ttl)) ])
+  | with_entries(select(.value | length > 0))
+'
+
+add_entry() { # sid agent mode
+  ensure_json
+  jq --arg sid "$1" --arg agent "$2" --arg mode "$3" --argjson now "$now" --argjson ttl "$TTL" "
+    .[\$sid] = (((.[\$sid] // []) | map(select(.agent != \$agent)))
+                 + [{ agent: \$agent, mode: \$mode, started: \$now }])
+    | $PRUNE
+  " "$RUNNING_JSON" > "$RUNNING_JSON.tmp" && mv "$RUNNING_JSON.tmp" "$RUNNING_JSON"
+}
+
+del_entry() { # sid agent
+  ensure_json
+  jq --arg sid "$1" --arg agent "$2" --argjson now "$now" --argjson ttl "$TTL" "
+    .[\$sid] = ((.[\$sid] // []) | map(select(.agent != \$agent)))
+    | $PRUNE
+  " "$RUNNING_JSON" > "$RUNNING_JSON.tmp" && mv "$RUNNING_JSON.tmp" "$RUNNING_JSON"
+}
+
+action="${1:-start}"
+
+# --- Acciones directas (trap de check.sh u otros scripts) ---
+case "$action" in
+  mark-start) add_entry "${2:-__global__}" "${3:-tests}" "${4:-foreground}"; exit 0 ;;
+  mark-stop)  del_entry "${2:-__global__}" "${3:-tests}";                     exit 0 ;;
+esac
+
+# --- Acciones de hook (leen el JSON del evento por stdin) ---
 input=$(cat)
+
+if [ "$action" = "subagent-stop" ]; then
+  # SubagentStop no identifica al subagente: desapilamos el último que marcamos.
+  [ -f "$STACK" ] || exit 0
+  last=$(tail -n 1 "$STACK" 2>/dev/null)
+  [ -z "$last" ] && exit 0
+  sed -i '$d' "$STACK" 2>/dev/null
+  del_entry "${last%%:*}" "${last#*:}"
+  exit 0
+fi
+
+# action = start (PreToolUse)
 tool_name=$(echo "$input" | jq -r '.tool_name // ""')
 
 if [ "$tool_name" = "Agent" ]; then
@@ -19,33 +91,19 @@ if [ "$tool_name" = "Agent" ]; then
   prompt=$(echo "$input" | jq -r '.tool_input.prompt // ""')
   spec_id=$(echo "$prompt" | grep -oE 'specs/[0-9]{3}-' | grep -oE '[0-9]{3}' | head -1)
   [ -z "$spec_id" ] && exit 0
+  # Los subagentes de este entorno siempre corren en segundo plano.
+  add_entry "$spec_id" "$subagent" "background"
+  echo "${spec_id}:${subagent}" >> "$STACK"
 
 elif [ "$tool_name" = "Bash" ]; then
   command=$(echo "$input" | jq -r '.tool_input.command // ""')
-  echo "$command" | grep -qE '(phpunit|check\.sh)' || exit 0
-  subagent="tests"
+  # Solo seguimos check.sh (la puerta de QA): se autodetiene con su trap EXIT.
+  echo "$command" | grep -qE 'check\.sh' || exit 0
+  bg=$(echo "$input" | jq -r '.tool_input.run_in_background // false')
+  [ "$bg" = "true" ] && mode="background" || mode="foreground"
   spec_id=$(echo "$command" | grep -oE 'specs/[0-9]{3}-' | grep -oE '[0-9]{3}' | head -1)
   [ -z "$spec_id" ] && spec_id="__global__"
-
-else
-  exit 0
+  add_entry "$spec_id" "tests" "$mode"
 fi
 
-# Crear running.json si no existe o está vacío/corrupto
-[ -f "$RUNNING_JSON" ] || echo '{}' > "$RUNNING_JSON"
-jq empty "$RUNNING_JSON" 2>/dev/null || echo '{}' > "$RUNNING_JSON"
-
-ACTION="${1:-start}"
-
-if [ "$ACTION" = "start" ]; then
-  jq --arg sid "$spec_id" --arg agent "$subagent" \
-    '.[$sid] = ((.[$sid] // []) + [$agent] | unique)' \
-    "$RUNNING_JSON" > "${RUNNING_JSON}.tmp" && mv "${RUNNING_JSON}.tmp" "$RUNNING_JSON"
-else
-  jq --arg sid "$spec_id" --arg agent "$subagent" \
-    'if .[$sid] then
-       .[$sid] = (.[$sid] | map(select(. != $agent)))
-       | if .[$sid] | length == 0 then del(.[$sid]) else . end
-     else . end' \
-    "$RUNNING_JSON" > "${RUNNING_JSON}.tmp" && mv "${RUNNING_JSON}.tmp" "$RUNNING_JSON"
-fi
+exit 0
