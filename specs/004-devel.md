@@ -2,7 +2,7 @@
 id: "004"
 titulo: Módulo de desarrollo Devel
 version: 1.0
-estado: aprobada
+estado: implementada
 nivel: S
 tipo: modulo
 proyecto: devel
@@ -50,8 +50,15 @@ Archivos modificados/creados:
 - [x] `drush config:status` → 0 diferencias
 
 ## Puertas
-- Validación: nivel S — sin pasada de agente
-- QA: `config:status` limpio; `devel` instalado y habilitado
+- Validación: nivel S — sin pasada de agente (contrib puro)
+- QA (`scripts/check.sh --spec specs/004-devel.md --no-a11y`):
+  - R1 ✓ `drupal/devel: ^5.5` en `require-dev` (dependencia `--dev`).
+  - R2 ✓ módulo `devel` 5.5.0 habilitado.
+  - R3 · CA1 ✓ `devel` sincronizado: no figura como `Different` en
+    `config:status` y aparece en `config/sync/core.extension.yml`.
+  - El rojo global de `check.sh` (phpunit/phpstan de `sdc_cartoteca` y deriva
+    de `config:status` en bloques/tema) es **ajeno a esta spec**: proviene de
+    la 007 (en curso) y de la configuración del tema, no de `devel`.
 
 ## Trazabilidad
 | Requisito | Criterio | Test |
