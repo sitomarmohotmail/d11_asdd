@@ -20,6 +20,34 @@ fi
 
 items=()
 
+# Primer valor de una línea de cabecera "- Etiqueta: valor" (regex tolerante,
+# las etiquetas de los informes varían: "Versión de la spec", "…validada",
+# "Hallazgos nuevos"…).
+hdr() { # fichero regex_etiqueta
+  [ -f "$1" ] || return 0
+  grep -m1 -iE "$2" "$1" | sed -E 's/^[^:]*:[[:space:]]*//; s/[[:space:]]*$//'
+}
+
+# La puerta se mantiene salvo que el valor tras "Resultado:" empiece por BLOQUEAD.
+# Sin línea "Resultado:" (p. ej. algunos informes), se mantiene.
+gate_ok() { # fichero informe
+  case "$(hdr "$1" '^-[[:space:]]*Resultado:')" in
+    [Bb][Ll][Oo][Qq][Uu][Ee][Aa][Dd]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+# Resumen de cabecera de un informe como objeto JSON (solo campos presentes).
+report_json() { # fichero
+  jq -n \
+    --arg fecha     "$(hdr "$1" '^-[[:space:]]*Fecha:')" \
+    --arg version   "$(hdr "$1" '^-[[:space:]]*Versi[oó]n')" \
+    --arg resultado "$(hdr "$1" '^-[[:space:]]*Resultado:')" \
+    --arg hallazgos "$(hdr "$1" '^-[[:space:]]*Hallazgos')" \
+    '{fecha:$fecha, version:$version, resultado:$resultado, hallazgos:$hallazgos}
+       | with_entries(select(.value != ""))'
+}
+
 for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
   name=$(basename "$f")
   # Ignorar informes de agentes y ficheros especiales
@@ -37,18 +65,31 @@ for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
 
   [ -z "$id" ] && continue
 
-  # Detectar puertas de calidad superadas (existen informes NNN-*.md)
+  # Detectar puertas superadas: existe el informe Y su veredicto no es bloqueante.
   num="${name%%[^0-9]*}"   # primeros 3 dígitos
+  val_f="$SPECS_DIR/${num}-validacion.md"
+  qa_f="$SPECS_DIR/${num}-qa.md"
+  seg_f="$SPECS_DIR/${num}-seguridad.md"
+  a11y_f="$SPECS_DIR/${num}-accesibilidad.md"
   gates_arr=()
-  [ -f "$SPECS_DIR/${num}-validacion.md" ]    && gates_arr+=("val")
-  [ -f "$SPECS_DIR/${num}-qa.md" ]            && gates_arr+=("qa")
-  [ -f "$SPECS_DIR/${num}-seguridad.md" ]     && gates_arr+=("seg")
-  [ -f "$SPECS_DIR/${num}-accesibilidad.md" ] && gates_arr+=("a11y")
+  [ -f "$val_f" ]  && gate_ok "$val_f"  && gates_arr+=("val")
+  [ -f "$qa_f" ]   && gate_ok "$qa_f"   && gates_arr+=("qa")
+  [ -f "$seg_f" ]  && gate_ok "$seg_f"  && gates_arr+=("seg")
+  [ -f "$a11y_f" ] && gate_ok "$a11y_f" && gates_arr+=("a11y")
   if [ ${#gates_arr[@]} -gt 0 ]; then
     gates_json=$(printf '%s\n' "${gates_arr[@]}" | jq -R . | jq -s .)
   else
     gates_json='[]'
   fi
+
+  # Resumen de cada documento para el desplegable de la tarjeta.
+  reports=$(jq -n --arg v "$version" --arg e "$estado" \
+    '{spec: ({version:$v, estado:$e} | with_entries(select(.value != "")))}')
+  for pair in "validacion:$val_f" "qa:$qa_f" "seguridad:$seg_f" "accesibilidad:$a11y_f"; do
+    k="${pair%%:*}"; rf="${pair#*:}"
+    [ -f "$rf" ] || continue
+    reports=$(jq --arg k "$k" --argjson r "$(report_json "$rf")" '. + {($k): $r}' <<<"$reports")
+  done
 
   item=$(jq -n \
     --arg id      "$id"      \
@@ -59,7 +100,8 @@ for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
     --arg version "$version" \
     --arg file    "$name"    \
     --argjson gates "$gates_json" \
-    '{id:$id,titulo:$titulo,nivel:$nivel,tipo:$tipo,estado:$estado,version:$version,file:$file,gates:$gates}')
+    --argjson reports "$reports" \
+    '{id:$id,titulo:$titulo,nivel:$nivel,tipo:$tipo,estado:$estado,version:$version,file:$file,gates:$gates,reports:$reports}')
 
   items+=("$item")
 done

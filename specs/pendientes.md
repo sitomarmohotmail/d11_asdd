@@ -16,3 +16,6 @@ Una línea por pendiente: origen · descripción. Se agrupan en specs futuras.
 - 007 v1.6 · AMB: R7/CA9 «disparar el evento en cada componente» no define el selector (el plan sí: `.sdc-cartoteca__slider`/`__info`).
 - tooling · `asdd_tools/gen-specs-json.sh` pinta las puertas val/qa en verde por la mera existencia del fichero `NNN-validacion.md`/`NNN-qa.md`, sin leer el veredicto (`Resultado:`); engaña si el informe está BLOQUEADO. Mejora: leer la primera línea de resultado.
 - 007 v1.6 · CA2b: `CartotecaFormErrorTest` usa `user/login` y no comprueba que el error esté ausente de la barra de mensajes (solo que esté inline con `aria-invalid`). Mejora: aserción negativa sobre `[data-drupal-messages]`.
+- 008 v1.1 · CA8/CA-A1 no fijan actor ni la vista/navegador concretos de la verificación manual.
+- 008 v1.1 · "Mejorar el TTL del hook" sin referencia a su línea (`TTL=1800` en `scripts/agent-hook.sh`).
+- 008 v1.3 · CA9/CA11/CA12 son tests de presencia (grep sobre `index.html`) por no haber arnés JS para el dashboard; plantear un arnés `node` mínimo (extraer helpers puros) en spec futura.

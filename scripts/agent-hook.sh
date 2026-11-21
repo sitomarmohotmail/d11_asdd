@@ -22,9 +22,21 @@
 
 set -u
 
-RUNNING_JSON="/var/www/d11asdd/asdd_tools/running.json"
-STACK="/var/www/d11asdd/asdd_tools/.running.stack"
+RUNNING_JSON="${ASDD_RUNNING_JSON:-/var/www/d11asdd/asdd_tools/running.json}"
+STACK="${ASDD_STACK:-/var/www/d11asdd/asdd_tools/.running.stack}"
 TTL=1800  # segundos; entradas más antiguas se consideran colgadas y se purgan.
+
+# ¿El comando *ejecuta* scripts/check.sh, o solo lo *menciona*?
+# check.sh debe ir en posición de comando: al inicio o tras ; & | (, con bash/sh
+# y ruta opcionales. Se descartan las menciones entre comillas (p. ej. el mensaje
+# de un commit) y como argumento de otro programa (grep, ps…). Evita el falso
+# positivo que marcaba "tests en ejecución" con cualquier comando que citara check.sh.
+ejecuta_check() {
+  local c
+  c=$(printf '%s' "$1" | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
+  printf '%s' "$c" | grep -qE \
+    '(^|[;&(|])[[:space:]]*((bash|sh)[[:space:]]+)?([^;&(|[:space:]]*/)?check\.sh([[:space:]]|$)'
+}
 
 now=$(date +%s)
 
@@ -98,7 +110,7 @@ if [ "$tool_name" = "Agent" ]; then
 elif [ "$tool_name" = "Bash" ]; then
   command=$(echo "$input" | jq -r '.tool_input.command // ""')
   # Solo seguimos check.sh (la puerta de QA): se autodetiene con su trap EXIT.
-  echo "$command" | grep -qE 'check\.sh' || exit 0
+  ejecuta_check "$command" || exit 0
   bg=$(echo "$input" | jq -r '.tool_input.run_in_background // false')
   [ "$bg" = "true" ] && mode="background" || mode="foreground"
   spec_id=$(echo "$command" | grep -oE 'specs/[0-9]{3}-' | grep -oE '[0-9]{3}' | head -1)

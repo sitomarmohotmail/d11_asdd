@@ -29,6 +29,9 @@
   --implementada-fg:#50fa7b;
   --implementada-bg:#0e2619;
   --implementada-bd:#236638;
+  --en-curso-fg:    #8be9fd;
+  --en-curso-bg:    #0f2b33;
+  --en-curso-bd:    #3a9ab0;
 
   /* Niveles — purple, cyan, pink */
   --l-s-fg: #bd93f9;  --l-s-bg: #25173a;  --l-s-bd: #5a3580;
@@ -127,6 +130,7 @@ body::before {
 .stat.borrador     { color:var(--borrador-fg);    background:var(--borrador-bg);    border-color:var(--borrador-bd); }
 .stat.aprobada     { color:var(--aprobada-fg);    background:var(--aprobada-bg);    border-color:var(--aprobada-bd); }
 .stat.implementada { color:var(--implementada-fg);background:var(--implementada-bg);border-color:var(--implementada-bd); }
+.stat.en-curso     { color:var(--en-curso-fg);     background:var(--en-curso-bg);     border-color:var(--en-curso-bd); }
 
 /* ── Main layout ──────────────────────────────────────── */
 main {
@@ -199,6 +203,7 @@ main {
 .pn-box.borrador     { border-color:var(--borrador-bd);    color:var(--borrador-fg); }
 .pn-box.aprobada     { border-color:var(--aprobada-bd);    color:var(--aprobada-fg); }
 .pn-box.implementada { border-color:var(--implementada-bd);color:var(--implementada-fg); }
+.pn-box.en-curso     { border-color:var(--en-curso-bd);    color:var(--en-curso-fg); }
 
 .pn-label {
   font-size: 13px;
@@ -331,7 +336,7 @@ main {
 /* ── Kanban board ─────────────────────────────────────── */
 .kanban {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: 10px;
   row-gap: 2px;
   align-items: start;
@@ -346,6 +351,7 @@ main {
 .kol-cell[data-col="borrador"]     { background: linear-gradient(to bottom, rgba(98,114,164,.22), var(--borrador-bg)); }
 .kol-cell[data-col="aprobada"]     { background: linear-gradient(to bottom, rgba(255,184,108,.18), var(--aprobada-bg)); }
 .kol-cell[data-col="implementada"] { background: linear-gradient(to bottom, rgba(80,250,123,.14), var(--implementada-bg)); }
+.kol-cell[data-col="en-curso"]     { background: linear-gradient(to bottom, rgba(139,233,253,.14), var(--en-curso-bg)); }
 
 .kol-cell.dimmed, .kol-hd.dimmed { opacity: .22; pointer-events: none; }
 
@@ -369,6 +375,7 @@ main {
 .kol-hd.borrador     { color:var(--borrador-fg);    background:var(--borrador-bg);    border-color:var(--borrador-bd); }
 .kol-hd.aprobada     { color:var(--aprobada-fg);    background:var(--aprobada-bg);    border-color:var(--aprobada-bd); }
 .kol-hd.implementada { color:var(--implementada-fg);background:var(--implementada-bg);border-color:var(--implementada-bd); }
+.kol-hd.en-curso     { color:var(--en-curso-fg);     background:var(--en-curso-bg);     border-color:var(--en-curso-bd); }
 
 .kol-count {
   font-family: 'JetBrains Mono', monospace;
@@ -406,6 +413,7 @@ main {
 .card[data-estado="borrador"]     { background: linear-gradient(160deg, var(--surface) 30%, rgba(98,114,164,.18) 100%); border-color: var(--borrador-bd); }
 .card[data-estado="aprobada"]     { background: linear-gradient(160deg, var(--surface) 30%, rgba(255,184,108,.14) 100%); border-color: var(--aprobada-bd); }
 .card[data-estado="implementada"] { background: linear-gradient(160deg, var(--surface) 30%, rgba(80,250,123,.12) 100%); border-color: var(--implementada-bd); }
+.card[data-estado="en-curso"]     { background: linear-gradient(160deg, var(--surface) 30%, rgba(139,233,253,.12) 100%); border-color: var(--en-curso-bd); }
 
 .card:hover { box-shadow: var(--sh-up); transform: translateY(-2px); }
 .card[hidden] { display: none; }
@@ -475,6 +483,12 @@ main {
 .card.collapsed { gap: 4px; }
 .card.collapsed .card-meta,
 .card.collapsed .agent-icons { display: none; }
+.card-meta { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.card-meta-doc { border-top: 1px solid var(--border); padding-top: 4px; }
+.card-meta-doc-t { font: 600 10px/1.4 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.card-meta-row { display: flex; gap: 6px; font-size: 11px; }
+.card-meta-k { color: var(--muted); flex: 0 0 42%; }
+.card-meta-v { color: var(--fg); flex: 1; }
 
 .card-gates {
   display: flex;
@@ -681,6 +695,7 @@ main {
 .dp-estado.borrador     { color:var(--borrador-fg);    background:var(--borrador-bg);    border-color:var(--borrador-bd); }
 .dp-estado.aprobada     { color:var(--aprobada-fg);    background:var(--aprobada-bg);    border-color:var(--aprobada-bd); }
 .dp-estado.implementada { color:var(--implementada-fg);background:var(--implementada-bg);border-color:var(--implementada-bd); }
+.dp-estado.en-curso     { color:var(--en-curso-fg);     background:var(--en-curso-bg);     border-color:var(--en-curso-bd); }
 
 /* ── Iconos de agentes en tiempo real ─────────────────── */
 @keyframes spin      { to { transform: rotate(360deg); } }
@@ -891,6 +906,8 @@ const PIPELINE = [
   { type:'arrow' },
   { type:'state', id:'aprobada',     label:'Aprobada' },
   { type:'arrow' },
+  { type:'state', id:'en-curso',     label:'En curso' },
+  { type:'arrow' },
   { type:'gate',  label:'Tests + código', note:'todos' },
   { type:'arrow' },
   { type:'gate',  label:'check.sh',  note:'todos' },
@@ -900,11 +917,11 @@ const PIPELINE = [
   { type:'state', id:'implementada', label:'Implementada' },
 ];
 
-const STATE_LABELS = { borrador:'borrador', aprobada:'aprobada', implementada:'implementada' };
-const FILTER_ES    = { borrador:'borradores', aprobada:'aprobadas', implementada:'implementadas' };
+const STATE_LABELS = { borrador:'borrador', aprobada:'aprobada', 'en-curso':'en curso', implementada:'implementada' };
+const FILTER_ES    = { borrador:'borradores', aprobada:'aprobadas', 'en-curso':'en curso', implementada:'implementadas' };
 
-// Track steps: borrador=step1, aprobada=step2, implementada=step3
-const STEP_POS = { borrador:1, aprobada:2, implementada:3 };
+// Track steps: borrador=1, aprobada=2, en-curso=3, implementada=4
+const STEP_POS = { borrador:1, aprobada:2, 'en-curso':3, implementada:4 };
 
 let activeFilter = null;
 let runningAgents = {}; // { specId: ['asdd-validacion', ...] }
@@ -934,8 +951,23 @@ function agentIconHTML(entry) {
     `<span class="agent-mode" title="${modeTitle}">${bg ? 'bg' : 'fg'}</span></span>`;
 }
 
+// TTL del indicador de procesos (igual que agent-hook.sh, en segundos). Purga en
+// cliente: una entrada colgada desaparece en el sondeo sin esperar a que el hook
+// reescriba running.json.
+const RUN_TTL = 1800;
+function fresh(entry) {
+  if (typeof entry === 'string') return true;          // cadena suelta: se conserva
+  if (typeof entry.started !== 'number') return false; // objeto sin started: se purga
+  return entry.started >= (Date.now() / 1000) - RUN_TTL;
+}
+
 function updateAgentIcons(data) {
-  runningAgents = data || {};
+  // Descartar entradas obsoletas (started anterior al TTL) antes de pintar.
+  runningAgents = {};
+  Object.entries(data || {}).forEach(([id, arr]) => {
+    const kept = (arr || []).filter(fresh);
+    if (kept.length) runningAgents[id] = kept;
+  });
 
   // Actualizar iconos en cada tarjeta
   document.querySelectorAll('.card[data-spec-id]').forEach(card => {
@@ -1016,7 +1048,7 @@ function count(state) { return SPECS.filter(s => s.estado === state).length; }
 
 function renderStats() {
   const el = document.getElementById('stat-row');
-  el.innerHTML = ['implementada','aprobada','borrador'].map(s =>
+  el.innerHTML = ['implementada','en-curso','aprobada','borrador'].map(s =>
     `<button class="stat ${s}${activeFilter===s?' active':''}" data-state="${s}" aria-pressed="${activeFilter===s}">
       <span>${count(s)}</span>${STATE_LABELS[s]}
     </button>`
@@ -1060,6 +1092,22 @@ function gatesFor(spec) {
   ).join('');
 }
 
+const DOC_LABELS = { spec:'spec', validacion:'validación', qa:'qa', seguridad:'seguridad', accesibilidad:'accesibilidad' };
+const FIELD_LABELS = { fecha:'Fecha', version:'Versión de la spec', resultado:'Resultado', hallazgos:'Hallazgos' };
+
+// Resumen de cada documento de la spec para la parte desplegable de la tarjeta.
+function cardMetaHTML(spec) {
+  const reports = spec.reports || {};
+  const docs = Object.keys(DOC_LABELS).filter(k => reports[k]).map(k => {
+    const r = reports[k];
+    const rows = ['fecha', 'version', 'resultado', 'hallazgos'].filter(f => r[f]).map(f =>
+      `<div class="card-meta-row"><span class="card-meta-k">${FIELD_LABELS[f]}</span><span class="card-meta-v">${esc(r[f])}</span></div>`
+    ).join('');
+    return `<div class="card-meta-doc"><div class="card-meta-doc-t">${esc(DOC_LABELS[k])}</div>${rows}</div>`;
+  }).join('');
+  return docs ? `<div class="card-meta">${docs}</div>` : '';
+}
+
 function cardHTML(spec) {
   const agents = normList(runningAgents[spec.id]);
   const agentsHTML = agents.length
@@ -1082,14 +1130,15 @@ function cardHTML(spec) {
     </div>
     <div class="card-title">${spec.titulo}</div>
     <div class="card-gates">${gatesFor(spec)}</div>
+    ${cardMetaHTML(spec)}
     ${agentsHTML}
   </article>`;
 }
 
 function renderSpecs() {
-  const sorted = [...SPECS].sort((a, b) => a.id.localeCompare(b.id));
-  const cols = ['borrador', 'aprobada', 'implementada'];
-  const labels = { borrador:'Borrador', aprobada:'Aprobada', implementada:'Implementada' };
+  const sorted = [...SPECS].sort((a, b) => b.id.localeCompare(a.id));
+  const cols = ['borrador', 'aprobada', 'en-curso', 'implementada'];
+  const labels = { borrador:'Borrador', aprobada:'Aprobada', 'en-curso':'En curso', implementada:'Implementada' };
   const counts = {};
   cols.forEach(c => counts[c] = sorted.filter(s => s.estado === c).length);
 

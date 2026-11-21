@@ -60,6 +60,7 @@ run "stylelint" scripts/lint/lint.sh css
 run "eslint" scripts/lint/lint.sh js
 run "twig" scripts/lint/lint.sh twig
 run "linters (fixtures)" scripts/lint/test.sh
+run "tooling (fixtures)" scripts/asdd/test.sh
 run "js-unit (node --test)" bash -c '. "$HOME/.nvm/nvm.sh" >/dev/null 2>&1; nvm use >/dev/null 2>&1; npm run --silent test:js'
 run "drush config:status" bash -c 'vendor/bin/drush config:status 2>&1 | grep -q "No differences"'
 
